@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-secondary: #3b4e6c;
+  --color-secondary-light: #7397d250;
+}
+
+:root {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  box-sizing: border-box;
+  padding: 0px;
+  margin: 0px;
+}
+
+body {
+  background-color: var(--color-gray-700);
+  color: var(--color-white);
+  padding: 0px;
+  margin: 0px;
+}
+
+.gradient-background {
+  @apply -bg-linear-45 from-secondary to-secondary-light shadow-xl p-4 rounded-lg;
+}
