@@ -1,3 +1,5 @@
+import { Assignee } from "../interfaces";
+
 export type IFourUp = {
   id: number;
   dateRange: string;
@@ -8,6 +10,6 @@ export type IFourUp = {
 };
 
 export type IFourUpItem = {
-  title: string;
+  title: Assignee[];
   content: string;
 };

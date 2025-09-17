@@ -4,6 +4,7 @@ export enum Assignee {
   Colin = "Colin Tondreau",
   Niccolls = "Niccolls Evsseef",
   Jonathan = "Jonathan Zhu",
+  Team = "Team",
 }
 
 export const AssigneeValues = Object.values(Assignee);

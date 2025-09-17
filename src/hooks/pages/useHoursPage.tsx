@@ -65,13 +65,16 @@ export const useHoursPage = () => {
       pageDateRanges.push(getDateRangeString(start, end));
     }
 
+    // Calculate average and round to nearest tenth
+    const avgHours = Math.round((totalHoursLocal / sortedData.length) * 10) / 10;
+
     // Set state
     setCurrentPage(0);
     setPages(pagesLocal);
     setDateRanges(pageDateRanges);
     setStats({
       total: totalHoursLocal,
-      avg: totalHoursLocal / sortedData.length,
+      avg: avgHours,
       weekly: getTotalDayHours(pagesLocal[0]),
     });
 
