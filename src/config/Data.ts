@@ -189,6 +189,10 @@ export const Data: IData = {
   // Put all hours here
   hours: [
     {
+      date: "09/18/25",
+      hours: { Andrew: 2.5, Robert: 2.5, Colin: 2.5, Niccolls: 2.5, Jonathan: 2.5 },
+    },
+    {
       date: "09/16/25",
       hours: { Andrew: 2, Robert: 2, Colin: 2, Niccolls: 2, Jonathan: 2 },
     },
