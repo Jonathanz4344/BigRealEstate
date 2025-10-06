@@ -1,0 +1,9 @@
+# Core web framework
+fastapi>=0.115.0,<0.116.0
+
+# ASGI server (needed to run FastAPI)
+uvicorn>=0.30.0,<0.31.0
+
+# Pydantic v2 (FastAPI >=0.100 uses this)
+pydantic>=2.9.0,<3.0.0
+pydantic-settings>=2.5.0,<3.0.0

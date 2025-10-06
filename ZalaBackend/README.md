@@ -1,0 +1,128 @@
+# 🏗️ Zala Backend (FastAPI)
+
+Backend service for the **Zala** project — built with [FastAPI](https://fastapi.tiangolo.com/), [Uvicorn](https://www.uvicorn.org/), and [Pydantic v2](https://docs.pydantic.dev/).
+
+---
+
+## ⚙️ Requirements
+
+- **Python 3.13 or higher** (tested on Python 3.13)
+- **pip** (Python package installer)
+
+---
+
+## 📁 Project Structure
+
+ZalaBackend/
+│
+├── app/
+│ ├── main.py    # FastAPI entry point
+│ ├── db.py      # Database setup
+│ ├── models/    # Pydantic or ORM models
+         └── exampleUser.py  # example model
+│ ├── routes/    # API route definitions
+         └── exampleUser.py  # example route
+  └── example.py # example api test
+│ ├── utils/     # Helper functions and utilities
+│ ├── tests/     # Unit/integration tests
+│ ├── .env       # Environment variables (DB URLs, secrets, etc.)
+│ └── .gitignore # Ignored files for Git
+│
+├── requirements.txt # Project dependencies
+└── README.md # Setup and usage guide
+
+## 🧩 Setting Up Your Environment (Windows)
+
+### 1. **Verify Python**
+   ```bash
+py --version
+
+Must be Python 3.13 or higher
+
+2. Must be 3.13 or higher.
+
+3. py -m pip install -r requirements.txt
+
+## Running the Server
+
+From Project Root (ZalaBackend/)
+
+py -m uvicorn app.main:app --reload
+
+1. App runs at: http://127.0.0.1:8000
+
+2. Interactive docs: http://127.0.0.1:8000/docs
+
+3. Alternative docs: http://127.0.0.1:8000/redoc
+
+If Youre Inside the app Folder
+
+py -m uvicorn main:app --reload
+
+
+## How FastAPI Works
+
+1. FastAPI app instance
+    Defined in example.py
+
+Creates a single FastAPI app.
+
+Includes modular route files using include_router().
+
+## Testing Your API
+1. Run your app:
+   py -m uvicorn app.example:app --reload
+
+2. Visit:
+   Swagger UI → http://127.0.0.1:8000/docs
+   ReDoc → http://127.0.0.1:8000/redoc
+
+3. In Swagger:
+   You’ll see both:
+
+   GET /users/
+   POST /users/
+
+   Example request (POST /users/)
+   {
+   "name": "Charlie",
+   "email": "charlie@example.com",
+   "age": 28
+   }
+
+   Example response
+   {
+   "message": "User created successfully",
+   "user": {
+      "name": "Charlie",
+      "email": "charlie@example.com",
+      "age": 28
+   }
+   
+
+## Automatic Documentation
+
+FastAPI automatically generates documentation endpoints:
+
+/docs → Swagger UI (interactive testing)
+
+/redoc → ReDoc (clean read-only documentation)
+
+Both stay updated automatically as you add new routes or models.
+
+## Development Notes
+
+Use --reload during development for hot-reload.
+
+Use environment variables in .env for configs (DB URLs, secrets, etc.).
+
+To structure a larger app:
+
+Create multiple routers (e.g., users.py, auth.py, products.py)
+
+Register each with app.include_router()
+
+
+
+
+
