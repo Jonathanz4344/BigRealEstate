@@ -34,18 +34,6 @@ async def import_csv(file: UploadFile = File(...)):
             lead = Lead(**lead_data)
             leads.append(lead)
 
-            # Optional: raw SQL insert (commented out)
-            # import psycopg2
-            # conn = psycopg2.connect("your_connection_string")
-            # cur = conn.cursor()
-            # cur.execute("""
-            #     INSERT INTO leads (first_name, last_name, email, phone_number)
-            #     VALUES (%s, %s, %s, %s)
-            # """, (lead.first_name, lead.last_name, lead.email, lead.phone_number))
-            # conn.commit()
-            # cur.close()
-            # conn.close()
-
         return {
             "message": f"Successfully parsed {len(leads)} leads",
             "parsed_data": [lead.dict() for lead in leads]
