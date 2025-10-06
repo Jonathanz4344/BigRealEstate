@@ -13,6 +13,8 @@ Backend service for the **Zala** project — built with [FastAPI](https://fastap
 
 ## 📁 Project Structure
 
+ ```bash
+
 ZalaBackend/
 │
 ├── app/
@@ -31,13 +33,17 @@ ZalaBackend/
 ├── requirements.txt # Project dependencies
 └── README.md # Setup and usage guide
 
+```
+
 ## 🧩 Setting Up Your Environment (Windows)
 
 ### 1. **Verify Python**
-   ```bash
-py --version
 
-Must be Python 3.13 or higher
+   ```bash
+   py --version
+
+   Must be Python 3.13 or higher
+   ```
 
 2. Must be 3.13 or higher.
 
@@ -45,9 +51,13 @@ Must be Python 3.13 or higher
 
 ## Running the Server
 
+```bash
+
 From Project Root (ZalaBackend/)
 
 py -m uvicorn app.main:app --reload
+
+```
 
 1. App runs at: http://127.0.0.1:8000
 
@@ -55,19 +65,27 @@ py -m uvicorn app.main:app --reload
 
 3. Alternative docs: http://127.0.0.1:8000/redoc
 
+
+```bash
+
 If Youre Inside the app Folder
 
 py -m uvicorn main:app --reload
 
+```
 
 ## How FastAPI Works
 
 1. FastAPI app instance
     Defined in example.py
 
+ ```bash
+
 Creates a single FastAPI app.
 
 Includes modular route files using include_router().
+
+```
 
 ## Testing Your API
 1. Run your app:
@@ -78,11 +96,13 @@ Includes modular route files using include_router().
    ReDoc → http://127.0.0.1:8000/redoc
 
 3. In Swagger:
+
    You’ll see both:
 
    GET /users/
    POST /users/
 
+   ```bash
    Example request (POST /users/)
    {
    "name": "Charlie",
@@ -90,7 +110,11 @@ Includes modular route files using include_router().
    "age": 28
    }
 
-   Example response
+   ```
+
+   ```bash
+   Example response:
+
    {
    "message": "User created successfully",
    "user": {
@@ -98,9 +122,12 @@ Includes modular route files using include_router().
       "email": "charlie@example.com",
       "age": 28
    }
+   ```
    
 
 ## Automatic Documentation
+
+```bash
 
 FastAPI automatically generates documentation endpoints:
 
@@ -110,8 +137,11 @@ FastAPI automatically generates documentation endpoints:
 
 Both stay updated automatically as you add new routes or models.
 
+```
+
 ## Development Notes
 
+```bash
 Use --reload during development for hot-reload.
 
 Use environment variables in .env for configs (DB URLs, secrets, etc.).
@@ -121,6 +151,8 @@ To structure a larger app:
 Create multiple routers (e.g., users.py, auth.py, products.py)
 
 Register each with app.include_router()
+
+```
 
 
 
