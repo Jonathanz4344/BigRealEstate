@@ -77,7 +77,8 @@ py -m uvicorn main:app --reload
 ## How FastAPI Works
 
 1. FastAPI app instance
-    Defined in example.py
+    
+   Defined in example.py
 
  ```bash
 
@@ -92,8 +93,9 @@ Includes modular route files using include_router().
    py -m uvicorn app.example:app --reload
 
 2. Visit:
-   Swagger UI → http://127.0.0.1:8000/docs
-   ReDoc → http://127.0.0.1:8000/redoc
+
+   1. Swagger UI → http://127.0.0.1:8000/docs
+   2. ReDoc → http://127.0.0.1:8000/redoc
 
 3. In Swagger:
 
@@ -113,6 +115,7 @@ Includes modular route files using include_router().
    ```
 
    ```bash
+
    Example response:
 
    {
