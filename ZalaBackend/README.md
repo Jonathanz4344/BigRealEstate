@@ -119,12 +119,6 @@ Use --reload during development for hot-reload.
 
 Use environment variables in .env for configs (DB URLs, secrets, etc.).
 
-To structure a larger app:
-
-Create multiple routers (e.g., users.py, auth.py, products.py)
-
-Register each with app.include_router()
-
 ```
 
 
