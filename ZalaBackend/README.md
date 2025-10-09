@@ -121,6 +121,16 @@ Use environment variables in .env for configs (DB URLs, secrets, etc.).
 
 ```
 
+## ENV Notes
+
+1. Requires google api for geocode
+   1. naming GOOGLE_API_KEY
+2. How to Get Google Maps API Key
+   1. Go to https://console.cloud.google.com/
+   2. Create a new project or existing one
+   3. Enable Geocoding API
+   4. Go to Credentials and copy API key
+
 
 
 
