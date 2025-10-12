@@ -18,6 +18,8 @@ Backend service for the **Zala** project — built with [FastAPI](https://fastap
 ZalaBackend/
 │
 ├── app/
+  ├── data/      # data folder  
+      └── mock_properties.json # mock data for properties
   ├── db/        # DB logic (queries, migrations, etc.)
 │ ├── main.py    # FastAPI entry point
 │ ├── db.py      #  Database setup and connection
