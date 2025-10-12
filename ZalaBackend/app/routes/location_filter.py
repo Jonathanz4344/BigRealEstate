@@ -2,8 +2,34 @@ from fastapi import APIRouter, HTTPException
 from app.models.location import LocationFilter, DataSource
 from app.utils.geocode import geocode_location, reverse_geocode
 import re
+from math import radians, sin, cos, sqrt, atan2
+import os
+import json
+
+
+mock_data_path = os.path.join(os.path.dirname(__file__), "../data/mock_properties.json")
+with open(mock_data_path, "r") as f:
+    MOCK_PROPERTIES = json.load(f)
+
 
 router = APIRouter()
+
+def haversine(lat1, lon1, lat2, lon2):
+    R = 3958.8  # Radius of Earth in miles
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+    a = sin(dlat / 2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return R * c
+
+def get_mock_properties(lat: float, lon: float):
+    results = []
+    for prop in MOCK_PROPERTIES:
+        distance = haversine(lat, lon, prop["latitude"], prop["longitude"])
+        if distance <= 50:
+            prop["distance_miles"] = round(distance, 2)
+            results.append(prop)
+    return results
 
 @router.post("/search-location/")
 def search_location(filter: LocationFilter):
@@ -13,7 +39,11 @@ def search_location(filter: LocationFilter):
         if not result:
             raise HTTPException(status_code=400, detail="Reverse geocoding failed")
         result["source"] = filter.source or "gpt"
-        return {"normalized_location": result}
+        mock_properties = get_mock_properties(result["latitude"], result["longitude"])
+        return {
+            "normalized_location": result,
+            "nearby_properties": mock_properties
+        }
 
     # Auto-detect zip code pattern
     zip_match = re.match(r"^\d{5}$", filter.location_text or "")
@@ -40,4 +70,10 @@ def search_location(filter: LocationFilter):
     # Append the selected source to the result
     result["source"] = filter.source or "gpt"
 
-    return {"normalized_location": result}
+    # Add mock property data based on lat/lng
+    mock_properties = get_mock_properties(result["latitude"], result["longitude"])
+
+    return {
+        "normalized_location": result,
+        "nearby_properties": mock_properties
+    }
