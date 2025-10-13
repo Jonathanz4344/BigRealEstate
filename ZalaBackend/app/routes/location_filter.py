@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.models.location import LocationFilter, DataSource
 from app.utils.geocode import geocode_location, reverse_geocode
+from fastapi.responses import JSONResponse
 import re
 from math import radians, sin, cos, sqrt, atan2
 import os
@@ -37,7 +38,7 @@ def search_location(filter: LocationFilter):
     if filter.latitude and filter.longitude:
         result = reverse_geocode(filter.latitude, filter.longitude)
         if not result:
-            raise HTTPException(status_code=400, detail="Reverse geocoding failed")
+            return JSONResponse(status_code=400, content={"error": "Reverse geocoding failed"})
         result["source"] = filter.source or "gpt"
         mock_properties = get_mock_properties(result["latitude"], result["longitude"])
         return {
@@ -60,12 +61,12 @@ def search_location(filter: LocationFilter):
             location_text = filter.state
 
     if not location_text:
-        raise HTTPException(status_code=400, detail="No valid location input provided")
+        return JSONResponse(status_code=400, content={"error": "No valid location input provided"})
 
     # Geocode the location
     result = geocode_location(location_text)
     if not result:
-        raise HTTPException(status_code=400, detail="Geocoding failed")
+         return JSONResponse(status_code=400, content={"error": "Geocoding failed"}) 
 
     # Append the selected source to the result
     result["source"] = filter.source or "gpt"
