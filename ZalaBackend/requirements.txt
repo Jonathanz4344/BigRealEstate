@@ -12,3 +12,6 @@ pydantic-settings>=2.5.0,<3.0.0
 pandas>=2.2.2,<3.0.0
 openpyxl>=3.1.2,<4.0.0       # Required for reading .xlsx files
 python-multipart>=0.0.7,<0.1.0  # Enables file uploads in FastAPI
+
+# misc
+python-dotenv==1.0.1
