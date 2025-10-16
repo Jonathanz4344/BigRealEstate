@@ -1,11 +1,16 @@
-import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine, URL
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-# --- Core Setup (You already have this) ---
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://your_user:your_password@localhost/your_db")
-engine = create_engine(DATABASE_URL)
+url = URL.create(
+    drivername="postgresql",
+    username="postgresadmin",
+    password="master",
+    host="localhost",
+    database="zala",
+    port=5432
+)
+
+engine = create_engine(url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
