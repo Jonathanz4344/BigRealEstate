@@ -39,8 +39,8 @@ CREATE TABLE users (
     role            VARCHAR(20) NOT NULL DEFAULT 'user',
     profile_pic     TEXT,
     xp              INTEGER DEFAULT 0,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMPTZ
 );
 
 CREATE TABLE leads (
@@ -72,7 +72,7 @@ CREATE TABLE properties (
 CREATE TABLE units (
     unit_id         SERIAL PRIMARY KEY,
     property_id     INTEGER NOT NULL REFERENCES properties(property_id) ON DELETE CASCADE, -- Added FK and ON DELETE
-    apt_num         VARCHAR(10),
+    apt_num         TEXT,
     bedrooms        INTEGER,
     bath            NUMERIC(3, 1),
     sqft            INTEGER,
