@@ -1,5 +1,6 @@
-import requests, sys, re
+import requests, sys, re, pprint
 from __init__ import GOOGLE_API_KEY
+from to_leads import to_leads
 
 GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 PLACES_NEARBY_URL = "https://places.googleapis.com/v1/places:searchNearby"
@@ -79,15 +80,16 @@ def search_agents(place_text_or_zip: str, radius_m=10000):
         except Exception:
             base.update({"phone": None, "website": None, "maps_url": None})
         results.append(base)
-    return results
+    return to_leads(results)
 
 if __name__ == "__main__":
     query = sys.argv[1] if len(sys.argv) > 1 else "Houston, TX"
     try:
         agents = search_agents(query)
-        for a in agents:
-            print(f"{a['name']} — {a['address']} — {a.get('phone')} — {a.get('website')}")
-        if not agents:
-            print("No agents found in the search radius.")
+        pprint.pprint(agents)
+        # for a in agents:
+        #     print(f"{a['name']} — {a['address']} — {a.get('phone')} — {a.get('website')}")
+        # if not agents:
+        #     print("No agents found in the search radius.")
     except (GeocodeError, PlacesError) as e:
         print(f"Error: {e}")
