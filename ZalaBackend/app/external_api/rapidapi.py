@@ -4,7 +4,7 @@ import json
 from __init__ import RAPIDAPI_KEY
 from to_leads import rapid_to_leads
 
-def get_leads(city: str):
+def search_agents(city: str):
 
     url = "https://zillow-com4.p.rapidapi.com/agents/search"
 
@@ -18,12 +18,12 @@ def get_leads(city: str):
     response = requests.get(url, headers=headers, params=querystring)
 
     leads = rapid_to_leads(response.json()["data"]["results"]["professionals"])
-    
+
     return leads
 
 
 if __name__ == "__main__":
-    response = get_leads("Houston, TX")
+    response = search_agents("Houston, TX")
     pprint.pprint(response)
 
     # with open("agents_log.txt", "a", encoding="utf-8") as f:
