@@ -2,20 +2,32 @@ import requests
 import pprint
 import json
 from __init__ import RAPIDAPI_KEY
+from to_leads import rapid_to_leads
 
-url = "https://zillow-com4.p.rapidapi.com/agents/search"
+def get_leads(city: str):
 
-querystring = {"location":"Houston, TX","specialty":"BuyersAgent"}
+    url = "https://zillow-com4.p.rapidapi.com/agents/search"
 
-headers = {
-	"x-rapidapi-key": RAPIDAPI_KEY,
-	"x-rapidapi-host": "zillow-com4.p.rapidapi.com"
-}
+    querystring = {"location":city,"specialty":"BuyersAgent"}
 
-response = requests.get(url, headers=headers, params=querystring)
+    headers = {
+        "x-rapidapi-key": RAPIDAPI_KEY,
+        "x-rapidapi-host": "zillow-com4.p.rapidapi.com"
+    }
 
-pprint.pprint(response.json()["data"]["results"]["professionals"])
+    response = requests.get(url, headers=headers, params=querystring)
 
-with open("agents_log.txt", "a", encoding="utf-8") as f:
-    f.write("\n--- new run ---\n")
-    f.write(json.dumps(response.json()["data"]["results"]["professionals"], indent=2, ensure_ascii=False))
+    leads = rapid_to_leads(response.json()["data"]["results"]["professionals"])
+    
+    return leads
+
+
+if __name__ == "__main__":
+    response = get_leads("Houston, TX")
+    pprint.pprint(response)
+
+    # with open("agents_log.txt", "a", encoding="utf-8") as f:
+    #     f.write("\n--- new run ---\n")
+    #     f.write(json.dumps(response.json()["data"]["results"]["professionals"], indent=2, ensure_ascii=False))
+
+

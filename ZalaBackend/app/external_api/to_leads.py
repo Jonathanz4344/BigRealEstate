@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 from app.models.lead import Lead 
+
 def _split_name(name: str) -> Tuple[str, str | None]:
     # naive split: "John Smith" -> ("John", "Smith"); "Virage" -> ("Virage", None)
     parts = name.split()
@@ -10,7 +11,7 @@ def _split_name(name: str) -> Tuple[str, str | None]:
         return ("", None)
     return (parts[0], " ".join(parts[1:]) or None)
 
-def to_leads(items: list[dict]) -> List[Lead]:
+def gplaces_to_leads(items: list[dict]) -> List[Lead]:
     leads: List[Lead] = []
     for x in items:
         first, last = _split_name(x.get("name", ""))
@@ -18,9 +19,26 @@ def to_leads(items: list[dict]) -> List[Lead]:
             Lead(
                 first_name=first,
                 last_name=last,
-                email=None,  # you don't have emails in this payload
+                email=None,  
                 phone_number=x.get("phone"),
                 address=x.get("address"),
+                businessName=x.get("name")
+            )
+        )
+    return leads
+
+def rapid_to_leads(items: list[dict]) -> List[Lead]:
+    leads: List[Lead] = []
+    for x in items:
+        first, last = _split_name(x.get("fullName", ""))
+        leads.append(
+            Lead(
+                first_name=first,
+                last_name=last,
+                email=None, 
+                phone_number=x.get("phoneNumber"),
+                address=x.get("location"),
+                businessName=x.get("businessName")
             )
         )
     return leads

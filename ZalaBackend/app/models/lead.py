@@ -7,3 +7,4 @@ class Lead(BaseModel):
     email: Optional[EmailStr]
     phone_number: Optional[str]
     address: Optional[str]
+    businessName: Optional[str]
