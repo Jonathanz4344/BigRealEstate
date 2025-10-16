@@ -1,0 +1,56 @@
+@import url("https://fonts.googleapis.com/css2?family=Grenze:wght@400;500;700;800;900family=Ubuntu+Mono:wght@400;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #f6e6c3;
+  --color-secondary: #1e1e1e;
+  --color-accent: #fa6f1e;
+
+  --color-background: #fbf1e1;
+  --color-white: #ffffff;
+
+  --color-secondary-50: #1e1e1e80;
+}
+
+:root {
+  font-family: "Ubuntu Mono", monospace;
+  font-style: normal;
+  box-sizing: border-box;
+  padding: 0px;
+  margin: 0px;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-secondary);
+  padding: 0px;
+  margin: 0px;
+
+  @apply w-screen h-screen;
+}
+
+/* .gradient-background {
+  @apply -bg-linear-45 from-secondary to-secondary-light shadow-xl p-4 rounded-lg;
+} */
+
+.box-shadow {
+  box-shadow: 5px 5px 15px var(--color-secondary-50);
+}
+
+.box-shadow-sm {
+  box-shadow: 2.5px 2.5px 7.5px var(--color-secondary-50);
+}
+
+.card-base {
+  @apply bg-primary rounded-[15px];
+}
+
+.grenze {
+  font-family: "Grenze", serif;
+  font-style: normal;
+}
+
+.ubuntu {
+  font-family: "Ubuntu Mono", monospace;
+  font-style: normal;
+}

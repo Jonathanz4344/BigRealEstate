@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi.responses import JSONResponse
 from app.models.lead import Lead
 import pandas as pd
 import io
@@ -8,7 +9,7 @@ router = APIRouter()
 @router.post("/import-csv/")
 async def import_csv(file: UploadFile = File(...)):
     if file.content_type not in ["text/csv", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]:
-        raise HTTPException(status_code=400, detail="Unsupported file type")
+        return JSONResponse(status_code=400, content={"error": "Unsupported file type"})
 
     try:
         contents = await file.read()
@@ -40,4 +41,4 @@ async def import_csv(file: UploadFile = File(...)):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Parsing failed: {str(e)}")
+        return JSONResponse(status_code=500, content={"error": f"Parsing failed: {str(e)}"})
