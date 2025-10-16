@@ -1,6 +1,5 @@
 import requests
 import pprint
-import json
 from __init__ import RAPIDAPI_KEY
 from to_leads import rapid_to_leads
 
