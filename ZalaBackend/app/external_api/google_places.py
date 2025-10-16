@@ -87,9 +87,5 @@ if __name__ == "__main__":
     try:
         agents = search_agents(query)
         pprint.pprint(agents)
-        # for a in agents:
-        #     print(f"{a['name']} — {a['address']} — {a.get('phone')} — {a.get('website')}")
-        # if not agents:
-        #     print("No agents found in the search radius.")
     except (GeocodeError, PlacesError) as e:
         print(f"Error: {e}")
