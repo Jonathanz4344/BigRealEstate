@@ -21,9 +21,9 @@ ZalaBackend/
 │ ├── main.py    # FastAPI entry point
 │ ├── db.py      # Database setup
 │ ├── models/    # Pydantic or ORM models
-         └── exampleUser.py  # example model
+         └── user.py  # example model
 │ ├── routes/    # API route definitions
-         └── exampleUser.py  # example route
+         └── user.py  # example route
   └── example.py # example api test
 │ ├── utils/     # Helper functions and utilities
 │ ├── tests/     # Unit/integration tests
