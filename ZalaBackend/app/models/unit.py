@@ -15,7 +15,7 @@ class Unit(Base):
     property_id: Mapped[int] = mapped_column(ForeignKey("properties.property_id"))
     apt_num: Mapped[str] = mapped_column(nullable=True)
     bedrooms: Mapped[int] = mapped_column(nullable=True)
-    bath: Mapped[Decimal] = mapped_column(Numeric(3, 1))
+    bath: Mapped[Decimal] = mapped_column(Numeric(3, 1), nullable=True)
     sqft: Mapped[int] = mapped_column(nullable=True)
     notes: Mapped[str] = mapped_column(nullable=True)
 

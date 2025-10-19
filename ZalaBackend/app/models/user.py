@@ -23,10 +23,10 @@ class User(Base):
     contact_id: Mapped[int] = mapped_column(ForeignKey("contacts.contact_id"), unique=True, nullable=False)
     username: Mapped[str] = mapped_column(String(15), unique=True, nullable=False)
     role: Mapped[str] = mapped_column(String(20), nullable=False, default="user")
-    profile_pic: Mapped[str] = mapped_column(nullable=False, default="user")
+    profile_pic: Mapped[str] = mapped_column(nullable=True)
     xp: Mapped[int] = mapped_column(nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
 
     contact: Mapped["Contact"] = relationship(back_populates="user")
     authentication: Mapped["UserAuthentication"] = relationship(
@@ -38,4 +38,4 @@ class User(Base):
         secondary=user_properties,
         back_populates="users"
     )
-    leads: Mapped[List["Lead"]] = relationship(back_populates="user")
+    leads_created: Mapped[List["Lead"]] = relationship(back_populates="created_by_user")

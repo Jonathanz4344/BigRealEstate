@@ -18,8 +18,8 @@ class Address(Base):
     city: Mapped[str] = mapped_column(nullable=False)
     state: Mapped[str] = mapped_column(nullable=False)
     zipcode: Mapped[str] = mapped_column(String(10), nullable=False)
-    lat: Mapped[Decimal] = mapped_column(Numeric(9, 6))
-    long: Mapped[Decimal] = mapped_column(Numeric(9, 6))
+    lat: Mapped[Decimal] = mapped_column(Numeric(9, 6), nullable=True)
+    long: Mapped[Decimal] = mapped_column(Numeric(9, 6), nullable=True)
 
     property: Mapped["Property"] = relationship(back_populates="address")
     lead: Mapped["Lead"] = relationship(back_populates="address")
