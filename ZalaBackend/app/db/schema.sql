@@ -66,7 +66,9 @@ CREATE TABLE properties (
     property_id     SERIAL PRIMARY KEY,
     property_name   TEXT NOT NULL,
     address_id      INTEGER REFERENCES addresses(address_id),
-    mls_number      TEXT UNIQUE
+    mls_number      TEXT UNIQUE,
+    lead_id         INTEGER REFERENCES leads(lead_id),
+    notes           TEXT
 );
 
 CREATE TABLE units (
