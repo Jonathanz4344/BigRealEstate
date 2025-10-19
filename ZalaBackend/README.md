@@ -18,14 +18,19 @@ Backend service for the **Zala** project — built with [FastAPI](https://fastap
 ZalaBackend/
 │
 ├── app/
+  ├── data/      # data folder  
+      └── mock_properties.json # mock data for properties
+  ├── db/        # DB logic (queries, migrations, etc.)
 │ ├── main.py    # FastAPI entry point
-│ ├── db.py      # Database setup
+│ ├── db.py      #  Database setup and connection
 │ ├── models/    # Pydantic or ORM models
-         └── user.py  # example model
+         └── lead.py  # Lead model (first name, last name, email, phone)
+         └── location.py # Location filter model (zip, city, state, lat/lng)
 │ ├── routes/    # API route definitions
-         └── user.py  # example route
-  └── example.py # example api test
+         └── csv_intake.py # Upload and parse CSV/Excel leads
+         └── location_filter.py # Flexible location filter + geocoding
 │ ├── utils/     # Helper functions and utilities
+         └── geocode.py # Google Maps geocoder (need google maps env)
 │ ├── tests/     # Unit/integration tests
 │ ├── .env       # Environment variables (DB URLs, secrets, etc.)
 │ └── .gitignore # Ignored files for Git
@@ -77,8 +82,6 @@ py -m uvicorn main:app --reload
 ## How FastAPI Works
 
 1. FastAPI app instance
-    
-   Defined in example.py
 
  ```bash
 
@@ -90,43 +93,12 @@ Includes modular route files using include_router().
 
 ## Testing Your API
 1. Run your app:
-   py -m uvicorn app.example:app --reload
+   py -m uvicorn app.main:app --reload
 
 2. Visit:
 
    1. Swagger UI → http://127.0.0.1:8000/docs
    2. ReDoc → http://127.0.0.1:8000/redoc
-
-3. In Swagger:
-
-   You’ll see both:
-
-   GET /users/
-   POST /users/
-
-   ```bash
-   Example request (POST /users/)
-   {
-   "name": "Charlie",
-   "email": "charlie@example.com",
-   "age": 28
-   }
-
-   ```
-
-   ```bash
-
-   Example response:
-
-   {
-   "message": "User created successfully",
-   "user": {
-      "name": "Charlie",
-      "email": "charlie@example.com",
-      "age": 28
-   }
-   ```
-   
 
 ## Automatic Documentation
 
@@ -149,13 +121,17 @@ Use --reload during development for hot-reload.
 
 Use environment variables in .env for configs (DB URLs, secrets, etc.).
 
-To structure a larger app:
-
-Create multiple routers (e.g., users.py, auth.py, products.py)
-
-Register each with app.include_router()
-
 ```
+
+## ENV Notes
+
+1. Requires google api for geocode
+   1. naming GOOGLE_API_KEY
+2. How to Get Google Maps API Key
+   1. Go to https://console.cloud.google.com/
+   2. Create a new project or existing one
+   3. Enable Geocoding API
+   4. Go to Credentials and copy API key
 
 
 
