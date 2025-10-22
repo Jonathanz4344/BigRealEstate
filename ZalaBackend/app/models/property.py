@@ -16,6 +16,7 @@ class Property(Base):
     property_id: Mapped[int] = mapped_column(primary_key=True)
     property_name: Mapped[str] = mapped_column(nullable=False)
     address_id: Mapped[int] = mapped_column(ForeignKey("addresses.address_id"), unique=True)
+    address: Mapped["Address"] = relationship(back_populates="property") 
     mls_number: Mapped[str] = mapped_column(unique=True, nullable=True)
     lead_id: Mapped[int] = mapped_column(ForeignKey("leads.lead_id"), nullable=True)
     notes: Mapped[str] = mapped_column(nullable=True)
