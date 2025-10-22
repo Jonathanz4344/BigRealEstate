@@ -1,0 +1,1 @@
+from .contact import ContactBase, ContactCreate, ContactUpdate, ContactPublic

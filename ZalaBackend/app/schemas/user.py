@@ -2,10 +2,10 @@ from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from typing import Optional, List
 
-from ZalaBackend.app.models.contact import Contact
-from ZalaBackend.app.schemas.contact import ContactPublic, ContactBase
-from ZalaBackend.app.schemas.lead import LeadPublic
-from ZalaBackend.app.schemas.property import PropertyPublic
+from app.models.contact import Contact
+from app.schemas.contact import ContactPublic, ContactBase
+from app.schemas.lead import LeadPublic
+from app.schemas.property import PropertyPublic
 
 
 class UserBase(BaseModel):

@@ -2,8 +2,8 @@ from typing import Optional, List
 
 from pydantic import BaseModel, Field
 
-from ZalaBackend.app.schemas.address import AddressPublic, AddressBase
-from ZalaBackend.app.schemas.unit import UnitPublic
+from app.schemas.address import AddressPublic, AddressBase
+from app.schemas.unit import UnitPublic
 
 
 class PropertyBase(BaseModel):

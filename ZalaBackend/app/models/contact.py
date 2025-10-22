@@ -1,7 +1,7 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from ..db.session import Base
+from app.db.session import Base
 
 
 class Contact(Base):
@@ -13,5 +13,5 @@ class Contact(Base):
     email: Mapped[str] = mapped_column(nullable=True)
     phone: Mapped[str] = mapped_column(String(20), nullable=True)
 
-    user: Mapped["User"] = relationship(back_populates="contact")
-    lead: Mapped["Lead"] = relationship(back_populates="contact")
+    # user: Mapped["User"] = relationship(back_populates="contact")
+    # lead: Mapped["Lead"] = relationship(back_populates="contact")

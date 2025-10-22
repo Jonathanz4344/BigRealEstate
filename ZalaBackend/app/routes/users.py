@@ -2,9 +2,9 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from ZalaBackend.app.db.session import get_db
-from ZalaBackend.app.db.crud import user as user_crud
-from ZalaBackend.app import schemas
+from app.db.session import get_db
+from app.db.crud import user as user_crud
+from app import schemas
 
 router = APIRouter(
     prefix="/users",
