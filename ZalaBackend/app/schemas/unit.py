@@ -23,6 +23,17 @@ class UnitCreate(UnitBase):
     """
     property_id: int
 
+class UnitUpdate(BaseModel):
+    """
+    Schema for Create Unit
+    """
+    property_id: Optional[int]
+    apt_num: Optional[str]
+    bedrooms: Optional[int]
+    bath: Optional[Decimal] = Field(max_digits=3, decimal_places=1)
+    sqft: Optional[int]
+    notes: Optional[str]
+
 
 class UnitPublic(UnitBase):
     """

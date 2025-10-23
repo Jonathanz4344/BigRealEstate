@@ -23,6 +23,16 @@ class PropertyCreate(PropertyBase):
     # lead_id: Optional[int] = None
 
 
+class PropertyUpdate(BaseModel):
+    """
+    Schema for Update a property
+    """
+    address: Optional[AddressBase]
+    property_name: Optional[str]
+    lead_id: Optional[int] = None
+    mls_number: Optional[str] = None
+    notes: Optional[str] = None
+
 class PropertyPublic(PropertyBase):
     """
     Schema for Get Property

@@ -16,14 +16,18 @@ class ContactCreate(ContactBase):
     """
     Schema for creating a new Contact
     """
-    first_name: str
+    pass
 
 
 class ContactUpdate(ContactBase):
     """
     Schema for updating an existing Contact
     """
-    pass
+
+    first_name: Optional[str]
+    last_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = Field(default=None, max_length=20)
 
 
 class ContactPublic(ContactBase):

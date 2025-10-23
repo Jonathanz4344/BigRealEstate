@@ -33,7 +33,7 @@ class LeadUpdate(BaseModel):
     Schema for Updating a Lead
     """
     contact: Optional[ContactBase] = None
-    address: Optional[AddressBase] = None
+    address: Optional[AddressUpdate] = None
     created_by_user_id: Optional[int] = None
     person_type: Optional[str] = None
     business: Optional[str] = None
