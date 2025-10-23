@@ -28,6 +28,20 @@ class LeadCreate(LeadBase):
     created_by_user_id: Optional[int] = None
 
 
+class LeadUpdate(BaseModel):
+    """
+    Schema for Updating a Lead
+    """
+    contact: Optional[ContactBase] = None
+    address: Optional[AddressBase] = None
+    created_by_user_id: Optional[int] = None
+    person_type: Optional[str] = None
+    business: Optional[str] = None
+    website: Optional[str] = None
+    license_num: Optional[str] = None
+    notes: Optional[str] = None
+
+
 class LeadPublic(LeadBase):
     """
     Schema for Get a Lead
@@ -41,5 +55,3 @@ class LeadPublic(LeadBase):
 
     class Config:
         orm_mode = True
-
-
