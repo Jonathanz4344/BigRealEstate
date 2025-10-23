@@ -59,8 +59,7 @@ def create_user(db: Session, user: schemas.UserCreate):
     )
 
     db.add(db_contact)
-    db.commit()
-    db.refresh(db_contact)
+    db.flush()
 
     db_user = models.User(
         username=user.username,
@@ -68,6 +67,7 @@ def create_user(db: Session, user: schemas.UserCreate):
         role=user.role,
         contact_id=db_contact.contact_id  # foreign key link to contact
     )
+
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
