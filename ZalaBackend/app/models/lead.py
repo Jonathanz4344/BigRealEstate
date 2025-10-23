@@ -22,7 +22,7 @@ class Lead(Base):
     license_num: Mapped[str] = mapped_column(nullable=True)
     notes: Mapped[str] = mapped_column(nullable=True)
 
-    created_by_user: Mapped["User"] = relationship(back_populates="leads_created")
-    contact: Mapped["Contact"] = relationship(back_populates="lead")
-    address: Mapped["Address"] = relationship(back_populates="lead")
-    properties: Mapped[List["Property"]] = relationship(back_populates="lead")
+    # created_by_user: Mapped["User"] = relationship(back_populates="leads_created")
+    # contact: Mapped["Contact"] = relationship(back_populates="lead")
+    # address: Mapped["Address"] = relationship(back_populates="lead")
+    # properties: Mapped[List["Property"]] = relationship(back_populates="lead")

@@ -28,14 +28,14 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
 
-    contact: Mapped["Contact"] = relationship(back_populates="user")
-    authentication: Mapped["UserAuthentication"] = relationship(
-        back_populates="user",
-        cascade="all, delete-orphan",
-        uselist=False
-    )
-    properties: Mapped[List["Property"]] = relationship(
-        secondary=user_properties,
-        back_populates="users"
-    )
-    leads_created: Mapped[List["Lead"]] = relationship(back_populates="created_by_user")
+    # contact: Mapped["Contact"] = relationship(back_populates="user")
+    # authentication: Mapped["UserAuthentication"] = relationship(
+    #     back_populates="user",
+    #     cascade="all, delete-orphan",
+    #     uselist=False
+    # )
+    # properties: Mapped[List["Property"]] = relationship(
+    #     secondary=user_properties,
+    #     back_populates="users"
+    # )
+    # leads_created: Mapped[List["Lead"]] = relationship(back_populates="created_by_user")
