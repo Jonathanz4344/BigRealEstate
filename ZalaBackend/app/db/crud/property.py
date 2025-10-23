@@ -3,12 +3,13 @@ from app.models.property import Property
 from app.models.address import Address
 from app.schemas.property import PropertyCreate
 
+
 def create_property(db: Session, property_in: PropertyCreate) -> Property:
     # Create Address first (nested create)
     db_address = Address(**property_in.address.dict())
     db.add(db_address)
-    db.commit()
-    db.refresh(db_address)
+
+    db.flush()
 
     db_property = Property(
         property_name=property_in.property_name,
@@ -22,11 +23,14 @@ def create_property(db: Session, property_in: PropertyCreate) -> Property:
     db.refresh(db_property)
     return db_property
 
+
 def get_properties(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Property).offset(skip).limit(limit).all()
 
+
 def get_property(db: Session, property_id: int):
     return db.query(Property).filter(Property.property_id == property_id).first()
+
 
 def update_property(db: Session, property_id: int, property_in: PropertyCreate):
     db_property = db.query(Property).filter(Property.property_id == property_id).first()
@@ -46,6 +50,7 @@ def update_property(db: Session, property_id: int, property_in: PropertyCreate):
     db.commit()
     db.refresh(db_property)
     return db_property
+
 
 def delete_property(db: Session, property_id: int):
     db_property = db.query(Property).filter(Property.property_id == property_id).first()
