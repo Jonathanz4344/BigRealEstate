@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.models.location import LocationFilter, DataSource
+from app.schemas.location import LocationFilter, DataSource
 from app.utils.geocode import geocode_location, reverse_geocode
 from fastapi.responses import JSONResponse
 import re
