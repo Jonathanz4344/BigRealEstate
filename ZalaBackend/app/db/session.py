@@ -28,9 +28,13 @@ def get_db():
 
 def init_db():
     """
-    Creates tables in DB and import all models
+    Drops all tables and recreates them from the current models.
     """
-    # Import all your models here so Base knows about them
+    # Import all your models so Base knows about them
     from ..models import user, property, contact, lead, address, unit, user_authentication
+
+    print("Dropping all database tables...")
+    Base.metadata.drop_all(bind=engine)
+
     print("Creating all database tables...")
     Base.metadata.create_all(bind=engine)
