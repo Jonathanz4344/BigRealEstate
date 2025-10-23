@@ -66,12 +66,45 @@ def create_user(db: Session, user: schemas.UserCreate):
         username=user.username,
         profile_pic=user.profile_pic,
         role=user.role,
-        contact_id=db_contact.contact_id    # foreign key link to contact
+        contact_id=db_contact.contact_id  # foreign key link to contact
     )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
 
-    # add functionality for hashing
+    # TODO add functionality for hashing
 
+    return db_user
+
+
+def update_user(db: Session, user_id: int, user: schemas.UserUpdate):
+    db_user = db.query(models.User).filter(models.User.user_id == user_id).first()
+
+    update_data = user.dict(exclude_unset=True)
+
+    if "contact" in update_data:
+        contact_data = update_data.pop("contact")
+        if db_user.contact:
+            for key, value in contact_data.items():
+                setattr(db_user.contact, key, value)
+
+    if "password" in update_data:
+        password_data = update_data.pop("password")
+        # TODO add functionality for hashing
+        pass
+
+    for key, value in update_data.items():
+        setattr(db_user, key, value)
+
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+def delete_user(db: Session, user_id: int):
+    db_user = db.query(models.User).filter(models.User.user_id == user_id).first()
+    if not db_user:
+        return None
+    db.delete(db_user)
+    db.commit()
     return db_user
