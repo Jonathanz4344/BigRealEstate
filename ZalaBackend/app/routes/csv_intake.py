@@ -71,7 +71,7 @@ import io
 
 router = APIRouter()
 
-@router.post("/import-csv/")
+@router.post("/import-csv/", tags=["Import CSV"])
 async def import_csv(file: UploadFile = File(...)):
     # Validate file type
     if file.content_type not in [

@@ -32,7 +32,7 @@ def get_mock_properties(lat: float, lon: float):
             results.append(prop)
     return results
 
-@router.post("/search-location/")
+@router.post("/search-location/", tags=["Search Filter"])
 def search_location(filter: LocationFilter):
     # Reverse geocode if lat/lng provided
     if filter.latitude and filter.longitude:

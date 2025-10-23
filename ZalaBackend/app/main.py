@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 load_dotenv()
 
-from app.routes import csv_intake, location_filter, contacts  
+from app.routes import csv_intake, location_filter, contacts, addresses
 
 app = FastAPI()
 
@@ -17,7 +17,7 @@ app.add_middleware(
 )
 
 
-@app.get("/")
+@app.get("/", tags=["Root"])
 def read_root():
     return {"message": "Zala API is running"}
 
@@ -26,3 +26,4 @@ def read_root():
 app.include_router(csv_intake.router, prefix="/api")
 app.include_router(location_filter.router, prefix="/api")
 app.include_router(contacts.router, prefix="/api") 
+app.include_router(addresses.router, prefix="/api")
