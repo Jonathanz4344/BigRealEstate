@@ -27,4 +27,5 @@ class Property(Base):
     )
     units: Mapped[List["Unit"]] = relationship(back_populates="property")
     lead: Mapped["Lead"] = relationship(back_populates="properties")
+    address: Mapped["Address"] = relationship(back_populates="address")
 
