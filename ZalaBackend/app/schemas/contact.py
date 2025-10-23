@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 
 class ContactBase(BaseModel):
@@ -8,7 +8,7 @@ class ContactBase(BaseModel):
     """
     first_name: str
     last_name: Optional[str] = None
-    email: Optional[str] = None
+    email: Optional[EmailStr] = None
     phone: Optional[str] = Field(default=None, max_length=20)
 
 

@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from fastapi import HTTPException, status
 
 from app.models.contact import Contact
 from app import schemas
@@ -32,6 +33,25 @@ def create_contact(db: Session, contact_in: schemas.ContactCreate) -> Contact:
     Create a new contact
     SQL: INSERT INTO contacts (first_name, last_name, email, phone) VALUES (...)
     """
+
+    # Check for duplicate email
+    if contact_in.email:
+        existing = db.query(Contact).filter(Contact.email == contact_in.email).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A contact with this email already exists."
+            )
+
+    # Check for duplicate phone
+    if contact_in.phone:
+        existing = db.query(Contact).filter(Contact.phone == contact_in.phone).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A contact with this phone already exists."
+            )
+
     db_contact = Contact(
         first_name=contact_in.first_name,
         last_name=contact_in.last_name,
@@ -55,6 +75,24 @@ def update_contact(db: Session, contact_id: int, contact_in: schemas.ContactUpda
     db_contact = db.query(Contact).filter(Contact.contact_id == contact_id).first()
     if not db_contact:
         return None
+
+    # Check for duplicate email (if updating email)
+    if contact_in.email and contact_in.email != db_contact.email:
+        existing = db.query(Contact).filter(Contact.email == contact_in.email).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Another contact with this email already exists."
+            )
+
+    # Check for duplicate phone (if updating phone)
+    if contact_in.phone and contact_in.phone != db_contact.phone:
+        existing = db.query(Contact).filter(Contact.phone == contact_in.phone).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Another contact with this phone already exists."
+            )
 
     db_contact.first_name = contact_in.first_name
     db_contact.last_name = contact_in.last_name
