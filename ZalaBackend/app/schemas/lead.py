@@ -2,10 +2,10 @@ from typing import Optional, List
 
 from pydantic import BaseModel
 
-from ZalaBackend.app.schemas.address import AddressPublic, AddressBase
-from ZalaBackend.app.schemas.contact import ContactPublic, ContactBase
-from ZalaBackend.app.schemas.property import PropertyPublic
-from ZalaBackend.app.schemas.user import UserPublic
+from app.schemas.address import AddressPublic, AddressBase
+from app.schemas.contact import ContactPublic, ContactBase
+from app.schemas.property import PropertyPublic
+from app.schemas.user import UserPublic
 
 
 class LeadBase(BaseModel):

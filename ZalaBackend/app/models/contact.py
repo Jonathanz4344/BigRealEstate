@@ -1,17 +1,21 @@
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from ..db.session import Base
+from sqlalchemy import String, DateTime, func, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column
+from app.db.session import Base
 
 
 class Contact(Base):
     __tablename__ = "contacts"
 
-    contact_id: Mapped[int] = mapped_column(primary_key=True)
+    contact_id: Mapped[int] = mapped_column(primary_key=True, index=True)
     first_name: Mapped[str] = mapped_column(nullable=False)
     last_name: Mapped[str] = mapped_column(nullable=True)
-    email: Mapped[str] = mapped_column(nullable=True)
-    phone: Mapped[str] = mapped_column(String(20), nullable=True)
+    email: Mapped[str] = mapped_column(String(255), nullable=True, unique=True, index=True)
+    phone: Mapped[str] = mapped_column(String(20), nullable=True, unique=True, index=True)
 
-    user: Mapped["User"] = relationship(back_populates="contact")
-    lead: Mapped["Lead"] = relationship(back_populates="contact")
+    __table_args__ = (
+        UniqueConstraint("email", name="uq_contact_email"),
+        UniqueConstraint("phone", name="uq_contact_phone"),
+    )
+
+    # user: Mapped["User"] = relationship(back_populates="contact")
+    # lead: Mapped["Lead"] = relationship(back_populates="contact")

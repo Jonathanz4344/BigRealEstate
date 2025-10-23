@@ -21,6 +21,8 @@ ZalaBackend/
   ├── data/      # data folder  
       └── mock_properties.json # mock data for properties
   ├── db/        # DB logic (queries, migrations, etc.)
+      └── crud/
+  ├── external_api/
 │ ├── main.py    # FastAPI entry point
 │ ├── db.py      #  Database setup and connection
 │ ├── models/    # Pydantic or ORM models
@@ -29,6 +31,7 @@ ZalaBackend/
 │ ├── routes/    # API route definitions
          └── csv_intake.py # Upload and parse CSV/Excel leads
          └── location_filter.py # Flexible location filter + geocoding
+  ├── schemas/  
 │ ├── utils/     # Helper functions and utilities
          └── geocode.py # Google Maps geocoder (need google maps env)
 │ ├── tests/     # Unit/integration tests

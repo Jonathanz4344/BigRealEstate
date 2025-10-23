@@ -1,60 +1,56 @@
 from sqlalchemy.orm import Session
+from app.models.property import Property
+from app.models.address import Address
+from app.schemas.property import PropertyCreate
 
-from ZalaBackend.app import models
-from ZalaBackend.app import schemas
-
-"""GET FUNCTIONS"""
-
-
-def get_user_by_id(db: Session, property_id: int):
-    """
-    Get a single user by their ID
-    SELECT * FROM users WHERE property_id = {property_id}
-    """
-    return db.query(models.Property).filter(models.Property.property_id == property_id).first()
-
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    """
-    Get a list of users with limits
-    SELECT * FROM users OFFSET {skip} LIMIT {limit};
-    """
-    return db.query(models.Property).offset(skip).limit(limit).all()
-
-
-"""CREATE FUNCTIONS"""
-
-
-def create_property(db: Session, property: schemas.PropertyCreate):
-    """
-    Create a new property and all associated records.
-    This function handles:
-    1. Create new Contact - INSERT INTO contacts
-    2. Create new User record - INSERT INTO users
-    3. Hash user's password - TODO
-    4. Create UserAuthentication with hashed password - TODO - INSERT INTO user_authentication
-
-    """
-    db_address = models.Address(
-        street_1=property.address.street_1,
-        street_2=property.address.street_2,
-        city=property.address.city,
-        state=property.address.state
-    )
-
+def create_property(db: Session, property_in: PropertyCreate) -> Property:
+    # Create Address first (nested create)
+    db_address = Address(**property_in.address.dict())
     db.add(db_address)
     db.commit()
     db.refresh(db_address)
 
-    db_user = models.Property(
-        username=user.username,
-        profile_pic=user.profile_pic,
-        role=user.role,
-        address_id=db_address.address_id    # foreign key link to address
+    db_property = Property(
+        property_name=property_in.property_name,
+        mls_number=property_in.mls_number,
+        notes=property_in.notes,
+        # lead_id=property_in.lead_id,
+        address_id=db_address.address_id
     )
-    db.add(db_user)
+    db.add(db_property)
     db.commit()
-    db.refresh(db_user)
+    db.refresh(db_property)
+    return db_property
 
-    # add functionality for hashing
+def get_properties(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(Property).offset(skip).limit(limit).all()
 
-    return db_user
+def get_property(db: Session, property_id: int):
+    return db.query(Property).filter(Property.property_id == property_id).first()
+
+def update_property(db: Session, property_id: int, property_in: PropertyCreate):
+    db_property = db.query(Property).filter(Property.property_id == property_id).first()
+    if not db_property:
+        return None
+
+    # Update nested address
+    if db_property.address:
+        for field, value in property_in.address.dict().items():
+            setattr(db_property.address, field, value)
+
+    db_property.property_name = property_in.property_name
+    db_property.mls_number = property_in.mls_number
+    db_property.notes = property_in.notes
+    db_property.lead_id = property_in.lead_id
+
+    db.commit()
+    db.refresh(db_property)
+    return db_property
+
+def delete_property(db: Session, property_id: int):
+    db_property = db.query(Property).filter(Property.property_id == property_id).first()
+    if not db_property:
+        return None
+    db.delete(db_property)
+    db.commit()
+    return db_property
