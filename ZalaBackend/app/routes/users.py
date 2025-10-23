@@ -51,7 +51,7 @@ def read_users(
     return users
 
 
-@router.get("/{user_id}", response_model=schemas.UserPublicWithLeadsAndProperties)
+@router.get("/{user_id}", response_model=schemas.UserPublic)
 def get_user_by_id(
         user_id: int,
         db: Session = Depends(get_db)
@@ -66,3 +66,5 @@ def get_user_by_id(
             detail="User not found",
         )
     return db_user
+
+
