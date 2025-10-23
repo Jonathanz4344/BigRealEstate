@@ -13,7 +13,7 @@ router = APIRouter(
 
 
 @router.post("/", response_model=schemas.UserPublic, status_code=status.HTTP_201_CREATED)
-def create_new_user(
+def create_user(
         user_in: schemas.UserCreate,
         db: Session = Depends(get_db)
 ):
@@ -21,20 +21,20 @@ def create_new_user(
     Create a new user
     """
     user_by_username = user_crud.get_user_by_username(db, username=user_in.username)
-    if user_by_username:    # check if exists already (username)
+    if user_by_username:  # check if exists already (username)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="A user with this username already exists.",
         )
 
     user_by_email = user_crud.get_user_by_email(db, email=user_in.contact.email)
-    if user_by_email:       # check if exists already (email)
+    if user_by_email:  # check if exists already (email)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="A user with this email already exists.",
         )
 
-    new_user = user_crud.create_user(db=db, user=user_in)   # create user
+    new_user = user_crud.create_user(db=db, user=user_in)  # create user
     return new_user
 
 
@@ -52,7 +52,7 @@ def read_users(
 
 
 @router.get("/{user_id}", response_model=schemas.UserPublic)
-def get_user_by_id(
+def read_user_by_id(
         user_id: int,
         db: Session = Depends(get_db)
 ):
@@ -60,7 +60,7 @@ def get_user_by_id(
     Retrieve a single user by their ID, including their leads and properties.
     """
     db_user = user_crud.get_user_by_id(db, user_id=user_id)
-    if db_user is None:     # no user
+    if db_user is None:  # no user
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
@@ -68,3 +68,20 @@ def get_user_by_id(
     return db_user
 
 
+@router.put("/{user_id}", response_model=schemas.UserPublic)
+def update_user(user_id: int, user: schemas.UserUpdate, db: Session = Depends(get_db)):
+    db_user = user_crud.update_user(db=db, user_id=user_id, user=user)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
+
+
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    """
+    Delete a User by ID
+    """
+    success = user_crud.delete_contact(db, user_id=user_id)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return None
