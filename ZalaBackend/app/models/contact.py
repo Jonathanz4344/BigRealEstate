@@ -1,5 +1,5 @@
 from sqlalchemy import String, DateTime, func, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.session import Base
 
 
@@ -17,5 +17,5 @@ class Contact(Base):
         UniqueConstraint("phone", name="uq_contact_phone"),
     )
 
-    # user: Mapped["User"] = relationship(back_populates="contact")
+    user: Mapped["User"] = relationship("User", back_populates="contact", uselist=False)
     # lead: Mapped["Lead"] = relationship(back_populates="contact")

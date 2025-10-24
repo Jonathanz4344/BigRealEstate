@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
-from app import models
+from app.models.contact import Contact
+from app.models.user import User
 from app import schemas
 
 """GET FUNCTIONS"""
@@ -11,7 +12,7 @@ def get_user_by_id(db: Session, user_id: int):
     Get a single user by their ID
     SELECT * FROM users WHERE user_id = {user_id}
     """
-    return db.query(models.User).filter(models.User.user_id == user_id).first()
+    return db.query(User).filter(User.user_id == user_id).first()
 
 
 def get_user_by_email(db: Session, email: str):
@@ -19,7 +20,7 @@ def get_user_by_email(db: Session, email: str):
     Get a single user by their email address
     SELECT * FROM users JOIN contacts WHERE contact.email = {email}
     """
-    return db.query(models.User).join(models.Contact).filter(models.Contact.email == email).first()
+    return db.query(User).join(Contact).filter(Contact.email == email).first()
 
 
 def get_user_by_username(db: Session, username: str):
@@ -27,7 +28,7 @@ def get_user_by_username(db: Session, username: str):
     Get a single user by their username
     SELECT * FROM users WHERE username = {username}
     """
-    return db.query(models.User).filter(models.User.username == username).first()
+    return db.query(User).filter(User.username == username).first()
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
@@ -35,7 +36,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     Get a list of users with limits
     SELECT * FROM users OFFSET {skip} LIMIT {limit};
     """
-    return db.query(models.User).offset(skip).limit(limit).all()
+    return db.query(User).offset(skip).limit(limit).all()
 
 
 """CREATE FUNCTIONS"""
@@ -51,7 +52,7 @@ def create_user(db: Session, user: schemas.UserCreate):
     4. Create UserAuthentication with hashed password - TODO - INSERT INTO user_authentication
 
     """
-    db_contact = models.Contact(
+    db_contact = Contact(
         first_name=user.contact.first_name,
         last_name=user.contact.last_name,
         email=user.contact.email,
@@ -61,7 +62,7 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.add(db_contact)
     db.flush()
 
-    db_user = models.User(
+    db_user = User(
         username=user.username,
         profile_pic=user.profile_pic,
         role=user.role,
@@ -78,7 +79,7 @@ def create_user(db: Session, user: schemas.UserCreate):
 
 
 def update_user(db: Session, user_id: int, user: schemas.UserUpdate):
-    db_user = db.query(models.User).filter(models.User.user_id == user_id).first()
+    db_user = db.query(User).filter(User.user_id == user_id).first()
 
     update_data = user.dict(exclude_unset=True)
 
@@ -102,9 +103,9 @@ def update_user(db: Session, user_id: int, user: schemas.UserUpdate):
 
 
 def delete_user(db: Session, user_id: int):
-    db_user = db.query(models.User).filter(models.User.user_id == user_id).first()
+    db_user = db.query(User).filter(User.user_id == user_id).first()
     if not db_user:
-        return None
+        return False
     db.delete(db_user)
     db.commit()
-    return db_user
+    return True

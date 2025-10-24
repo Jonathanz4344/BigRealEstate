@@ -81,7 +81,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     """
     Delete a User by ID
     """
-    success = user_crud.delete_contact(db, user_id=user_id)
+    success = user_crud.delete_user(db, user_id=user_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return None
