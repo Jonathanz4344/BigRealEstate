@@ -3,9 +3,6 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from app.schemas.property import PropertyPublic
-
-
 class UnitBase(BaseModel):
     """
     Base Schema for Unit
