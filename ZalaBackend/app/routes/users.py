@@ -11,11 +11,10 @@ from app import schemas as _schemas
 
 router = APIRouter(
     prefix="/users",
-    tags=["Users"],
 )
 
 
-@router.post("/", response_model=schemas.UserPublic, status_code=status.HTTP_201_CREATED)
+@router.post("/",tags=["Users"], response_model=schemas.UserPublic, status_code=status.HTTP_201_CREATED)
 def create_user(
         user_in: schemas.UserCreate,
         db: Session = Depends(get_db)
@@ -41,7 +40,7 @@ def create_user(
     return new_user
 
 
-@router.get("/", response_model=List[schemas.UserPublic])
+@router.get("/",tags=["Users"], response_model=List[schemas.UserPublic])
 def read_users(
         skip: int = 0,
         limit: int = 100,
@@ -54,7 +53,7 @@ def read_users(
     return users
 
 
-@router.get("/{user_id}", response_model=schemas.UserPublic)
+@router.get("/{user_id}", tags=["Users"], response_model=schemas.UserPublic)
 def read_user_by_id(
         user_id: int,
         db: Session = Depends(get_db)
@@ -71,7 +70,7 @@ def read_user_by_id(
     return db_user
 
 
-@router.put("/{user_id}", response_model=schemas.UserPublic)
+@router.put("/{user_id}",tags=["Users"], response_model=schemas.UserPublic)
 def update_user(user_id: int, user: schemas.UserUpdate, db: Session = Depends(get_db)):
     db_user = user_crud.update_user(db=db, user_id=user_id, user=user)
     if not db_user:
@@ -79,7 +78,7 @@ def update_user(user_id: int, user: schemas.UserUpdate, db: Session = Depends(ge
     return db_user
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{user_id}", tags=["Users"],status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     """
     Delete a User by ID
@@ -89,7 +88,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return None
 
-@router.get("/{user_id}/contact", response_model=_schemas.ContactPublic)
+@router.get("/{user_id}/contact", response_model=_schemas.ContactPublic, summary="Read Contact for User By Id", tags=["User Contact Link"])
 def read_user_contact(user_id: int, db: Session = Depends(get_db)):
     """Get the contact record associated with a user."""
     contact = user_crud.get_contact_for_user(db, user_id=user_id)
@@ -101,7 +100,24 @@ def read_user_contact(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found for user")
     return contact
 
-@router.get("/{user_id}/properties", response_model=List[schemas.PropertyPublic])
+@router.post("/{user_id}/contacts/{contact_id}", response_model=schemas.UserPublic, summary="Link Contact", tags=["User Contact Link"])
+def link_contact(user_id: int, contact_id: int, db: Session = Depends(get_db)):
+    """Link an existing Contact to a User (attach contact_id to user)."""
+    db_user = user_crud.link_contact_to_user(db=db, user_id=user_id, contact_id=contact_id)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User or Contact not found, or contact already linked")
+    return db_user
+
+
+@router.delete("/{user_id}/contacts/{contact_id}", response_model=schemas.UserPublic, summary="Unlink Contact", tags=["User Contact Link"])
+def unlink_contact(user_id: int, contact_id: int, db: Session = Depends(get_db)):
+    """Unlink (but do not delete) a Contact from a User."""
+    db_user = user_crud.unlink_contact_from_user(db=db, user_id=user_id, contact_id=contact_id)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
+
+@router.get("/{user_id}/properties", response_model=List[schemas.PropertyPublic], summary="Read Properties Linked To User By Id", tags=["User Properties Link"])
 def read_user_properties(user_id: int, db: Session = Depends(get_db)):
     """Return the list of properties assigned to a user (agent)."""
     db_user = user_crud.get_user_by_id(db, user_id=user_id)
@@ -112,27 +128,9 @@ def read_user_properties(user_id: int, db: Session = Depends(get_db)):
     # return empty list if none
     return properties or []
 
-@router.post("/{user_id}/contacts/{contact_id}", response_model=schemas.UserPublic)
-def link_contact(user_id: int, contact_id: int, db: Session = Depends(get_db)):
-    """Link an existing contact to a user (attach contact_id to user)."""
-    db_user = user_crud.link_contact_to_user(db=db, user_id=user_id, contact_id=contact_id)
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User or Contact not found, or contact already linked")
-    return db_user
-
-
-@router.delete("/{user_id}/contacts/{contact_id}", response_model=schemas.UserPublic)
-def unlink_contact(user_id: int, contact_id: int, db: Session = Depends(get_db)):
-    """Unlink (but do not delete) a contact from a user."""
-    db_user = user_crud.unlink_contact_from_user(db=db, user_id=user_id, contact_id=contact_id)
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
-
-
-@router.post("/{user_id}/properties/{property_id}", response_model=schemas.UserPublicWithProperties)
+@router.post("/{user_id}/properties/{property_id}", response_model=schemas.UserPublicWithProperties, summary="Link Property", tags=["User Properties Link"])
 def add_property(user_id: int, property_id: int, db: Session = Depends(get_db)):
-    """Assign a property to a user (agent)."""
+    """Assign a Property to a User (agent)."""
     db_user = user_crud.add_property_to_user(db=db, user_id=user_id, property_id=property_id)
     if not db_user:
         raise HTTPException(status_code=404, detail="User or Property not found")
@@ -145,9 +143,9 @@ def add_property(user_id: int, property_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
-@router.delete("/{user_id}/properties/{property_id}", response_model=schemas.UserPublicWithProperties)
+@router.delete("/{user_id}/properties/{property_id}", response_model=schemas.UserPublicWithProperties, summary="Unlink Property", tags=["User Properties Link"])
 def remove_property(user_id: int, property_id: int, db: Session = Depends(get_db)):
-    """Unassign a property from a user."""
+    """Unassign a Property from a User."""
     db_user = user_crud.remove_property_from_user(db=db, user_id=user_id, property_id=property_id)
     if not db_user:
         raise HTTPException(status_code=404, detail="User or Property not found")

@@ -6,15 +6,15 @@ from app.db.session import get_db
 from app.db.crud import lead as lead_crud
 from app import schemas
 
-router = APIRouter(prefix="/leads", tags=["Leads"])
+router = APIRouter(prefix="/leads")
 
 
-@router.post("/", response_model=schemas.LeadPublic, status_code=status.HTTP_201_CREATED)
+@router.post("/",tags=["Leads"], response_model=schemas.LeadPublic, status_code=status.HTTP_201_CREATED)
 def create_lead(lead_in: schemas.LeadCreate, db: Session = Depends(get_db)):
     return lead_crud.create_lead(db, lead_in)
 
 
-@router.get("/", response_model=List[schemas.LeadPublic])
+@router.get("/",tags=["Leads"], response_model=List[schemas.LeadPublic])
 def read_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     db_leads = lead_crud.get_leads(db, skip=skip, limit=limit)
     results = []
@@ -46,15 +46,6 @@ def read_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
                     "notes": u.notes,
                 })
 
-            # users = []
-            # for usr in (p.users or []):
-            #     users.append({
-            #         "user_id": usr.user_id,
-            #         "username": getattr(usr, "username", None),
-            #         "profile_pic": getattr(usr, "profile_pic", None),
-            #         "role": getattr(usr, "role", None),
-            #     })
-
             props.append({
                 "property_id": p.property_id,
                 "property_name": getattr(p, "property_name", None),
@@ -63,7 +54,6 @@ def read_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
                 "address_id": p.address.address_id if getattr(p, "address", None) else None,
                 "address": addr,
                 "units": units,
-                # "users": users,
             })
 
         results.append({
@@ -80,7 +70,7 @@ def read_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return results
 
 
-@router.get("/{lead_id}", response_model=schemas.LeadPublic)
+@router.get("/{lead_id}", tags=["Leads"],summary="Read Lead By Id", response_model=schemas.LeadPublic)
 def read_lead(lead_id: int, db: Session = Depends(get_db)):
     lead = lead_crud.get_lead_by_id(db, lead_id=lead_id)
     if not lead:
@@ -112,15 +102,6 @@ def read_lead(lead_id: int, db: Session = Depends(get_db)):
                 "notes": u.notes,
             })
 
-        # users = []
-        # for usr in (p.users or []):
-        #     users.append({
-        #         "user_id": usr.user_id,
-        #         "username": getattr(usr, "username", None),
-        #         "profile_pic": getattr(usr, "profile_pic", None),
-        #         "role": getattr(usr, "role", None),
-        #     })
-
         props.append({
             "property_id": p.property_id,
             "property_name": getattr(p, "property_name", None),
@@ -129,7 +110,6 @@ def read_lead(lead_id: int, db: Session = Depends(get_db)):
             "address_id": p.address.address_id if getattr(p, "address", None) else None,
             "address": addr,
             "units": units,
-            # "users": users,
         })
 
     created_by_user = None
@@ -168,7 +148,7 @@ def read_lead(lead_id: int, db: Session = Depends(get_db)):
     }
 
 
-@router.put("/{lead_id}", response_model=schemas.LeadPublic)
+@router.put("/{lead_id}",tags=["Leads"], response_model=schemas.LeadPublic)
 def update_lead(lead_id: int, lead_in: schemas.LeadUpdate, db: Session = Depends(get_db)):
     lead = lead_crud.update_lead(db, lead_id=lead_id, lead_in=lead_in)
     if not lead:
@@ -176,7 +156,7 @@ def update_lead(lead_id: int, lead_in: schemas.LeadUpdate, db: Session = Depends
     return lead
 
 
-@router.delete("/{lead_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{lead_id}",tags=["Leads"], status_code=status.HTTP_204_NO_CONTENT)
 def delete_lead(lead_id: int, db: Session = Depends(get_db)):
     ok = lead_crud.delete_lead(db, lead_id=lead_id)
     if not ok:
@@ -184,7 +164,7 @@ def delete_lead(lead_id: int, db: Session = Depends(get_db)):
     return None
 
 
-@router.post("/{lead_id}/properties/{property_id}", response_model=schemas.LeadPublic)
+@router.post("/{lead_id}/properties/{property_id}",tags=["Leads Properties Link"], response_model=schemas.LeadPublic)
 def link_property(lead_id: int, property_id: int, db: Session = Depends(get_db)):
     updated = lead_crud.link_property_to_lead(db, lead_id=lead_id, property_id=property_id)
     if not updated:
@@ -196,7 +176,7 @@ def link_property(lead_id: int, property_id: int, db: Session = Depends(get_db))
     return read_lead(lead_id, db)
 
 
-@router.delete("/{lead_id}/properties/{property_id}", response_model=schemas.LeadPublic)
+@router.delete("/{lead_id}/properties/{property_id}",tags=["Leads Properties Link"], response_model=schemas.LeadPublic)
 def unlink_property(lead_id: int, property_id: int, db: Session = Depends(get_db)):
     updated = lead_crud.unlink_property_from_lead(db, lead_id=lead_id, property_id=property_id)
     if not updated:
@@ -204,7 +184,7 @@ def unlink_property(lead_id: int, property_id: int, db: Session = Depends(get_db
     return read_lead(lead_id, db)
 
 
-@router.post("/{lead_id}/users/{user_id}", response_model=schemas.LeadPublic)
+@router.post("/{lead_id}/users/{user_id}",tags=["Leads Users Link"], response_model=schemas.LeadPublic)
 def link_user(lead_id: int, user_id: int, db: Session = Depends(get_db)):
     updated = lead_crud.link_user_to_lead(db, lead_id=lead_id, user_id=user_id)
     if not updated:
@@ -212,7 +192,7 @@ def link_user(lead_id: int, user_id: int, db: Session = Depends(get_db)):
     return read_lead(lead_id, db)
 
 
-@router.delete("/{lead_id}/users/{user_id}", response_model=schemas.LeadPublic)
+@router.delete("/{lead_id}/users/{user_id}", tags=["Leads Users Link"], response_model=schemas.LeadPublic)
 def unlink_user(lead_id: int, user_id: int, db: Session = Depends(get_db)):
     updated = lead_crud.unlink_user_from_lead(db, lead_id=lead_id, user_id=user_id)
     if not updated:
