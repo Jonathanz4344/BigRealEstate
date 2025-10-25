@@ -27,7 +27,6 @@ def get_contacts(db: Session, skip: int = 0, limit: int = 100) -> List[Contact]:
 
 """CREATE FUNCTION"""
 
-
 def create_contact(db: Session, contact_in: schemas.ContactCreate) -> Contact:
     """
     Create a new contact

@@ -20,3 +20,4 @@ class Unit(Base):
     notes: Mapped[str] = mapped_column(nullable=True)
 
     # property: Mapped["Property"] = relationship(back_populates="units")
+    property: Mapped["Property"] = relationship("Property", back_populates="units")
