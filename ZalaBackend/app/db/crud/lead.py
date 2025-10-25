@@ -10,7 +10,6 @@ from fastapi import HTTPException, status
 
 def get_lead_by_id(db: Session, lead_id: int) -> Optional[Lead]:
     # use selectinload for the collection relationship to avoid complex outer-join
-    # row-shaping issues when the child collection is present
     # eager-load nested relationships: properties (with address, units, users), created_by_user, contact and address
     return (
         db.query(Lead)

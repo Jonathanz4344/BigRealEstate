@@ -44,7 +44,7 @@ def update_address(db: Session, address_id: int, address_in: AddressUpdate):
 
 
 def delete_address(db: Session, address_id: int):
-    # ensure address isn't referenced by a property - property CRUD will enforce FK constraints too
+    # ensure address isn't referenced by a property - property CRUD will enforce FK constraints 
     db_address = db.query(Address).filter(Address.address_id == address_id).first()
     if not db_address:
         return None

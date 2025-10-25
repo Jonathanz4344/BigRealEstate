@@ -19,7 +19,6 @@ def create_property(db: Session, property_in: PropertyCreate, address_id: int) -
         property_name=property_in.property_name,
         mls_number=property_in.mls_number,
         notes=property_in.notes,
-        # lead_id=property_in.lead_id,
         address_id=address_id
     )
     db.add(db_property)
