@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 from app.schemas.unit import UnitPublic
 from app.schemas.address import AddressPublic
-from app.schemas.user import UserSummary
+from app.schemas.summaries import UserSummary
 
 
 class PropertyBase(BaseModel):

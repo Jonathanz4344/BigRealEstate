@@ -39,4 +39,4 @@ class User(Base):
         secondary=user_properties,
         back_populates="users"
     )
-    # leads_created: Mapped[List["Lead"]] = relationship(back_populates="created_by_user")
+    leads_created: Mapped[List["Lead"]] = relationship("Lead", back_populates="created_by_user")

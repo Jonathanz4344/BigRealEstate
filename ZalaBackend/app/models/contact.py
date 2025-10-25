@@ -18,4 +18,5 @@ class Contact(Base):
     )
 
     user: Mapped["User"] = relationship("User", back_populates="contact", uselist=False)
-    # lead: Mapped["Lead"] = relationship(back_populates="contact")
+    # A contact can belong to multiple leads (one contact may be referenced by multiple leads)
+    leads: Mapped[list["Lead"]] = relationship("Lead", back_populates="contact")

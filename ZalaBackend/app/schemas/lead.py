@@ -2,12 +2,10 @@ from typing import Optional, List
 
 from pydantic import BaseModel
 
-from app.schemas.address import AddressPublic, AddressBase
-from app.schemas.contact import ContactPublic, ContactBase
+from app.schemas.address import AddressPublic
+from app.schemas.contact import ContactPublic
+from app.schemas.summaries import UserSummary
 from app.schemas.property import PropertyPublic
-from app.schemas.user import UserPublic
-
-
 class LeadBase(BaseModel):
     """
     Base Schema for a Lead.
@@ -23,18 +21,18 @@ class LeadCreate(LeadBase):
     """
     Schema for Create a Lead.
     """
-    contact: ContactBase
-    address: Optional[AddressBase] = None
-    created_by_user_id: Optional[int] = None
+    # contact: ContactBase
+    # address: Optional[AddressBase] = None
+    # Linking a user to a lead should be done via the link endpoint
+    # POST /leads/{lead_id}/users/{user_id} and not via the create body.
 
 
 class LeadUpdate(BaseModel):
     """
     Schema for Updating a Lead
     """
-    contact: Optional[ContactBase] = None
-    address: Optional[AddressUpdate] = None
-    created_by_user_id: Optional[int] = None
+    # contact: Optional[ContactBase] = None
+    # address: Optional[AddressUpdate] = None
     person_type: Optional[str] = None
     business: Optional[str] = None
     website: Optional[str] = None
@@ -48,9 +46,13 @@ class LeadPublic(LeadBase):
     """
     lead_id: int
 
-    created_by_user: Optional[UserPublic] = None
-    contact: ContactPublic
-    address: Optional[AddressPublic] = None
+    # expose ids for related resources to keep response small and avoid circular imports
+    created_by: Optional[int] = None
+    contact_id: Optional[int] = None
+
+    # nested created_by user summary and full contact/property details
+    created_by_user: Optional[UserSummary] = None
+    contact: Optional[ContactPublic] = None
     properties: List[PropertyPublic] = []
 
     class Config:

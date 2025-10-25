@@ -22,4 +22,5 @@ class Address(Base):
     long: Mapped[Decimal] = mapped_column(Numeric(9, 6), nullable=True)
 
     property: Mapped["Property"] = relationship("Property", back_populates="address", uselist=False)
-    # lead: Mapped["Lead"] = relationship(back_populates="address")
+    # A single address may be referenced by multiple leads
+    leads: Mapped[list["Lead"]] = relationship("Lead", back_populates="address")

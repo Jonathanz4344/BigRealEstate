@@ -4,7 +4,7 @@ from typing import Optional, List
 
 from app.models.contact import Contact
 from app.schemas.contact import ContactPublic, ContactBase
-from app.schemas.lead import LeadPublic
+from app.schemas.summaries import LeadSummary
 
 
 class UserSummary(BaseModel):
@@ -53,7 +53,8 @@ class UserPublic(UserBase):
     Schema for GET user (read/return)
     """
     user_id: int
-    contact: ContactPublic
+    # Contact is optional — users may not have a linked contact
+    contact: Optional[ContactPublic] = None
     xp: int
     created_at: datetime
     updated_at: Optional[datetime] = None
@@ -74,12 +75,12 @@ class UserPublicWithLeads(UserPublic):
     """
     Schema for Get a user with their leads
     """
-    leads_created: List[LeadPublic] = []
+    leads_created: List[LeadSummary] = []
 
 
 class UserPublicWithLeadsAndProperties(UserPublic):
     """
     Schema for Get a user with their leads and properties
     """
-    leads_created: List[LeadPublic] = []
+    leads_created: List[LeadSummary] = []
     properties: List[int] = []
