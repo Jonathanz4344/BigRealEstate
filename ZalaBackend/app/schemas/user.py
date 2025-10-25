@@ -5,7 +5,17 @@ from typing import Optional, List
 from app.models.contact import Contact
 from app.schemas.contact import ContactPublic, ContactBase
 from app.schemas.lead import LeadPublic
-from app.schemas.property import PropertyPublic
+
+
+class UserSummary(BaseModel):
+    """Lightweight summary of a User for embedding in other resources."""
+    user_id: int
+    username: str
+    profile_pic: Optional[str] = None
+    role: Optional[str] = "user"
+
+    class Config:
+        orm_mode = True
 
 
 class UserBase(BaseModel):
@@ -21,7 +31,9 @@ class UserCreate(UserBase):
     """
     Schema for POST user (create)
     """
-    contact: ContactBase
+    # Contact should not be created or attached when creating a user.
+    # Linking a contact to a user must be done with the link endpoint
+    # POST /users/{user_id}/contacts/{contact_id}
     password: str
 
 
@@ -54,7 +66,8 @@ class UserPublicWithProperties(UserPublic):
     """
     Schema for Get a user with their properties
     """
-    properties: List[PropertyPublic] = []
+    # return property ids to avoid circular schema imports
+    properties: List[int] = []
 
 
 class UserPublicWithLeads(UserPublic):
@@ -69,4 +82,4 @@ class UserPublicWithLeadsAndProperties(UserPublic):
     Schema for Get a user with their leads and properties
     """
     leads_created: List[LeadPublic] = []
-    properties: List[PropertyPublic] = []
+    properties: List[int] = []

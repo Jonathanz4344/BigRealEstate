@@ -37,7 +37,7 @@ def get_properties(db: Session, address_id: int, skip: int = 0, limit: int = 100
     """Return properties for an address, eager-loading address and units to avoid N+1."""
     return (
         db.query(Property)
-        .options(joinedload(Property.address), joinedload(Property.units))
+        .options(joinedload(Property.address), joinedload(Property.units), joinedload(Property.users))
         .filter(Property.address_id == address_id)
         .offset(skip)
         .limit(limit)
@@ -49,7 +49,7 @@ def get_property(db: Session, address_id: int, property_id: int) -> Optional[Pro
     """Get single property scoped to address, eager-loading address and units."""
     return (
         db.query(Property)
-        .options(joinedload(Property.address), joinedload(Property.units))
+        .options(joinedload(Property.address), joinedload(Property.units), joinedload(Property.users))
         .filter(Property.property_id == property_id, Property.address_id == address_id)
         .first()
     )

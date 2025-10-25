@@ -21,10 +21,10 @@ class Property(Base):
     notes: Mapped[str] = mapped_column(nullable=True)
 
 
-    # users: Mapped[List["User"]] = relationship(
-    #     secondary=user_properties,
-    #     back_populates="properties"
-    # )
+    users: Mapped[List["User"]] = relationship(
+        secondary=user_properties,
+        back_populates="properties"
+    )
     units: Mapped[List["Unit"]] = relationship("Unit", back_populates="property", cascade="all, delete-orphan")
     # lead: Mapped["Lead"] = relationship(back_populates="properties")
     address: Mapped["Address"] = relationship("Address", back_populates="property", uselist=False)

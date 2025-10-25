@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from app.schemas.unit import UnitPublic
 from app.schemas.address import AddressPublic
+from app.schemas.user import UserSummary
 
 
 class PropertyBase(BaseModel):
@@ -42,6 +43,7 @@ class PropertyPublic(PropertyBase):
     # include nested address details when reading a property
     address: Optional[AddressPublic] = None
     units: List[UnitPublic] = []
+    users: List[UserSummary] = []
 
     class Config:
         orm_mode = True

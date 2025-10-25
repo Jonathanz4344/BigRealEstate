@@ -21,6 +21,5 @@ class Address(Base):
     lat: Mapped[Decimal] = mapped_column(Numeric(9, 6), nullable=True)
     long: Mapped[Decimal] = mapped_column(Numeric(9, 6), nullable=True)
 
-    # property: Mapped["Property"] = relationship(back_populates="address")
     property: Mapped["Property"] = relationship("Property", back_populates="address", uselist=False)
     # lead: Mapped["Lead"] = relationship(back_populates="address")
