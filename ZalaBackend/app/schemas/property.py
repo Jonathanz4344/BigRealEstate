@@ -43,7 +43,6 @@ class PropertyPublic(PropertyBase):
     # include nested address details when reading a property
     address: Optional[AddressPublic] = None
     units: List[UnitPublic] = []
-    users: List[UserSummary] = []
 
     class Config:
         orm_mode = True

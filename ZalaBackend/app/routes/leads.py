@@ -13,63 +13,6 @@ router = APIRouter(prefix="/leads")
 def create_lead(lead_in: schemas.LeadCreate, db: Session = Depends(get_db)):
     return lead_crud.create_lead(db, lead_in)
 
-
-@router.get("/",tags=["Leads"], response_model=List[schemas.LeadPublic])
-def read_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    db_leads = lead_crud.get_leads(db, skip=skip, limit=limit)
-    results = []
-    for l in db_leads:
-        props = []
-        for p in (l.properties or []):
-            addr = None
-            if getattr(p, "address", None):
-                addr = {
-                    "address_id": p.address.address_id,
-                    "street_1": p.address.street_1,
-                    "street_2": p.address.street_2,
-                    "city": p.address.city,
-                    "state": p.address.state,
-                    "zipcode": p.address.zipcode,
-                    "lat": p.address.lat,
-                    "long": p.address.long,
-                }
-
-            units = []
-            for u in (p.units or []):
-                units.append({
-                    "unit_id": u.unit_id,
-                    "property_id": u.property_id,
-                    "apt_num": u.apt_num,
-                    "bedrooms": u.bedrooms,
-                    "bath": u.bath,
-                    "sqft": u.sqft,
-                    "notes": u.notes,
-                })
-
-            props.append({
-                "property_id": p.property_id,
-                "property_name": getattr(p, "property_name", None),
-                "mls_number": getattr(p, "mls_number", None),
-                "notes": getattr(p, "notes", None),
-                "address_id": p.address.address_id if getattr(p, "address", None) else None,
-                "address": addr,
-                "units": units,
-            })
-
-        results.append({
-            "lead_id": l.lead_id,
-            "person_type": l.person_type,
-            "business": l.business,
-            "website": l.website,
-            "license_num": l.license_num,
-            "notes": l.notes,
-            "created_by": l.created_by,
-            "contact_id": l.contact_id,
-            "properties": props,
-        })
-    return results
-
-
 @router.get("/{lead_id}", tags=["Leads"],summary="Read Lead By Id", response_model=schemas.LeadPublic)
 def read_lead(lead_id: int, db: Session = Depends(get_db)):
     lead = lead_crud.get_lead_by_id(db, lead_id=lead_id)

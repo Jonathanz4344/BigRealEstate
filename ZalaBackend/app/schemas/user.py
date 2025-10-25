@@ -41,7 +41,7 @@ class UserUpdate(BaseModel):
     """
     Schema for update a User
     """
-    contact: Optional[ContactBase]
+    # contact: Optional[ContactBase]
     password: Optional[str]
     username: Optional[str] = Field(max_length=15)
     profile_pic: Optional[str]
