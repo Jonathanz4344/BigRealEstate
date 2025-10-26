@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 
 from app.models.contact import Contact
 from app.models.user import User
-from app import schemas
 from app.models.property import Property
 from sqlalchemy.orm import joinedload
 from typing import Optional
@@ -262,16 +261,19 @@ def delete_user(db: Session, user_id: int):
 
 
 def authenticate_user(db: Session, username: str, password: str) -> User | None:
-    db_user = get_user_by_username(db, username=username)
+
+    db_user = get_user_by_username(db,username)
 
     if not db_user:
         return None
 
-    if not db_user.authentication:
+    db_auth = db.query(UserAuthentication).filter(UserAuthentication.user_id == db_user.user_id).first()
+
+    if not db_auth.password_hash:
         return None
 
     # verify password
-    if not security.verify_password(password, db_user.authentication.password_hash):
+    if not security.verify_password(password, db_auth.password_hash):
         return None
 
     # If all checks pass, return the user
