@@ -13,8 +13,8 @@ class AddressBase(BaseModel):
     city: str
     state: str
     zipcode: str = Field(max_length=10)
-    lat: Optional[Decimal] = Field(max_digits=9, decimal_places=6)
-    long: Optional[Decimal] = Field(max_digits=9, decimal_places=6)
+    lat: Optional[Decimal] = None
+    long: Optional[Decimal] = None
 
 
 class AddressCreate(AddressBase):
@@ -24,6 +24,19 @@ class AddressCreate(AddressBase):
     pass
 
 
+class AddressUpdate(BaseModel):
+    """
+    Schema for update an Address
+    """
+    street_1: Optional[str]
+    street_2: Optional[str] = None
+    city: Optional[str]
+    state: Optional[str]
+    zipcode: Optional[str] = Field(max_length=10)
+    lat: Optional[Decimal] = None
+    long: Optional[Decimal] = None
+
+
 class AddressPublic(AddressBase):
     """
     Schema for Get Address
@@ -31,4 +44,4 @@ class AddressPublic(AddressBase):
     address_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
