@@ -7,8 +7,26 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 gpt_model = "gpt-5-mini"
 
+max_searches = 6
+
 prompt = """
-What are the three biggest news stories in the US for October 20 2025?
+I am a real estate agent, and I am looking to contact real estate agents in Miami, FL that have a good chance of being interested in buying one of my properties or getting me in contact with clients interested in buying. Try to find all the details before returning, but do not hallucinate. Leave a field blank if you need to.
+Format exactly like this:
+{ 
+firstName: "", 
+lastName: "", 
+phoneNumber: "", 
+email: "", 
+website: "", 
+businessName: "",
+licenseNum: "",
+address: ""
+}
+Make sure:
+The output contains only characters that can be easily stored or parsed (no hidden Unicode, citations, or formatting artifacts).
+Do not return anything except the clean JSON array.
+Each entry should contain firstName, lastName, and email at minimum
+Return 10 agents.
 """
 
 # Search with Brave API
@@ -63,6 +81,7 @@ def chat_with_brave(prompt: str):
         {"role": "user", "content": prompt}
     ]
 
+    search_count = 0
     while True:
         response = client.chat.completions.create(
             model=gpt_model,
@@ -74,13 +93,26 @@ def chat_with_brave(prompt: str):
 
         # If the model requests tool calls, handle all of them
         if message.tool_calls:
+            if search_count >= max_searches:
+                print(f"\n[Reached max searches ({max_searches}), requesting final answer]\n")
+                messages.append({
+                    "role": "user",
+                    "content": "You've reached the search limit. Please provide your best answer based on the information you've gathered."
+                })
+                response = client.chat.completions.create(
+                    model=gpt_model,
+                    messages=messages
+                )
+                print("\nResponse:\n", response.choices[0].message.content)
+                break
             messages.append(message)  # include model’s tool call
             for tool_call in message.tool_calls:
                 fn_name = tool_call.function.name
                 args = json.loads(tool_call.function.arguments)
 
                 if fn_name == "web_search":
-                    print(f"\n[Web Search: {args['query']}]\n")
+                    search_count += 1
+                    print(f"\n[Web Search {search_count}/{max_searches}: {args['query']}]\n")
                     search_results = web_search(args["query"], args.get("count", 10))
 
                     messages.append({
