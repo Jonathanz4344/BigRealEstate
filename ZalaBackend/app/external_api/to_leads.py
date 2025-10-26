@@ -42,3 +42,19 @@ def rapid_to_leads(items: list[dict]) -> List[Lead]:
             )
         )
     return leads
+
+# def openai_to_leads(items: list[dict]) -> List[Lead]:
+#     leads: List[Lead] = []
+#     for x in items:
+#         first, last = _split_name(x.get("fullName", ""))
+#         leads.append(
+#             Lead(
+#                 first_name=first,
+#                 last_name=last,
+#                 email=None, 
+#                 phone_number=x.get("phoneNumber"),
+#                 address=x.get("location"),
+#                 businessName=x.get("businessName")
+#             )
+#         )
+#     return leads
