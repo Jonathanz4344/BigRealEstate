@@ -1,8 +1,6 @@
 from passlib.context import CryptContext
 from passlib.hash import argon2 as _argon2
 
-# Prefer argon2 if available; gracefully fallback to pbkdf2_sha256
-# to avoid MissingBackendError when argon2 backend isn't installed.
 # Passlib will choose the first available scheme in this list.
 pwd_context = CryptContext(
     schemes=[
