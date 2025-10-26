@@ -3,16 +3,13 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from ZalaBackend.app.schemas.property import PropertyPublic
-
-
 class UnitBase(BaseModel):
     """
     Base Schema for Unit
     """
     apt_num: Optional[str]
     bedrooms: Optional[int]
-    bath: Optional[Decimal] = Field(max_digits=3, decimal_places=1)
+    bath: Optional[Decimal] = None
     sqft: Optional[int]
     notes: Optional[str]
 
@@ -21,12 +18,25 @@ class UnitCreate(UnitBase):
     """
     Schema for Create Unit
     """
-    property_id: int
+    # property_id is provided on the path (server authoritative); it is not required in the body
+
+class UnitUpdate(BaseModel):
+    """
+    Schema for Create Unit
+    """
+    property_id: Optional[int]
+    apt_num: Optional[str]
+    bedrooms: Optional[int]
+    bath: Optional[Decimal] = None
+    sqft: Optional[int]
+    notes: Optional[str]
 
 
 class UnitPublic(UnitBase):
     """
     Schema for Get Unit
     """
+    unit_id: int
+    property_id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
