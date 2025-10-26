@@ -9,6 +9,9 @@ from typing import Optional
 from app.models.user import user_properties
 from app import schemas
 
+from app.models.user_authentication import UserAuthentication
+from app.utils import security
+
 """GET FUNCTIONS"""
 
 
@@ -17,7 +20,8 @@ def get_user_by_id(db: Session, user_id: int):
     Get a single user by their ID
     SELECT * FROM users WHERE user_id = {user_id}
     """
-    return db.query(User).options(joinedload(User.contact), joinedload(User.properties)).filter(User.user_id == user_id).first()
+    return db.query(User).options(joinedload(User.contact), joinedload(User.properties)).filter(
+        User.user_id == user_id).first()
 
 
 def get_user_by_email(db: Session, email: str):
@@ -77,11 +81,19 @@ def create_user(db: Session, user: schemas.UserCreate):
     )
 
     db.add(db_user)
+
+    hashed_password = security.get_password_hash(user.password)
+    db_auth = UserAuthentication(
+        user_id=db_user.user_id,
+        password_hash=hashed_password
+    )
+    db.add(db_auth)
+
     db.commit()
     db.refresh(db_user)
 
-    # TODO: hash password and create UserAuthentication record
     return db_user
+
 
 def link_contact_to_user(db: Session, user_id: int, contact_id: int) -> Optional[User]:
     """Link an existing Contact to a User (similar behavior to properties linking)."""
@@ -245,3 +257,20 @@ def delete_user(db: Session, user_id: int):
     db.delete(db_user)
     db.commit()
     return True
+
+
+def authenticate_user(db: Session, username: str, password: str) -> User | None:
+    db_user = get_user_by_username(db, username=username)
+
+    if not db_user:
+        return None
+
+    if not db_user.authentication:
+        return None
+
+    # verify password
+    if not security.verify_password(password, db_user.authentication.password_hash):
+        return None
+
+    # If all checks pass, return the user
+    return db_user
