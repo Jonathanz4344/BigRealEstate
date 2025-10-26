@@ -81,6 +81,8 @@ def create_user(db: Session, user: schemas.UserCreate):
     )
 
     db.add(db_user)
+    # Flush to persist the user and populate db_user.user_id
+    db.flush()
 
     hashed_password = security.get_password_hash(user.password)
     db_auth = UserAuthentication(
