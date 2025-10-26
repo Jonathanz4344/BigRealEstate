@@ -30,11 +30,11 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
 
     contact: Mapped["Contact"] = relationship("Contact", back_populates="user", uselist=False)
-    # authentication: Mapped["UserAuthentication"] = relationship(
-    #     back_populates="user",
-    #     cascade="all, delete-orphan",
-    #     uselist=False
-    # )
+    authentication: Mapped["UserAuthentication"] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        uselist=False
+    )
     properties: Mapped[List["Property"]] = relationship(
         secondary=user_properties,
         back_populates="users"

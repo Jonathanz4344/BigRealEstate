@@ -12,4 +12,4 @@ class UserAuthentication(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), primary_key=True)
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
 
-    # user: Mapped["User"] = relationship(back_populates="authentication")
+    user: Mapped["User"] = relationship(back_populates="authentication")
