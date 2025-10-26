@@ -3,9 +3,6 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from app.schemas.property import PropertyPublic
-
-
 class UnitBase(BaseModel):
     """
     Base Schema for Unit
@@ -21,7 +18,7 @@ class UnitCreate(UnitBase):
     """
     Schema for Create Unit
     """
-    property_id: int
+    # property_id is provided on the path (server authoritative); it is not required in the body
 
 class UnitUpdate(BaseModel):
     """
@@ -39,5 +36,7 @@ class UnitPublic(UnitBase):
     """
     Schema for Get Unit
     """
+    unit_id: int
+    property_id: int
     class Config:
         from_attributes = True

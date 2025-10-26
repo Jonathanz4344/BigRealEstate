@@ -20,7 +20,8 @@ class User(Base):
     """
     __tablename__ = "users"
     user_id: Mapped[int] = mapped_column(primary_key=True)
-    contact_id: Mapped[int] = mapped_column(ForeignKey("contacts.contact_id"), unique=True, nullable=False)
+    # Allow contact to be nullable so contacts can be created/removed independently
+    contact_id: Mapped[int] = mapped_column(ForeignKey("contacts.contact_id"), unique=True, nullable=True)
     username: Mapped[str] = mapped_column(String(15), unique=True, nullable=False)
     role: Mapped[str] = mapped_column(String(20), nullable=False, default="user")
     profile_pic: Mapped[str] = mapped_column(nullable=True)
@@ -28,14 +29,14 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now(), nullable=True)
 
-    # contact: Mapped["Contact"] = relationship(back_populates="user")
+    contact: Mapped["Contact"] = relationship("Contact", back_populates="user", uselist=False)
     # authentication: Mapped["UserAuthentication"] = relationship(
     #     back_populates="user",
     #     cascade="all, delete-orphan",
     #     uselist=False
     # )
-    # properties: Mapped[List["Property"]] = relationship(
-    #     secondary=user_properties,
-    #     back_populates="users"
-    # )
-    # leads_created: Mapped[List["Lead"]] = relationship(back_populates="created_by_user")
+    properties: Mapped[List["Property"]] = relationship(
+        secondary=user_properties,
+        back_populates="users"
+    )
+    leads_created: Mapped[List["Lead"]] = relationship("Lead", back_populates="created_by_user")
