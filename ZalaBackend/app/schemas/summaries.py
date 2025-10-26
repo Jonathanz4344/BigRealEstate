@@ -9,7 +9,7 @@ class UserSummary(BaseModel):
     role: Optional[str] = "user"
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class LeadSummary(BaseModel):
@@ -17,7 +17,7 @@ class LeadSummary(BaseModel):
     person_type: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class PropertySummary(BaseModel):
@@ -25,4 +25,4 @@ class PropertySummary(BaseModel):
     property_name: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
