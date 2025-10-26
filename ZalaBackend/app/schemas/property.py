@@ -42,4 +42,4 @@ class PropertyPublic(PropertyBase):
     # units: List[UnitPublic] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True

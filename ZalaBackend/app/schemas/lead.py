@@ -54,4 +54,4 @@ class LeadPublic(LeadBase):
     properties: List[PropertyPublic] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True

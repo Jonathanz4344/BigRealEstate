@@ -23,7 +23,7 @@ def read_root():
 
 
 # Mount all routes under the /api prefix
-app.include_router(csv_intake.router, prefix="/api")
+# app.include_router(csv_intake.router, prefix="/api")
 app.include_router(location_filter.router, prefix="/api")
 app.include_router(contacts.router, prefix="/api") 
 app.include_router(addresses.router, prefix="/api")
