@@ -15,7 +15,7 @@ class UserSummary(BaseModel):
     role: Optional[str] = "user"
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserBase(BaseModel):

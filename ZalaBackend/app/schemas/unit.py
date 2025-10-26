@@ -9,7 +9,7 @@ class UnitBase(BaseModel):
     """
     apt_num: Optional[str]
     bedrooms: Optional[int]
-    bath: Optional[Decimal] = Field(max_digits=3, decimal_places=1)
+    bath: Optional[Decimal] = None
     sqft: Optional[int]
     notes: Optional[str]
 
@@ -27,7 +27,7 @@ class UnitUpdate(BaseModel):
     property_id: Optional[int]
     apt_num: Optional[str]
     bedrooms: Optional[int]
-    bath: Optional[Decimal] = Field(max_digits=3, decimal_places=1)
+    bath: Optional[Decimal] = None
     sqft: Optional[int]
     notes: Optional[str]
 
