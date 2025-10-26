@@ -4,3 +4,4 @@ from .property import PropertyBase, PropertyCreate, PropertyUpdate, PropertyPubl
 from .user import UserBase, UserCreate, UserUpdate, UserPublic, UserPublicWithProperties
 from .unit import UnitBase, UnitCreate, UnitUpdate, UnitPublic
 from .lead import LeadBase, LeadCreate, LeadUpdate, LeadPublic
+from .login import Login
