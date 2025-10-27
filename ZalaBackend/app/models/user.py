@@ -34,4 +34,4 @@ class User(Base):
     properties: Mapped[List["Property"]] = relationship(secondary=user_properties, back_populates="users")
     leads_created: Mapped[List["Lead"]] = relationship("Lead", back_populates="created_by_user")
 
-    # campaigns: Mapped[List["Campaign"]] = relationship("Campaign", back_populates="user", uselist=False)
+    campaigns: Mapped[List["Campaign"]] = relationship("Campaign", back_populates="user")

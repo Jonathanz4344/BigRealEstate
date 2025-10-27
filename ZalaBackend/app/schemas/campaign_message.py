@@ -1,10 +1,14 @@
-from pydantic import BaseModel
+from datetime import datetime
 from enum import Enum
+from typing import Optional
 
-from app.schemas.user import UserPublic
-from app.schemas.property import PropertyPublic
+from pydantic import BaseModel
 
-class ContactMethod(Enum):
+from app.schemas.campaign import CampaignPublic
+from app.schemas.lead import LeadPublic
+
+
+class ContactMethod(str, Enum):
     PHONE = "phone"
     SMS = "sms"
     EMAIL = "email"
@@ -12,24 +16,43 @@ class ContactMethod(Enum):
 
 class CampaignMessageBase(BaseModel):
     """
-    Schema for create a campaign
+    Shared fields for CampaignMessage schema variants.
     """
-    # campaign and lead must be linked
+
     campaign_id: int
-    lead_id: int
+    lead_id: Optional[int] = None
     contact_method: ContactMethod
     message_subject: str
     message_body: str
 
+
 class CampaignMessageCreate(CampaignMessageBase):
     """
-    Schema for create a campaign
+    Schema for creating a campaign message.
     """
     pass
 
+
+class CampaignMessageUpdate(BaseModel):
+    """
+    Schema for updating a campaign message.
+    """
+
+    lead_id: Optional[int] = None
+    contact_method: Optional[ContactMethod] = None
+    message_subject: Optional[str] = None
+    message_body: Optional[str] = None
+
+
 class CampaignMessagePublic(CampaignMessageBase):
     """
-    Schema for create a campaign
+    Schema returned from Campaign Message endpoints.
     """
-    campaign: CampaignPublic
-    lead: LeadPublic
+
+    message_id: int
+    timestamp: datetime
+    campaign: Optional[CampaignPublic] = None
+    lead: Optional[LeadPublic] = None
+
+    class Config:
+        from_attributes = True

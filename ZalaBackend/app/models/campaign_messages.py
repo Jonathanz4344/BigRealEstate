@@ -1,6 +1,6 @@
-from typing import List
+from datetime import datetime
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..db.session import Base
@@ -10,12 +10,13 @@ class CampaignMessage(Base):
     """
     SQLAlchemy model for Contact history
     """
-    __tablename__ = "contact_history"
+    __tablename__ = "campaign_messages"
 
-    campaign_id: Mapped[int] = mapped_column(ForeignKey("campaigns.campaign_id"), nullable=True)
+    message_id: Mapped[int] = mapped_column(primary_key=True)
+    campaign_id: Mapped[int] = mapped_column(ForeignKey("campaigns.campaign_id"), nullable=False)
     lead_id: Mapped[int] = mapped_column(ForeignKey("leads.lead_id"), nullable=True)
-    contact_method: Mapped[str] = mapped_column(nullable=True)
-    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=True)
+    contact_method: Mapped[str] = mapped_column(nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     message_subject: Mapped[str] = mapped_column(nullable=False)
     message_body: Mapped[str] = mapped_column(nullable=False)
 
