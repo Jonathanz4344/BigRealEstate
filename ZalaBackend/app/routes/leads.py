@@ -93,7 +93,7 @@ def create_lead(lead_in: schemas.LeadCreate, db: Session = Depends(get_db)):
     return lead_crud.create_lead(db, lead_in)
 
 
-@router.get("/", tags=["Leads"], response_model=List[schemas.LeadPublic])
+@router.get("/", tags=["Leads"],summary="Get All Leads", response_model=List[schemas.LeadPublic])
 def list_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     leads = lead_crud.get_leads(db, skip=skip, limit=limit)
     return [_serialize_lead(lead) for lead in leads]
