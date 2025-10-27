@@ -5,19 +5,12 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.db.crud import lead as lead_crud
 from app import schemas
+from app.models.lead import Lead
 
 router = APIRouter(prefix="/leads")
 
 
-@router.post("/",tags=["Leads"], response_model=schemas.LeadPublic, status_code=status.HTTP_201_CREATED)
-def create_lead(lead_in: schemas.LeadCreate, db: Session = Depends(get_db)):
-    return lead_crud.create_lead(db, lead_in)
-
-@router.get("/{lead_id}", tags=["Leads"],summary="Read Lead By Id", response_model=schemas.LeadPublic)
-def read_lead(lead_id: int, db: Session = Depends(get_db)):
-    lead = lead_crud.get_lead_by_id(db, lead_id=lead_id)
-    if not lead:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
+def _serialize_lead(lead: Lead) -> dict:
     props = []
     for p in (lead.properties or []):
         addr = None
@@ -35,25 +28,29 @@ def read_lead(lead_id: int, db: Session = Depends(get_db)):
 
         units = []
         for u in (p.units or []):
-            units.append({
-                "unit_id": u.unit_id,
-                "property_id": u.property_id,
-                "apt_num": u.apt_num,
-                "bedrooms": u.bedrooms,
-                "bath": u.bath,
-                "sqft": u.sqft,
-                "notes": u.notes,
-            })
+            units.append(
+                {
+                    "unit_id": u.unit_id,
+                    "property_id": u.property_id,
+                    "apt_num": u.apt_num,
+                    "bedrooms": u.bedrooms,
+                    "bath": u.bath,
+                    "sqft": u.sqft,
+                    "notes": u.notes,
+                }
+            )
 
-        props.append({
-            "property_id": p.property_id,
-            "property_name": getattr(p, "property_name", None),
-            "mls_number": getattr(p, "mls_number", None),
-            "notes": getattr(p, "notes", None),
-            "address_id": p.address.address_id if getattr(p, "address", None) else None,
-            "address": addr,
-            "units": units,
-        })
+        props.append(
+            {
+                "property_id": p.property_id,
+                "property_name": getattr(p, "property_name", None),
+                "mls_number": getattr(p, "mls_number", None),
+                "notes": getattr(p, "notes", None),
+                "address_id": p.address.address_id if getattr(p, "address", None) else None,
+                "address": addr,
+                "units": units,
+            }
+        )
 
     created_by_user = None
     if getattr(lead, "created_by_user", None):
@@ -89,6 +86,25 @@ def read_lead(lead_id: int, db: Session = Depends(get_db)):
         "contact": contact,
         "properties": props,
     }
+
+
+@router.post("/",tags=["Leads"], response_model=schemas.LeadPublic, status_code=status.HTTP_201_CREATED)
+def create_lead(lead_in: schemas.LeadCreate, db: Session = Depends(get_db)):
+    return lead_crud.create_lead(db, lead_in)
+
+
+@router.get("/", tags=["Leads"], response_model=List[schemas.LeadPublic])
+def list_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    leads = lead_crud.get_leads(db, skip=skip, limit=limit)
+    return [_serialize_lead(lead) for lead in leads]
+
+
+@router.get("/{lead_id}", tags=["Leads"],summary="Read Lead By Id", response_model=schemas.LeadPublic)
+def read_lead(lead_id: int, db: Session = Depends(get_db)):
+    lead = lead_crud.get_lead_by_id(db, lead_id=lead_id)
+    if not lead:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
+    return _serialize_lead(lead)
 
 
 @router.put("/{lead_id}",tags=["Leads"], response_model=schemas.LeadPublic)
