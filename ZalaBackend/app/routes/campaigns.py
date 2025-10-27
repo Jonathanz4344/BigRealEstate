@@ -19,7 +19,7 @@ def create_campaign(campaign_in: schemas.CampaignCreate, db: Session = Depends(g
     return campaign_crud.create_campaign(db, campaign_in)
 
 
-@router.get("/", response_model=List[schemas.CampaignPublic])
+@router.get("/",summary="Get All Compaigns", response_model=List[schemas.CampaignPublic])
 def list_campaigns(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     List campaigns with optional pagination.
@@ -27,7 +27,7 @@ def list_campaigns(skip: int = 0, limit: int = 100, db: Session = Depends(get_db
     return campaign_crud.get_campaigns(db, skip=skip, limit=limit)
 
 
-@router.get("/{campaign_id}", response_model=schemas.CampaignPublic)
+@router.get("/{campaign_id}",summary="Get Compaign By Id", response_model=schemas.CampaignPublic)
 def get_campaign(campaign_id: int, db: Session = Depends(get_db)):
     """
     Retrieve a single campaign by ID.

@@ -39,18 +39,27 @@ def get_campaign_messages(db: Session, skip: int = 0, limit: int = 100) -> List[
 
 
 def get_campaign_messages_for_campaign(
-    db: Session, campaign_id: int, skip: int = 0, limit: int = 100
+    db: Session,
+    campaign_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    contact_methods: Optional[List[schemas.ContactMethod]] = None,
 ) -> List[CampaignMessage]:
     """
     Fetch messages for a given campaign.
     """
-    return (
-        _base_query(db)
-        .filter(CampaignMessage.campaign_id == campaign_id)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    query = _base_query(db).filter(CampaignMessage.campaign_id == campaign_id)
+
+    if contact_methods:
+        contact_method_values = [
+            contact_method.value
+            if hasattr(contact_method, "value")
+            else contact_method
+            for contact_method in contact_methods
+        ]
+        query = query.filter(CampaignMessage.contact_method.in_(contact_method_values))
+
+    return query.offset(skip).limit(limit).all()
 
 
 def create_campaign_message(db: Session, message_in: schemas.CampaignMessageCreate) -> CampaignMessage:

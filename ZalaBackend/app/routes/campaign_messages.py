@@ -21,7 +21,7 @@ def create_campaign_message(
     return campaign_message_crud.create_campaign_message(db, message_in)
 
 
-@router.get("/", response_model=List[schemas.CampaignMessagePublic])
+@router.get("/",summary="Get All Compaign Messages", response_model=List[schemas.CampaignMessagePublic])
 def list_campaign_messages(
     skip: int = 0,
     limit: int = 100,
@@ -38,7 +38,45 @@ def list_campaign_messages(
     return campaign_message_crud.get_campaign_messages(db, skip=skip, limit=limit)
 
 
-@router.get("/{message_id}", response_model=schemas.CampaignMessagePublic)
+@router.get("/campaign/{campaign_id}",summary="Get Compaign Messages For Compaign By Id and Contact Method", response_model=List[schemas.CampaignMessagePublic])
+def list_campaign_messages_for_campaign(
+    campaign_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    contact_method: Optional[schemas.ContactMethod] = None,
+    db: Session = Depends(get_db),
+):
+    """
+    List campaign messages for a specific campaign, optionally filtered by contact method.
+    The contact method filter expands based on the priority of each method. For example,
+    filtering by `phone` returns phone, sms, and email messages.
+    """
+    contact_methods = None
+    if contact_method:
+        contact_method_priority_map = {
+            schemas.ContactMethod.PHONE: [
+                schemas.ContactMethod.PHONE,
+                schemas.ContactMethod.SMS,
+                schemas.ContactMethod.EMAIL,
+            ],
+            schemas.ContactMethod.SMS: [
+                schemas.ContactMethod.SMS,
+                schemas.ContactMethod.EMAIL,
+            ],
+            schemas.ContactMethod.EMAIL: [schemas.ContactMethod.EMAIL],
+        }
+        contact_methods = contact_method_priority_map.get(contact_method, [contact_method])
+
+    return campaign_message_crud.get_campaign_messages_for_campaign(
+        db,
+        campaign_id=campaign_id,
+        skip=skip,
+        limit=limit,
+        contact_methods=contact_methods,
+    )
+
+
+@router.get("/{message_id}",summary="Get Compaign Message by id",  response_model=schemas.CampaignMessagePublic)
 def get_campaign_message(message_id: int, db: Session = Depends(get_db)):
     """
     Retrieve a campaign message by ID.
