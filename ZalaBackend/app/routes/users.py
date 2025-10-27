@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -50,6 +50,34 @@ def read_users(
     Retrieve a list of users.
     """
     users = user_crud.get_users(db, skip=skip, limit=limit)
+    return users
+
+
+@router.get("/batch", tags=["Users"], response_model=List[schemas.UserPublic])
+def read_users_by_ids(
+        ids: List[int] = Query(..., description="List of user IDs to retrieve"),
+        db: Session = Depends(get_db),
+):
+    """
+    Retrieve multiple users by providing a list of IDs.
+    """
+    # Remove duplicates while preserving client provided order
+    unique_ids = list(dict.fromkeys(ids))
+    if not unique_ids:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="At least one user id must be provided")
+
+    users = user_crud.get_users_by_ids(db, unique_ids)
+    if not users:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Users not found for provided ids")
+
+    found_ids = {user.user_id for user in users}
+    missing_ids = [user_id for user_id in unique_ids if user_id not in found_ids]
+    if missing_ids:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User(s) not found for id(s): {', '.join(map(str, missing_ids))}",
+        )
+
     return users
 
 
