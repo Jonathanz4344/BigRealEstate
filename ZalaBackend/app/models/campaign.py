@@ -17,6 +17,6 @@ class Lead(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False)
     property_id: Mapped[int] = mapped_column(nullable=True)
 
-    user: Mapped["User"] = relationship("User", back_populates="campaigns")
+    # user: Mapped["User"] = relationship("User", back_populates="campaigns")
     campaign_messages: Mapped[List["CampaignMessage"]] = relationship("CampaignMessage", back_populates="campaign")
 
