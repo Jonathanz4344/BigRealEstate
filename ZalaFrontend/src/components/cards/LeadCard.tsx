@@ -11,7 +11,7 @@ type LeadCardButton = {
   onClick?: () => void;
 };
 
-type LeadCardProps = {
+export type LeadCardProps = {
   lead: DemoData;
   i: number;
   active?: boolean;

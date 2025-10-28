@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
-import { LeadSearchPage, NotFoundPage } from "../pages";
+import { CampaignPage, LeadSearchPage, NotFoundPage } from "../pages";
 import { AppLayout } from "../layouts";
 
 export const NavigationProvider = () => {
@@ -10,8 +10,9 @@ export const NavigationProvider = () => {
       <Routes>
         <Route element={<AppLayout />}>
           <Route index element={<LeadSearchPage />} />
-          {/* <Route path="404" /> */}
-          <Route path="*" element={<NotFoundPage />} />
+          <Route path="/campaign/:campaignId" element={<CampaignPage />} />
+          <Route path="404" element={<NotFoundPage />} />
+          <Route path="*" element={<Navigate to={"/404"} />} />
         </Route>
       </Routes>
     </BrowserRouter>

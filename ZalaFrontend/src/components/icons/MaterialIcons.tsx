@@ -1,5 +1,6 @@
 import { Icons } from "./IconsEnum";
 
+import type { SvgIconProps } from "@mui/material/SvgIcon";
 import HomeFilledIcon from "@mui/icons-material/HomeFilled";
 import SearchIcon from "@mui/icons-material/Search";
 import InsertChartIcon from "@mui/icons-material/InsertChart";
@@ -12,7 +13,13 @@ import FlagIcon from "@mui/icons-material/Flag";
 import EmailIcon from "@mui/icons-material/Email";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import type { SvgIconProps } from "@mui/material/SvgIcon";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import PhoneIcon from "@mui/icons-material/Phone";
+import TextsmsIcon from "@mui/icons-material/Textsms";
+import SkipNextIcon from "@mui/icons-material/SkipNext";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 export const getMaterialIcon = (iconName: Icons) => {
   switch (iconName) {
@@ -40,6 +47,20 @@ export const getMaterialIcon = (iconName: Icons) => {
       return (props: SvgIconProps) => <RemoveCircleOutlineIcon {...props} />;
     case Icons.Close:
       return (props: SvgIconProps) => <HighlightOffIcon {...props} />;
+    case Icons.Arrow:
+      return (props: SvgIconProps) => <ArrowBackIcon {...props} />;
+    case Icons.CheckboxOutline:
+      return (props: SvgIconProps) => <CheckBoxOutlineBlankIcon {...props} />;
+    case Icons.CheckboxChecked:
+      return (props: SvgIconProps) => <CheckBoxIcon {...props} />;
+    case Icons.Phone:
+      return (props: SvgIconProps) => <PhoneIcon {...props} />;
+    case Icons.Txt:
+      return (props: SvgIconProps) => <TextsmsIcon {...props} />;
+    case Icons.Skip:
+      return (props: SvgIconProps) => <SkipNextIcon {...props} />;
+    case Icons.Chevron:
+      return (props: SvgIconProps) => <ChevronRightIcon {...props} />;
     default:
       return null;
   }

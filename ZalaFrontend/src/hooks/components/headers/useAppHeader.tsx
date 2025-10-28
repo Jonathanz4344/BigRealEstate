@@ -1,3 +1,4 @@
+import type { DemoDataSource } from "../../../interfaces";
 import {
   useSideNavControlStore,
   useSearchQueryStore,
@@ -19,7 +20,11 @@ export const useAppHeader = () => {
 
     if (location.pathname != "/") toLeadSearchPage();
 
-    const { data, err } = await searchLeads({ query, source });
+    await onSearchCore(query, source);
+  };
+
+  const onSearchCore = async (q: string, s: DemoDataSource) => {
+    const { data, err } = await searchLeads({ query: q, source: s });
 
     if (err || !data) {
       console.log("API Error:");
@@ -36,5 +41,6 @@ export const useAppHeader = () => {
     toLeadSearchPage,
     openSideNav,
     onSearchClick,
+    onSearchCore,
   };
 };

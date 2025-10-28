@@ -4,6 +4,7 @@ import {
   IconButtonVariant,
   Icons,
   LeadCard,
+  LeadListSection,
   Map,
 } from "../../components";
 import { useLeadSearchPage } from "../../hooks";
@@ -25,6 +26,7 @@ export const LeadSearchPage = () => {
     campaignHasAllLeads,
     onAllLeadsButton,
     onLeadButton,
+    onStart,
   } = useLeadSearchPage();
 
   return (
@@ -51,6 +53,7 @@ export const LeadSearchPage = () => {
                   campaignLeads={campaignLeads.length}
                   title={campaignTitle}
                   setTitle={setCampaignTitle}
+                  onStart={() => onStart(false)}
                 />
               </div>
             )}
@@ -70,7 +73,38 @@ export const LeadSearchPage = () => {
         </div>
       </div>
 
-      <div
+      <LeadListSection
+        animated
+        animationTrigger={showLeads}
+        leads={leadData}
+        title={`${leadData.length} results`}
+        getLeadProps={(lead, i) => ({
+          active: i === activeLead,
+          button: {
+            text: campaignLeads.includes(i)
+              ? "Remove from campaign"
+              : "Add to campaign",
+            icon: campaignLeads.includes(i) ? Icons.Minus : Icons.Flag,
+            onClick: () => onLeadButton(i),
+          },
+          onTitleClick: () => (
+            mapRef.current?.centerMap({
+              lat: lead.latitude,
+              lng: lead.longitude,
+            }),
+            setActiveLead(i)
+          ),
+        })}
+        footerBtn={{
+          text: campaignHasAllLeads
+            ? "Remove all from campaign"
+            : "Add all to campaign",
+          icon: campaignHasAllLeads ? Icons.Minus : Icons.Flag,
+          onClick: onAllLeadsButton,
+        }}
+      />
+
+      {/* <div
         className={clsx(
           "flex flex-col h-full py-[60px]",
           "transition-[flex] duration-250",
@@ -127,7 +161,7 @@ export const LeadSearchPage = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
