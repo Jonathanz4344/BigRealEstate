@@ -48,24 +48,8 @@ def list_campaign_messages_for_campaign(
 ):
     """
     List campaign messages for a specific campaign, optionally filtered by contact method.
-    The contact method filter expands based on the priority of each method. For example,
-    filtering by `phone` returns phone, sms, and email messages.
     """
-    contact_methods = None
-    if contact_method:
-        contact_method_priority_map = {
-            schemas.ContactMethod.PHONE: [
-                schemas.ContactMethod.PHONE,
-                schemas.ContactMethod.SMS,
-                schemas.ContactMethod.EMAIL,
-            ],
-            schemas.ContactMethod.SMS: [
-                schemas.ContactMethod.SMS,
-                schemas.ContactMethod.EMAIL,
-            ],
-            schemas.ContactMethod.EMAIL: [schemas.ContactMethod.EMAIL],
-        }
-        contact_methods = contact_method_priority_map.get(contact_method, [contact_method])
+    contact_methods = [contact_method] if contact_method else None
 
     return campaign_message_crud.get_campaign_messages_for_campaign(
         db,
