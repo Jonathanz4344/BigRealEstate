@@ -157,3 +157,19 @@ def unlink_user(lead_id: int, user_id: int, db: Session = Depends(get_db)):
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead or User not found")
     return read_lead(lead_id, db)
+
+
+@router.post("/{lead_id}/contacts/{contact_id}", tags=["Leads Contacts Link"], response_model=schemas.LeadPublic)
+def link_contact(lead_id: int, contact_id: int, db: Session = Depends(get_db)):
+    updated = lead_crud.link_contact_to_lead(db, lead_id=lead_id, contact_id=contact_id)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead or Contact not found")
+    return read_lead(lead_id, db)
+
+
+@router.delete("/{lead_id}/contacts/{contact_id}", tags=["Leads Contacts Link"], response_model=schemas.LeadPublic)
+def unlink_contact(lead_id: int, contact_id: int, db: Session = Depends(get_db)):
+    updated = lead_crud.unlink_contact_from_lead(db, lead_id=lead_id, contact_id=contact_id)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead or Contact not found")
+    return read_lead(lead_id, db)
