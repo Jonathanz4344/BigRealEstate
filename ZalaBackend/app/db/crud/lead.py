@@ -4,6 +4,7 @@ from typing import List, Optional
 from app.models.lead import Lead
 from app.models.property import Property
 from app.models.user import User
+from app.models.address import Address
 from app.models.contact import Contact
 from app import schemas
 from fastapi import HTTPException, status
@@ -177,6 +178,37 @@ def unlink_contact_from_lead(db: Session, lead_id: int, contact_id: int) -> Opti
     if db_lead.contact_id != contact_id:
         return db_lead
     db_lead.contact_id = None
+    db.add(db_lead)
+    db.commit()
+    db.refresh(db_lead)
+    return db_lead
+
+
+def link_address_to_lead(db: Session, lead_id: int, address_id: int) -> Optional[Lead]:
+    db_lead = db.query(Lead).filter(Lead.lead_id == lead_id).first()
+    if not db_lead:
+        return None
+    address = db.query(Address).filter(Address.address_id == address_id).first()
+    if not address:
+        return None
+    # guard against violating the unique constraint on lead.address_id
+    existing = db.query(Lead).filter(Lead.address_id == address_id).first()
+    if existing and existing.lead_id != lead_id:
+        return None
+    db_lead.address_id = address_id
+    db.add(db_lead)
+    db.commit()
+    db.refresh(db_lead)
+    return db_lead
+
+
+def unlink_address_from_lead(db: Session, lead_id: int, address_id: int) -> Optional[Lead]:
+    db_lead = db.query(Lead).filter(Lead.lead_id == lead_id).first()
+    if not db_lead:
+        return None
+    if db_lead.address_id != address_id:
+        return db_lead
+    db_lead.address_id = None
     db.add(db_lead)
     db.commit()
     db.refresh(db_lead)

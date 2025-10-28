@@ -73,6 +73,20 @@ def _serialize_lead(lead: Lead) -> dict:
             "phone": c.phone,
         }
 
+    address = None
+    if getattr(lead, "address", None):
+        a = lead.address
+        address = {
+            "address_id": a.address_id,
+            "street_1": a.street_1,
+            "street_2": a.street_2,
+            "city": a.city,
+            "state": a.state,
+            "zipcode": a.zipcode,
+            "lat": a.lat,
+            "long": a.long,
+        }
+
     return {
         "lead_id": lead.lead_id,
         "person_type": lead.person_type,
@@ -84,6 +98,8 @@ def _serialize_lead(lead: Lead) -> dict:
         "created_by_user": created_by_user,
         "contact_id": lead.contact_id,
         "contact": contact,
+        "address_id": lead.address_id,
+        "address": address,
         "properties": props,
     }
 
@@ -172,4 +188,20 @@ def unlink_contact(lead_id: int, contact_id: int, db: Session = Depends(get_db))
     updated = lead_crud.unlink_contact_from_lead(db, lead_id=lead_id, contact_id=contact_id)
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead or Contact not found")
+    return read_lead(lead_id, db)
+
+
+@router.post("/{lead_id}/addresses/{address_id}", tags=["Leads Addresses Link"], response_model=schemas.LeadPublic)
+def link_address(lead_id: int, address_id: int, db: Session = Depends(get_db)):
+    updated = lead_crud.link_address_to_lead(db, lead_id=lead_id, address_id=address_id)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead or Address not found")
+    return read_lead(lead_id, db)
+
+
+@router.delete("/{lead_id}/addresses/{address_id}", tags=["Leads Addresses Link"], response_model=schemas.LeadPublic)
+def unlink_address(lead_id: int, address_id: int, db: Session = Depends(get_db)):
+    updated = lead_crud.unlink_address_from_lead(db, lead_id=lead_id, address_id=address_id)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead or Address not found")
     return read_lead(lead_id, db)
