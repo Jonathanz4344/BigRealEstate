@@ -6,7 +6,19 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from app.routes import csv_intake, location_filter, contacts, addresses, properties, users, units, leads, auth
+from app.routes import (
+    csv_intake,
+    location_filter,
+    contacts,
+    addresses,
+    properties,
+    users,
+    units,
+    leads,
+    auth,
+    campaigns,
+    campaign_messages,
+)
 
 app = FastAPI()
 
@@ -25,7 +37,7 @@ def read_root():
 
 
 # Mount all routes under the /api prefix
-# app.include_router(csv_intake.router, prefix="/api")
+app.include_router(csv_intake.router, prefix="/api")
 app.include_router(location_filter.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(contacts.router, prefix="/api") 
@@ -34,5 +46,7 @@ app.include_router(properties.router, prefix="/api")
 app.include_router(units.router, prefix="/api")
 app.include_router(leads.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
+app.include_router(campaigns.router, prefix="/api")
+app.include_router(campaign_messages.router, prefix="/api")
 
 

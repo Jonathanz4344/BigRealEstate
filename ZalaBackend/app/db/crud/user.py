@@ -4,7 +4,7 @@ from app.models.contact import Contact
 from app.models.user import User
 from app.models.property import Property
 from sqlalchemy.orm import joinedload
-from typing import Optional
+from typing import Optional, Sequence, List
 from app.models.user import user_properties
 from app import schemas
 
@@ -45,6 +45,24 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     SELECT * FROM users OFFSET {skip} LIMIT {limit};
     """
     return db.query(User).options(joinedload(User.contact)).offset(skip).limit(limit).all()
+
+
+def get_users_by_ids(db: Session, user_ids: Sequence[int]) -> List[User]:
+    """
+    Get users matching a list of IDs. Returns results in the same order the IDs were provided.
+    """
+    if not user_ids:
+        return []
+
+    users = (
+        db.query(User)
+        .options(joinedload(User.contact), joinedload(User.properties))
+        .filter(User.user_id.in_(user_ids))
+        .all()
+    )
+
+    users_by_id = {user.user_id: user for user in users}
+    return [users_by_id[user_id] for user_id in user_ids if user_id in users_by_id]
 
 
 """CREATE FUNCTIONS"""

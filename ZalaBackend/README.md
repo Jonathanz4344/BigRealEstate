@@ -1,147 +1,117 @@
-# 🏗️ Zala Backend (FastAPI)
+# Zala Backend (FastAPI)
 
-Backend service for the **Zala** project — built with [FastAPI](https://fastapi.tiangolo.com/), [Uvicorn](https://www.uvicorn.org/), and [Pydantic v2](https://docs.pydantic.dev/).
-
----
-
-## ⚙️ Requirements
-
-- **Python 3.13 or higher** (tested on Python 3.13)
-- **pip** (Python package installer)
+Backend service for the **Zala** project, built with [FastAPI](https://fastapi.tiangolo.com/), [Uvicorn](https://www.uvicorn.org/), and [Pydantic v2](https://docs.pydantic.dev/).
 
 ---
 
-## 📁 Project Structure
+## Requirements
 
- ```bash
+- **Python 3.13 or higher** (tested with Python 3.13)
+- **pip** for dependency management
 
+---
+
+## Project Structure
+
+```text
 ZalaBackend/
-│
 ├── app/
-  ├── data/      # data folder  
-      └── mock_properties.json # mock data for properties
-  ├── db/        # DB logic (queries, migrations, etc.)
-      └── crud/
-  ├── external_api/
-│ ├── main.py    # FastAPI entry point
-│ ├── db.py      #  Database setup and connection
-│ ├── models/    # Pydantic or ORM models
-         └── lead.py  # Lead model (first name, last name, email, phone)
-         └── location.py # Location filter model (zip, city, state, lat/lng)
-│ ├── routes/    # API route definitions
-         └── csv_intake.py # Upload and parse CSV/Excel leads
-         └── location_filter.py # Flexible location filter + geocoding
-  ├── schemas/  
-│ ├── utils/     # Helper functions and utilities
-         └── geocode.py # Google Maps geocoder (need google maps env)
-│ ├── tests/     # Unit/integration tests
-│ ├── .env       # Environment variables (DB URLs, secrets, etc.)
-│ └── .gitignore # Ignored files for Git
-│
-├── requirements.txt # Project dependencies
-└── README.md # Setup and usage guide
-
+│   ├── data/
+│   │   └── mock_properties.json           # Mock property inventory used by search endpoints
+│   ├── db/
+│   │   ├── crud/                          # CRUD helpers (addresses, leads, campaigns, etc.)
+│   │   ├── schema.sql                     # Core PostgreSQL schema
+│   │   ├── data.sql                       # Seed data used during development
+│   │   └── session.py                     # SQLAlchemy session configuration
+│   ├── external_api/                      # Client wrappers for Google Places, RapidAPI, ToLeads
+│   ├── models/                            # SQLAlchemy ORM models
+│   ├── routes/                            # FastAPI routers (users, leads, campaigns, …)
+│   ├── schemas/                           # Pydantic request/response models
+│   ├── utils/                             # Utility helpers (e.g. geocoding)
+│   └── main.py                            # FastAPI application entry point
+├── scripts/                               # Helper scripts (data loading, tooling)
+├── tests/                                 # Unit and integration tests
+├── API_ROUTES_README.md                   # Endpoint documentation for frontend consumers
+├── requirements.txt                       # Python dependencies
+├── package.json / package-lock.json       # Frontend tooling configuration (if needed)
+├── .env                                   # Local environment variables (not tracked)
+├── __init__.py                            # Allows running `python -m app`
+└── README.md                              # This guide
 ```
 
-## 🧩 Setting Up Your Environment (Windows)
+For a detailed endpoint catalogue, see `API_ROUTES_README.md`.
 
-### 1. **Verify Python**
+---
 
-   ```bash
+## Local Environment Setup (Windows)
+
+1. **Verify Python installation**
+   ```powershell
    py --version
+   ```
+   Ensure the reported version is **3.13+**.
 
-   Must be Python 3.13 or higher
+2. **Install dependencies**
+   ```powershell
+   py -m pip install -r requirements.txt
    ```
 
-2. Must be 3.13 or higher.
+3. **Configure environment variables**
+   - Duplicate `.env.example` to `.env` if available, otherwise create `.env`.
+   - For geocoding features, set `GOOGLE_API_KEY=<your_api_key>`.
 
-3. py -m pip install -r requirements.txt
+---
 
-## Running the Server
+## Running the API
 
-```bash
+From the project root (`ZalaBackend/`):
 
-From Project Root (ZalaBackend/)
-
+```powershell
 py -m uvicorn app.main:app --reload
-
 ```
 
-1. App runs at: http://127.0.0.1:8000
+- API base URL: http://127.0.0.1:8000
+- Interactive docs (Swagger): http://127.0.0.1:8000/docs
+- Alternate docs (ReDoc): http://127.0.0.1:8000/redoc
 
-2. Interactive docs: http://127.0.0.1:8000/docs
+If you start inside the `app/` directory, adjust the module path:
 
-3. Alternative docs: http://127.0.0.1:8000/redoc
-
-
-```bash
-
-If Youre Inside the app Folder
-
+```powershell
 py -m uvicorn main:app --reload
-
 ```
 
-## How FastAPI Works
+Use `--reload` during development to auto-restart on file changes.
 
-1. FastAPI app instance
+---
 
- ```bash
+## Testing
 
-Creates a single FastAPI app.
+1. Start the server as shown above.
+2. Visit the autogenerated docs to exercise endpoints:
+   - Swagger UI: http://127.0.0.1:8000/docs
+   - ReDoc: http://127.0.0.1:8000/redoc
 
-Includes modular route files using include_router().
+You can also craft requests with tools such as `httpie`, `curl`, or Postman.
 
-```
-
-## Testing Your API
-1. Run your app:
-   py -m uvicorn app.main:app --reload
-
-2. Visit:
-
-   1. Swagger UI → http://127.0.0.1:8000/docs
-   2. ReDoc → http://127.0.0.1:8000/redoc
-
-## Automatic Documentation
-
-```bash
-
-FastAPI automatically generates documentation endpoints:
-
-/docs → Swagger UI (interactive testing)
-
-/redoc → ReDoc (clean read-only documentation)
-
-Both stay updated automatically as you add new routes or models.
-
-```
+---
 
 ## Development Notes
 
-```bash
-Use --reload during development for hot-reload.
+- Environment-specific configuration belongs in `.env`; keep secrets out of version control.
+- The `/api` prefix is applied to every router included in `app/main.py`.
+- When linking related entities (e.g., lead ↔ property), prefer the dedicated link/unlink endpoints rather than embedding IDs in create requests.
+- Keep `API_ROUTES_README.md` up to date when you add or change endpoints so the UI team has accurate guidance.
 
-Use environment variables in .env for configs (DB URLs, secrets, etc.).
+---
 
-```
+## ENV & External Services
 
-## ENV Notes
+Some features rely on external APIs (e.g., Google Maps). To enable them:
 
-1. Requires google api for geocode
-   1. naming GOOGLE_API_KEY
-2. How to Get Google Maps API Key
-   1. Go to https://console.cloud.google.com/
-   2. Create a new project or existing one
-   3. Enable Geocoding API
-   4. Go to Credentials and copy API key
-Requires openai api and brave api for ai search
-   https://platform.openai.com/api-keys
-      add to environment variables, name OPENAI_API_KEY
-   https://api-dashboard.search.brave.com/app/keys
-      add to environment variables, name BRAVE_API_KEY
+1. Create or select a project at https://console.cloud.google.com/.
+2. Enable the **Geocoding API** (and any other required services).
+3. Generate an API key under **APIs & Services → Credentials**.
+4. Add the key to `.env` as `GOOGLE_API_KEY=...`.
 
-
-
-
+Restart the server after updating `.env` so changes take effect.
 

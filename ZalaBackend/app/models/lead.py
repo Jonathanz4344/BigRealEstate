@@ -27,3 +27,6 @@ class Lead(Base):
     contact: Mapped["Contact"] = relationship("Contact", back_populates="leads", uselist=False)
     address: Mapped["Address"] = relationship("Address", back_populates="leads", uselist=False)
     properties: Mapped[List["Property"]] = relationship("Property", back_populates="lead")
+    campaign_messages: Mapped[List["CampaignMessage"]] = relationship(
+        "CampaignMessage", back_populates="lead", cascade="all, delete-orphan"
+    )

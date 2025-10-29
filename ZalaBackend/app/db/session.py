@@ -31,7 +31,7 @@ def init_db():
     Drops all tables and recreates them from the current models.
     """
     # Import all your models so Base knows about them
-    from ..models import user, property, contact, lead, address, unit, user_authentication
+    from ..models import user, property, contact, lead, address, unit, user_authentication, campaign, campaign_messages
 
     print("Dropping all database tables...")
     Base.metadata.drop_all(bind=engine)
