@@ -7,18 +7,24 @@ uvicorn>=0.30.0,<0.31.0
 # Pydantic v2 (FastAPI >=0.100 uses this)
 pydantic>=2.9.0,<3.0.0
 pydantic-settings>=2.5.0,<3.0.0
+email-validator>=2.0.0,<3.0.0
 
 # File parsing and data handling
 pandas>=2.2.2,<3.0.0
 openpyxl>=3.1.2,<4.0.0       # Required for reading .xlsx files
 python-multipart>=0.0.7,<0.1.0  # Enables file uploads in FastAPI
 
+# OpenAI and HTTP
+openai>=1.0.0,<2.0.0
+requests>=2.31.0,<3.0.0
+
 # misc
 python-dotenv==1.0.1
-
+psycopg2-binary==2.9.11
 # Password hashing
 passlib>=1.7.4,<2.0.0
 # Try to install Argon2 backend (may be unavailable for some Python versions)
 argon2-cffi>=23.1.0,<24.0.0
 # Secondary secure backend
 bcrypt>=4.0.1,<5.0.0
+sqlalchemy==2.0.44
