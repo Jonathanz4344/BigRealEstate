@@ -135,6 +135,11 @@ Use environment variables in .env for configs (DB URLs, secrets, etc.).
    2. Create a new project or existing one
    3. Enable Geocoding API
    4. Go to Credentials and copy API key
+Requires openai api and brave api for ai search
+   https://platform.openai.com/api-keys
+      add to environment variables, name OPENAI_API_KEY
+   https://api-dashboard.search.brave.com/app/keys
+      add to environment variables, name BRAVE_API_KEY
 
 
 
