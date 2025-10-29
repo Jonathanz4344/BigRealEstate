@@ -4,6 +4,8 @@ from typing import List, Optional
 from app.models.lead import Lead
 from app.models.property import Property
 from app.models.user import User
+from app.models.address import Address
+from app.models.contact import Contact
 from app import schemas
 from fastapi import HTTPException, status
 
@@ -27,7 +29,20 @@ def get_lead_by_id(db: Session, lead_id: int) -> Optional[Lead]:
 
 
 def get_leads(db: Session, skip: int = 0, limit: int = 100) -> List[Lead]:
-    return db.query(Lead).options(selectinload(Lead.properties)).offset(skip).limit(limit).all()
+    return (
+        db.query(Lead)
+        .options(
+            selectinload(Lead.properties).joinedload(Property.address),
+            selectinload(Lead.properties).selectinload(Property.units),
+            selectinload(Lead.properties).joinedload(Property.users),
+            joinedload(Lead.created_by_user),
+            joinedload(Lead.contact),
+            joinedload(Lead.address),
+        )
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def create_lead(db: Session, lead_in: schemas.LeadCreate) -> Lead:
@@ -132,6 +147,68 @@ def unlink_user_from_lead(db: Session, lead_id: int, user_id: int) -> Optional[L
     # clear created_by and also clear contact_id which was populated when the user was linked
     db_lead.created_by = None
     db_lead.contact_id = None
+    db.add(db_lead)
+    db.commit()
+    db.refresh(db_lead)
+    return db_lead
+
+
+def link_contact_to_lead(db: Session, lead_id: int, contact_id: int) -> Optional[Lead]:
+    db_lead = db.query(Lead).filter(Lead.lead_id == lead_id).first()
+    if not db_lead:
+        return None
+    contact = db.query(Contact).filter(Contact.contact_id == contact_id).first()
+    if not contact:
+        return None
+    # ensure the contact is not already linked to a different lead (contact_id is unique on leads)
+    existing = db.query(Lead).filter(Lead.contact_id == contact_id).first()
+    if existing and existing.lead_id != lead_id:
+        return None
+    db_lead.contact_id = contact_id
+    db.add(db_lead)
+    db.commit()
+    db.refresh(db_lead)
+    return db_lead
+
+
+def unlink_contact_from_lead(db: Session, lead_id: int, contact_id: int) -> Optional[Lead]:
+    db_lead = db.query(Lead).filter(Lead.lead_id == lead_id).first()
+    if not db_lead:
+        return None
+    if db_lead.contact_id != contact_id:
+        return db_lead
+    db_lead.contact_id = None
+    db.add(db_lead)
+    db.commit()
+    db.refresh(db_lead)
+    return db_lead
+
+
+def link_address_to_lead(db: Session, lead_id: int, address_id: int) -> Optional[Lead]:
+    db_lead = db.query(Lead).filter(Lead.lead_id == lead_id).first()
+    if not db_lead:
+        return None
+    address = db.query(Address).filter(Address.address_id == address_id).first()
+    if not address:
+        return None
+    # guard against violating the unique constraint on lead.address_id
+    existing = db.query(Lead).filter(Lead.address_id == address_id).first()
+    if existing and existing.lead_id != lead_id:
+        return None
+    db_lead.address_id = address_id
+    db.add(db_lead)
+    db.commit()
+    db.refresh(db_lead)
+    return db_lead
+
+
+def unlink_address_from_lead(db: Session, lead_id: int, address_id: int) -> Optional[Lead]:
+    db_lead = db.query(Lead).filter(Lead.lead_id == lead_id).first()
+    if not db_lead:
+        return None
+    if db_lead.address_id != address_id:
+        return db_lead
+    db_lead.address_id = None
     db.add(db_lead)
     db.commit()
     db.refresh(db_lead)
