@@ -110,8 +110,26 @@ Some features rely on external APIs (e.g., Google Maps). To enable them:
 
 1. Create or select a project at https://console.cloud.google.com/.
 2. Enable the **Geocoding API** (and any other required services).
-3. Generate an API key under **APIs & Services → Credentials**.
+3. Generate an API key under **APIs & Services -> Credentials**.
 4. Add the key to `.env` as `GOOGLE_API_KEY=...`.
+
+### Google Sign-In (OAuth 2.0)
+
+1. In Google Cloud Console, open **APIs & Services -> OAuth consent screen**, choose the appropriate user type, and complete the app details (support email, scopes, test users if needed). Publish or save the consent screen when finished.
+2. Go to **APIs & Services -> Credentials**, click **Create Credentials -> OAuth client ID**, select **Web application**, and add your local dev origins (`http://localhost:3000`, `http://127.0.0.1:3000`, `http://localhost:5173`, `http://127.0.0.1:5173`  plus your FastAPI host if you will initiate flows from Swagger). Add redirect URIs such as `http://localhost:3000/auth/google/callback` and `http://localhost:8000/docs/oauth2-redirect`.
+3. Copy the generated *Client ID* and *Client Secret* into `.env`:
+   ```ini
+   GOOGLE_CLIENT_ID=...
+   GOOGLE_CLIENT_SECRET=...
+   ```
+   Restart the FastAPI server after updating environment variables.
+4. Frontend clients should obtain a Google ID token via the Google Identity Services JavaScript SDK and send it to `POST /api/login/google`. The backend will verify the token and return the associated `UserPublic`.
+5. FRONTEND .ENV NEEDS 
+   ```ini
+   VITE_GOOGLE_CLIENT_ID=...
+
+   ```
+
 
 Restart the server after updating `.env` so changes take effect.
 

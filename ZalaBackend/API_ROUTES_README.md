@@ -21,6 +21,7 @@ This document summarizes the REST endpoints exposed by the FastAPI service so th
 | Method | Path | Purpose | Body Fields | Response |
 | --- | --- | --- | --- | --- |
 | POST | `/api/login/` | Authenticate a user | `username` *(string, required)*, `password` *(string, required)* | `UserPublic` (user details if credentials match) |
+| POST | `/api/login/google` | Authenticate via Google | `id_token` *(string, required)* | `UserPublic` (populated from Google profile or linked user) |
 
 401 is returned when credentials are invalid.
 

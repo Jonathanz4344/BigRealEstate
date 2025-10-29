@@ -57,7 +57,10 @@ CREATE TABLE leads (
 
 CREATE TABLE user_authentication (
     user_id         INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
-    password_hash   TEXT NOT NULL
+    password_hash   TEXT,
+    auth_provider   VARCHAR(50) NOT NULL DEFAULT 'local',
+    provider_subject TEXT UNIQUE,
+    provider_email  TEXT
 );
 
 CREATE TYPE user_role AS ENUM ('user', 'admin', 'moderator');
