@@ -77,6 +77,30 @@ def get_campaign_messages_by_lead(
     return query.offset(skip).limit(limit).all()
 
 
+def get_campaign_contact_methods_by_lead(
+        db: Session,
+        campaign_id: int,
+        lead_id: int
+) -> {}:
+    contact_methods = []
+
+    query = _base_query(db).filter(CampaignMessage.campaign_id == campaign_id, CampaignMessage.lead_id == lead_id,
+                                   CampaignMessage.contact_method == "phone")
+    if query.first():
+        contact_methods.append("phone")
+
+    query = _base_query(db).filter(CampaignMessage.campaign_id == campaign_id, CampaignMessage.lead_id == lead_id,
+                                   CampaignMessage.contact_method == "sms")
+    if query.first():
+        contact_methods.append("sms")
+    query = _base_query(db).filter(CampaignMessage.campaign_id == campaign_id, CampaignMessage.lead_id == lead_id,
+                                   CampaignMessage.contact_method == "email")
+    if query.first():
+        contact_methods.append("email")
+
+    return contact_methods
+
+
 def create_campaign_message(db: Session, message_in: schemas.CampaignMessageCreate) -> CampaignMessage:
     """
     Create and persist a campaign message.

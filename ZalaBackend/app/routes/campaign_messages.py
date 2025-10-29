@@ -82,6 +82,23 @@ def list_campaign_messages_by_lead(
     )
 
 
+@router.get("/campaign/{campaign_id}/lead/{lead_id}/contact", summary="Get Campaign Contact Methods For Campaign By Lead ID",
+            response_model={})
+def get_campaign_contact_methods_by_lead(
+        campaign_id: int,
+        lead_id: int,
+        db: Session = Depends(get_db),
+):
+    """
+    List campaign messages for a specific campaign, filtered by lead
+    """
+
+    return campaign_message_crud.get_campaign_contact_methods_by_lead(
+        db,
+        campaign_id=campaign_id,
+        lead_id=lead_id
+    )
+
 @router.get("/{message_id}", summary="Get Campaign Message by id", response_model=schemas.CampaignMessagePublic)
 def get_campaign_message(message_id: int, db: Session = Depends(get_db)):
     """
