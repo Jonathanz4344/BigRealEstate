@@ -7,13 +7,12 @@ from app import schemas
 from app.db.crud import campaign_message as campaign_message_crud
 from app.db.session import get_db
 
-
 router = APIRouter(prefix="/campaign-messages", tags=["Campaign Messages"])
 
 
 @router.post("/", response_model=schemas.CampaignMessagePublic, status_code=status.HTTP_201_CREATED)
 def create_campaign_message(
-    message_in: schemas.CampaignMessageCreate, db: Session = Depends(get_db)
+        message_in: schemas.CampaignMessageCreate, db: Session = Depends(get_db)
 ):
     """
     Create a new campaign message.
@@ -21,12 +20,12 @@ def create_campaign_message(
     return campaign_message_crud.create_campaign_message(db, message_in)
 
 
-@router.get("/",summary="Get All Compaign Messages", response_model=List[schemas.CampaignMessagePublic])
+@router.get("/", summary="Get All Campaign Messages", response_model=List[schemas.CampaignMessagePublic])
 def list_campaign_messages(
-    skip: int = 0,
-    limit: int = 100,
-    campaign_id: Optional[int] = None,
-    db: Session = Depends(get_db),
+        skip: int = 0,
+        limit: int = 100,
+        campaign_id: Optional[int] = None,
+        db: Session = Depends(get_db),
 ):
     """
     List campaign messages, optionally filtered by campaign_id.
@@ -38,20 +37,21 @@ def list_campaign_messages(
     return campaign_message_crud.get_campaign_messages(db, skip=skip, limit=limit)
 
 
-@router.get("/campaign/{campaign_id}",summary="Get Compaign Messages For Compaign By Id and Contact Method", response_model=List[schemas.CampaignMessagePublic])
-def list_campaign_messages_for_campaign(
-    campaign_id: int,
-    skip: int = 0,
-    limit: int = 100,
-    contact_method: Optional[schemas.ContactMethod] = None,
-    db: Session = Depends(get_db),
+@router.get("/campaign/{campaign_id}", summary="Get Campaign Messages For Campaign By Id and Contact Method",
+            response_model=List[schemas.CampaignMessagePublic])
+def list_campaign_messages_by_contact(
+        campaign_id: int,
+        skip: int = 0,
+        limit: int = 100,
+        contact_method: Optional[schemas.ContactMethod] = None,
+        db: Session = Depends(get_db),
 ):
     """
     List campaign messages for a specific campaign, optionally filtered by contact method.
     """
     contact_methods = [contact_method] if contact_method else None
 
-    return campaign_message_crud.get_campaign_messages_for_campaign(
+    return campaign_message_crud.get_campaign_messages_by_contact(
         db,
         campaign_id=campaign_id,
         skip=skip,
@@ -60,7 +60,29 @@ def list_campaign_messages_for_campaign(
     )
 
 
-@router.get("/{message_id}",summary="Get Compaign Message by id",  response_model=schemas.CampaignMessagePublic)
+@router.get("/campaign/{campaign_id}/lead/{lead_id}", summary="Get Campaign Messages For Campaign By Lead ID",
+            response_model=List[schemas.CampaignMessagePublic])
+def list_campaign_messages_by_lead(
+        campaign_id: int,
+        lead_id: int,
+        skip: int = 0,
+        limit: int = 100,
+        db: Session = Depends(get_db),
+):
+    """
+    List campaign messages for a specific campaign, filtered by lead
+    """
+
+    return campaign_message_crud.get_campaign_messages_by_lead(
+        db,
+        campaign_id=campaign_id,
+        lead_id=lead_id,
+        skip=skip,
+        limit=limit,
+    )
+
+
+@router.get("/{message_id}", summary="Get Campaign Message by id", response_model=schemas.CampaignMessagePublic)
 def get_campaign_message(message_id: int, db: Session = Depends(get_db)):
     """
     Retrieve a campaign message by ID.
@@ -73,7 +95,7 @@ def get_campaign_message(message_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{message_id}", response_model=schemas.CampaignMessagePublic)
 def update_campaign_message(
-    message_id: int, message_in: schemas.CampaignMessageUpdate, db: Session = Depends(get_db)
+        message_id: int, message_in: schemas.CampaignMessageUpdate, db: Session = Depends(get_db)
 ):
     """
     Update an existing campaign message.

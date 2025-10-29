@@ -38,12 +38,12 @@ def get_campaign_messages(db: Session, skip: int = 0, limit: int = 100) -> List[
     )
 
 
-def get_campaign_messages_for_campaign(
-    db: Session,
-    campaign_id: int,
-    skip: int = 0,
-    limit: int = 100,
-    contact_methods: Optional[List[schemas.ContactMethod]] = None,
+def get_campaign_messages_by_contact(
+        db: Session,
+        campaign_id: int,
+        skip: int = 0,
+        limit: int = 100,
+        contact_methods: Optional[List[schemas.ContactMethod]] = None,
 ) -> List[CampaignMessage]:
     """
     Fetch messages for a given campaign.
@@ -62,6 +62,21 @@ def get_campaign_messages_for_campaign(
     return query.offset(skip).limit(limit).all()
 
 
+def get_campaign_messages_by_lead(
+        db: Session,
+        campaign_id: int,
+        lead_id: int,
+        skip: int = 0,
+        limit: int = 100,
+) -> List[CampaignMessage]:
+    """
+    Fetch messages for a given campaign.
+    """
+    query = _base_query(db).filter(CampaignMessage.campaign_id == campaign_id, CampaignMessage.lead_id == lead_id)
+
+    return query.offset(skip).limit(limit).all()
+
+
 def create_campaign_message(db: Session, message_in: schemas.CampaignMessageCreate) -> CampaignMessage:
     """
     Create and persist a campaign message.
@@ -74,7 +89,7 @@ def create_campaign_message(db: Session, message_in: schemas.CampaignMessageCrea
 
 
 def update_campaign_message(
-    db: Session, message_id: int, message_in: schemas.CampaignMessageUpdate
+        db: Session, message_id: int, message_in: schemas.CampaignMessageUpdate
 ) -> Optional[CampaignMessage]:
     """
     Update a campaign message.
