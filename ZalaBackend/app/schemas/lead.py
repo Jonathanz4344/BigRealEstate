@@ -49,10 +49,12 @@ class LeadPublic(LeadBase):
     # expose ids for related resources to keep response small and avoid circular imports
     created_by: Optional[int] = None
     contact_id: Optional[int] = None
+    address_id: Optional[int] = None
 
     # nested created_by user summary and full contact/property details
     created_by_user: Optional[UserSummary] = None
     contact: Optional[ContactPublic] = None
+    address: Optional[AddressPublic] = None
     properties: List[PropertyPublic] = []
 
     class Config:
