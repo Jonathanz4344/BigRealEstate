@@ -5,6 +5,7 @@ import {
   NotFoundPage,
   SignupPage,
   LoginPage,
+  GoogleAuthTestPage,
 } from "../pages";
 import { AppLayout } from "../layouts";
 import { useAuthStore } from "../stores";
@@ -34,6 +35,10 @@ export const NavigationProvider = () => {
             <>
               <Route index element={<LeadSearchPage />} />
               <Route path="/campaign/:campaignId" element={<CampaignPage />} />
+              <Route
+                path="/auth/google-test"
+                element={<GoogleAuthTestPage />}
+              />
               <Route path="/signup" element={<Navigate to={"/"} />} />
               <Route path="/login" element={<Navigate to={"/"} />} />
             </>
