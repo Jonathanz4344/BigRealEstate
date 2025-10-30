@@ -6,16 +6,13 @@ import os
 
 load_dotenv(find_dotenv())
 
-SQL_UNAME = os.getenv("SQL_UNAME")
-SQL_PASSWORD = os.getenv("SQL_PWD")
-
 url = URL.create(
     drivername="postgresql",
-    username=SQL_UNAME,
-    password=SQL_PASSWORD,
-    host="localhost",
-    database="zala",
-    port=5432,
+    username=os.getenv("SQL_UNAME"),
+    password=os.getenv("SQL_PASSWORD"),
+    host=os.getenv("SQL_HOST"),
+    database=os.getenv("SQL_DBNAME"),
+    port=os.getenv("SQL_PORT"),
 )
 
 engine = create_engine(url)
