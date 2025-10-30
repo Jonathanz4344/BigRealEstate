@@ -18,4 +18,5 @@ export enum Icons {
   Phone = "Phone",
   Txt = "Txt",
   Skip = "Skip",
+  Lock = "Lock",
 }

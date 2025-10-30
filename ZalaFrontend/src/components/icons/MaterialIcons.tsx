@@ -20,6 +20,7 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import TextsmsIcon from "@mui/icons-material/Textsms";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import LockIcon from "@mui/icons-material/Lock";
 
 export const getMaterialIcon = (iconName: Icons) => {
   switch (iconName) {
@@ -61,6 +62,8 @@ export const getMaterialIcon = (iconName: Icons) => {
       return (props: SvgIconProps) => <SkipNextIcon {...props} />;
     case Icons.Chevron:
       return (props: SvgIconProps) => <ChevronRightIcon {...props} />;
+    case Icons.Lock:
+      return (props: SvgIconProps) => <LockIcon {...props} />;
     default:
       return null;
   }

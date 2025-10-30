@@ -49,7 +49,7 @@ export const ContactFolder = ({
                 <LeadTitleValue title="Email:" value={lead.contact} />
                 <LeadTitleValue title="Phone #:" value={"5853239877"} />
                 <LeadTitleValue title="Contacted by:">
-                  <div className="flex flex-row justify-between w-full pt-[5px]">
+                  <div className="flex flex-row justify-between w-full pt-[5px] px-[15px]">
                     <ContactMethod text="Email" icon={Icons.Mail} />
                     <ContactMethod text="Phone" icon={Icons.Phone} />
                     <ContactMethod text="SMS" icon={Icons.Txt} />

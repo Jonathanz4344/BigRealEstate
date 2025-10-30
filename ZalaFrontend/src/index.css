@@ -10,6 +10,8 @@
   --color-white: #ffffff;
 
   --color-secondary-50: #1e1e1e80;
+
+  --color-error: #d64545;
 }
 
 :root {
