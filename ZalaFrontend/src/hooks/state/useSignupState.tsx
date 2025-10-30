@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useErrors } from "./useErrors";
+import { useErrors } from "../utils";
 
 export const useSignupState = () => {
   const [userName, setUserName] = useState("");

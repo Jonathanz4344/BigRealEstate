@@ -1,6 +1,10 @@
 import { useEffect } from "react";
-import { useAppNavigation, useSignupState } from "../utils";
-import { useAuthStore } from "../../stores";
+import {
+  useAppNavigation,
+  useAuthUser,
+  useGoogleAuthButtonCallback,
+  useSnack,
+} from "../utils";
 import {
   AContactToIContact,
   AUserToIUser,
@@ -8,19 +12,16 @@ import {
 } from "../../interfaces";
 import { useApi } from "../api";
 import { stringify } from "../../utils";
-import { useSnackbar } from "notistack";
-import { useCookies } from "react-cookie";
+import { useSignupState } from "../state";
 
 export const useSignupPage = () => {
-  const setUser = useAuthStore((state) => state.setUser);
-
-  const [_cookies, setCookie] = useCookies(["userId"], {
-    doNotParse: true,
-  });
-  const snackbar = useSnackbar();
-
   const { toLoginPage } = useAppNavigation();
   const { createContact, createUser, linkContactToUser } = useApi();
+  const loginUser = useAuthUser();
+  const [successMsg, errorMsg] = useSnack();
+  const googleAuthCallback = useGoogleAuthButtonCallback({
+    onMsg: (user) => `Account created! Hello, ${user.contact?.firstName}`,
+  });
 
   const state = useSignupState();
   const {
@@ -76,17 +77,10 @@ export const useSignupPage = () => {
       });
       if (!user) return;
 
-      snackbar.enqueueSnackbar(
-        `Account created! Hello, ${user?.contact?.firstName}`,
-        { variant: "success" }
-      );
-      setCookie("userId", user.userId);
-      setUser(user);
+      successMsg(`Account created! Hello, ${user.contact?.firstName}`);
+      loginUser(user);
     })();
   };
-
-  const showAPIError = (msg: string) =>
-    snackbar.enqueueSnackbar(msg, { variant: "error" });
 
   const signupV1 = async (
     body: Omit<IContact, "contactId"> & { userName: string; password: string }
@@ -99,9 +93,9 @@ export const useSignupPage = () => {
     });
 
     if (contactRes.err || !contactRes.data) {
-      console.log(`Internal error - Contact: ${contactRes}`);
+      console.log(`Internal error - Contact: ${stringify(contactRes)}`);
       console.log(``);
-      showAPIError("Internal error - please try again later");
+      errorMsg("Internal error - please try again later");
       return;
     }
 
@@ -114,9 +108,9 @@ export const useSignupPage = () => {
     });
 
     if (blankUserRes.err || !blankUserRes.data) {
-      console.log(`Internal error - User: ${blankUserRes}`);
+      console.log(`Internal error - User: ${stringify(blankUserRes)}`);
       console.log(``);
-      showAPIError("Internal error - please try again later");
+      errorMsg("Internal error - please try again later");
       return;
     }
 
@@ -126,16 +120,13 @@ export const useSignupPage = () => {
     });
 
     if (userRes.err || !userRes.data) {
-      console.log(`Internal error - Connection: ${userRes}`);
+      console.log(`Internal error - Connection: ${stringify(userRes)}`);
       console.log(``);
-      showAPIError("Internal error - please try again later");
+      errorMsg("Internal error - please try again later");
       return;
     }
 
     const user = AUserToIUser(userRes.data);
-    console.log(`Signed In User:`);
-    console.log(stringify(user));
-    console.log(``);
     return user;
   };
 
@@ -148,5 +139,6 @@ export const useSignupPage = () => {
 
     onCreateClick,
     onLoginClick,
+    googleAuthCallback,
   };
 };

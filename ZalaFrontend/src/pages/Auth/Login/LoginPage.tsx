@@ -7,6 +7,7 @@ export const LoginPage = () => {
     state: { userName, setUserName, password, setPassword, errors },
     onLoginClick,
     onSignupClick,
+    googleAuthCallback,
   } = useLoginPage();
 
   return (
@@ -22,12 +23,13 @@ export const LoginPage = () => {
       }}
       secondaryBtn={{
         text: {
-          pre: "Dont have an account?",
+          pre: "Dont have an account? ",
           highlight: "Create an account",
           end: " now!",
         },
         onClick: onSignupClick,
       }}
+      googleCallback={googleAuthCallback}
     >
       <div className="w-[75%] grow-1 flex items-center">
         <div className="w-full space-y-[15px]">

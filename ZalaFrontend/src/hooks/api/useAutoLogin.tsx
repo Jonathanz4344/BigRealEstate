@@ -1,8 +1,8 @@
-import { useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { useAuthStore } from "../../stores";
 import { useApi } from "../api";
 import { AUserToIUser } from "../../interfaces";
+import { useTimeoutEffect } from "../utils";
 
 export const useAutoLogin = () => {
   const setUser = useAuthStore((state) => state.setUser);
@@ -13,9 +13,13 @@ export const useAutoLogin = () => {
 
   const { getUser } = useApi();
 
-  useEffect(() => {
-    autoLogin();
-  }, []);
+  useTimeoutEffect(
+    () => {
+      autoLogin();
+    },
+    [],
+    150
+  );
 
   const autoLogin = () => {
     const userId = cookies.userId;

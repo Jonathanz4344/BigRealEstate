@@ -8,7 +8,8 @@ import type {
   CreateContactProps,
   CreateUserProps,
   LinkContactToUserProps,
-  LoginProps,
+  LoginAPIProps,
+  LoginGoogleProps,
   SearchLeadsProps,
 } from "./types";
 import { useFetch } from "./useFetch";
@@ -45,12 +46,16 @@ export const useApi = () => {
     );
   };
 
-  const loginAPI = async (body: LoginProps) => {
+  const loginAPI = async (body: LoginAPIProps) => {
     return await post<AUser>(`/api/login`, body);
   };
 
   const getUser = async (userId: string) => {
     return await get<AUser>(`/api/users/${userId}`);
+  };
+
+  const loginGoogle = async ({ token }: LoginGoogleProps) => {
+    return await post<AUser>(`/api/login/google`, { id_token: token });
   };
 
   return {
@@ -60,5 +65,6 @@ export const useApi = () => {
     linkContactToUser,
     loginAPI,
     getUser,
+    loginGoogle,
   };
 };

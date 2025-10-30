@@ -1,5 +1,10 @@
 import { type PropsWithChildren } from "react";
-import { Button, ButtonVariant } from "../../../../components";
+import {
+  Button,
+  ButtonVariant,
+  GoogleAuthButton,
+  type GoogleAuthButtonCallback,
+} from "../../../../components";
 
 type HighlightText = {
   pre: string;
@@ -17,6 +22,7 @@ type CardPageProps = {
     text: HighlightText;
     onClick: () => void;
   };
+  googleCallback: GoogleAuthButtonCallback;
 };
 
 export const CardPage = ({
@@ -24,6 +30,7 @@ export const CardPage = ({
   primaryBtn,
   secondaryBtn,
   children,
+  googleCallback,
 }: PropsWithChildren<CardPageProps>) => {
   return (
     <div className="flex flex-1 items-center justify-center py-[60px]">
@@ -39,26 +46,52 @@ export const CardPage = ({
           </p>
         </div>
         {children}
-        <div className="w-full flex flex-col items-center text-secondary-50 text-base">
-          <div className="w-[300px]">
-            <Button
-              text={primaryBtn.text}
-              variant={ButtonVariant.Primary}
-              onClick={primaryBtn.onClick}
-            />
+        <div className="w-full flex flex-col items-center text-secondary-50 text-base space-y-[10px]">
+          <div className="w-full flex flex-col items-center space-y-[5px]">
+            <div className="w-[300px]">
+              <Button
+                text={primaryBtn.text}
+                variant={ButtonVariant.Primary}
+                onClick={primaryBtn.onClick}
+              />
+            </div>
+            <p className="text-sm">or</p>
+            <div className="w-[250px]">
+              <GoogleAuthButton callback={googleCallback} />
+            </div>
           </div>
-          <p className="mt-[10px]">or</p>
-          <p className="text-center">
-            {secondaryBtn.text.pre}
-            <br />
-            <span
-              className={"text-accent cursor-pointer underline hover:font-bold"}
-              onClick={secondaryBtn.onClick}
-            >
-              {secondaryBtn.text.highlight}
-            </span>
-            {secondaryBtn.text.end}
-          </p>
+
+          <div className="w-full flex flex-col items-center">
+            <p className="text-center">
+              {secondaryBtn.text.pre}
+              <span
+                className={
+                  "text-accent cursor-pointer underline hover:font-bold"
+                }
+                onClick={secondaryBtn.onClick}
+              >
+                {secondaryBtn.text.highlight}
+              </span>
+              {secondaryBtn.text.end}
+            </p>
+          </div>
+
+          {/* <div>
+            <p className="mt-[10px]">or</p>
+            <p className="text-center">
+              {secondaryBtn.text.pre}
+              <br />
+              <span
+                className={
+                  "text-accent cursor-pointer underline hover:font-bold"
+                }
+                onClick={secondaryBtn.onClick}
+              >
+                {secondaryBtn.text.highlight}
+              </span>
+              {secondaryBtn.text.end}
+            </p>
+          </div> */}
         </div>
       </div>
     </div>

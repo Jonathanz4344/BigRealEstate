@@ -24,7 +24,11 @@ export type LinkContactToUserProps = {
   contactId: number;
 };
 
-export type LoginProps = {
+export type LoginAPIProps = {
   username: string;
   password: string;
+};
+
+export type LoginGoogleProps = {
+  token: string;
 };

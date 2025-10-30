@@ -1,21 +1,23 @@
-import { useSnackbar } from "notistack";
 import { useEffect, useState } from "react";
 import { AUserToIUser } from "../../interfaces";
-import { useAuthStore } from "../../stores";
 import { useApi } from "../api";
-import { useAppNavigation, useErrors, type IError } from "../utils";
-import { useCookies } from "react-cookie";
+import {
+  useAppNavigation,
+  useAuthUser,
+  useErrors,
+  useGoogleAuthButtonCallback,
+  useSnack,
+  type IError,
+} from "../utils";
 
 export const useLoginPage = () => {
-  const setUser = useAuthStore((state) => state.setUser);
-
-  const [_cookies, setCookie] = useCookies(["userId"], {
-    doNotParse: true,
-  });
-  const snackbar = useSnackbar();
-
   const { toSignupPage } = useAppNavigation();
   const { loginAPI } = useApi();
+  const loginUser = useAuthUser();
+  const [successMsg, errorMsg] = useSnack();
+  const googleAuthCallback = useGoogleAuthButtonCallback({
+    onMsg: (user) => `Login success! Hello, ${user?.contact?.firstName}`,
+  });
 
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -42,17 +44,10 @@ export const useLoginPage = () => {
       const user = await loginV1();
       if (!user) return;
 
-      snackbar.enqueueSnackbar(
-        `Loggin success! Hello, ${user?.contact?.firstName}`,
-        { variant: "success" }
-      );
-      setCookie("userId", user.userId);
-      setUser(user);
+      successMsg(`Login success! Hello, ${user?.contact?.firstName}`);
+      loginUser(user);
     })();
   };
-
-  const showAPIError = (msg: string) =>
-    snackbar.enqueueSnackbar(msg, { variant: "error" });
 
   const loginV1 = async () => {
     const loginRes = await loginAPI({ username: userName, password });
@@ -60,7 +55,7 @@ export const useLoginPage = () => {
     if (loginRes.err || !loginRes.data) {
       console.log(`Internal Error - Login: ${loginRes.err}`);
       console.log(``);
-      showAPIError("Internal error - please try again later");
+      errorMsg("Internal error - please try again later");
       return;
     }
 
@@ -82,5 +77,6 @@ export const useLoginPage = () => {
     },
     onLoginClick,
     onSignupClick,
+    googleAuthCallback,
   };
 };

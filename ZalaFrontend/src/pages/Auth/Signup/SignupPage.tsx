@@ -23,6 +23,7 @@ export const SignupPage = () => {
     },
     onCreateClick,
     onLoginClick,
+    googleAuthCallback,
   } = useSignupPage();
 
   return (
@@ -38,12 +39,13 @@ export const SignupPage = () => {
       }}
       secondaryBtn={{
         text: {
-          pre: "Have an account allready?",
+          pre: "Have an account allready? ",
           highlight: "Login",
           end: " now!",
         },
         onClick: onLoginClick,
       }}
+      googleCallback={googleAuthCallback}
     >
       <div className="w-[75%] grow-1 flex items-center">
         <div className="w-full space-y-[15px]">
