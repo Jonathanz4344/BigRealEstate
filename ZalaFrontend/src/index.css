@@ -1,0 +1,71 @@
+@import url("https://fonts.googleapis.com/css2?family=Grenze:wght@400;500;700;800;900family=Ubuntu+Mono:wght@400;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #f6e6c3;
+  --color-secondary: #1e1e1e;
+  --color-accent: #fa6f1e;
+
+  --color-background: #fbf1e1;
+  --color-white: #ffffff;
+
+  --color-secondary-50: #1e1e1e80;
+
+  --color-error: #d64545;
+}
+
+:root {
+  font-family: "Ubuntu Mono", monospace;
+  font-style: normal;
+  box-sizing: border-box;
+  padding: 0px;
+  margin: 0px;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-secondary);
+  padding: 0px;
+  margin: 0px;
+
+  @apply w-screen h-screen;
+}
+
+.box-shadow {
+  box-shadow: 5px 5px 15px var(--color-secondary-50);
+}
+
+.box-shadow-sm {
+  box-shadow: 2.5px 2.5px 7.5px var(--color-secondary-50);
+}
+
+.card-base {
+  @apply bg-primary rounded-[15px];
+}
+
+.border-text-input {
+  @apply outline-0 border-b-2 border-secondary-50 focus:border-accent;
+}
+
+.text-area-style {
+  @apply outline-0 border-b-2 border-secondary-50 focus:border-accent;
+  @apply text-base w-full resize-none field-sizing-content;
+}
+
+.absolute-fill {
+  @apply absolute top-0 left-0 right-0 bottom-0;
+}
+
+.full {
+  @apply w-full h-full;
+}
+
+.grenze {
+  font-family: "Grenze", serif;
+  font-style: normal;
+}
+
+.ubuntu {
+  font-family: "Ubuntu Mono", monospace;
+  font-style: normal;
+}

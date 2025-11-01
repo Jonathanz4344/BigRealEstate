@@ -1,0 +1,42 @@
+from decimal import Decimal
+from typing import Optional
+
+from pydantic import BaseModel, Field
+
+class UnitBase(BaseModel):
+    """
+    Base Schema for Unit
+    """
+    apt_num: Optional[str]
+    bedrooms: Optional[int]
+    bath: Optional[Decimal] = None
+    sqft: Optional[int]
+    notes: Optional[str]
+
+
+class UnitCreate(UnitBase):
+    """
+    Schema for Create Unit
+    """
+    # property_id is provided on the path (server authoritative); it is not required in the body
+
+class UnitUpdate(BaseModel):
+    """
+    Schema for Create Unit
+    """
+    property_id: Optional[int]
+    apt_num: Optional[str]
+    bedrooms: Optional[int]
+    bath: Optional[Decimal] = None
+    sqft: Optional[int]
+    notes: Optional[str]
+
+
+class UnitPublic(UnitBase):
+    """
+    Schema for Get Unit
+    """
+    unit_id: int
+    property_id: int
+    class Config:
+        from_attributes = True
