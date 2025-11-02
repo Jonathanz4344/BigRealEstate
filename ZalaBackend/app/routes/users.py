@@ -44,7 +44,7 @@ def create_user(
     return new_user
 
 
-@public_router.post("/signup", tags=["Users"], response_model=schemas.UserPublic, status_code=status.HTTP_201_CREATED)
+@public_router.post("/signup", tags=["Sign Up"], response_model=schemas.UserPublic, status_code=status.HTTP_201_CREATED)
 def signup_user(
         user_in: schemas.UserSignup,
         db: Session = Depends(get_db),

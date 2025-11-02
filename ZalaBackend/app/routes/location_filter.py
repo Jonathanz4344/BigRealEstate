@@ -156,7 +156,7 @@ def _serialize_lead(lead: Lead, distance: float) -> Dict[str, object]:
     }
 
 
-@router.post("/search-location/", tags=["Search Filter"])
+@router.post("/search-location/",summary="Search Lead Mock", tags=["Search Lead"], include_in_schema=True)
 def search_location(filter: LocationFilter):
     # Reverse geocode if lat/lng provided
     if filter.latitude and filter.longitude:
@@ -204,7 +204,7 @@ def search_location(filter: LocationFilter):
     }
 
 
-@router.post("/search-location/db", tags=["Search Filter"])
+@router.post("/searchLeads/db",summary="Search Lead DB", tags=["Search Lead"])
 def search_location_db(filter: LocationFilter, db: Session = Depends(get_db)):
     lat = filter.latitude
     lon = filter.longitude
@@ -271,6 +271,6 @@ def search_location_db(filter: LocationFilter, db: Session = Depends(get_db)):
             nearby_leads.append(_serialize_lead(lead, round(best_distance, 2)))
 
     return {
-        "normalized_location": normalized_location,
-        "nearby_leads": nearby_leads,
+        # "normalized_location": normalized_location,
+        "leads": nearby_leads,
     }
