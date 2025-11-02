@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app import schemas
 from app.models.campaign import Campaign
@@ -10,7 +10,7 @@ from app.models.campaign_messages import CampaignMessage
 def _base_query(db: Session):
     return db.query(CampaignMessage).options(
         joinedload(CampaignMessage.campaign).joinedload(Campaign.user),
-        joinedload(CampaignMessage.campaign).joinedload(Campaign.property),
+        joinedload(CampaignMessage.campaign).selectinload(Campaign.leads),
         joinedload(CampaignMessage.lead),
     )
 

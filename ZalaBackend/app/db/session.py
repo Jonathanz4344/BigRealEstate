@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, URL
+from sqlalchemy import URL, create_engine, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 from dotenv import load_dotenv, find_dotenv
@@ -49,7 +49,12 @@ def init_db():
     )
 
     print("Dropping all database tables...")
-    Base.metadata.drop_all(bind=engine)
+    with engine.begin() as connection:
+        connection.execute(text("CREATE SCHEMA IF NOT EXISTS public"))
+        connection.execute(text("SET search_path TO public"))
+        Base.metadata.drop_all(bind=connection)
 
     print("Creating all database tables...")
-    Base.metadata.create_all(bind=engine)
+    with engine.begin() as connection:
+        connection.execute(text("SET search_path TO public"))
+        Base.metadata.create_all(bind=connection)
