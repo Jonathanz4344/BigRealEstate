@@ -13,6 +13,10 @@ router = APIRouter(
     prefix="/users",
 )
 
+public_router = APIRouter(
+    prefix="/users",
+)
+
 
 @router.post("/",tags=["Users"], response_model=schemas.UserPublic, status_code=status.HTTP_201_CREATED)
 def create_user(
@@ -38,6 +42,17 @@ def create_user(
     if new_user is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to create user (invalid contact_id?)")
     return new_user
+
+
+@public_router.post("/signup", tags=["Users"], response_model=schemas.UserPublic, status_code=status.HTTP_201_CREATED)
+def signup_user(
+        user_in: schemas.UserSignup,
+        db: Session = Depends(get_db),
+):
+    """
+    Create a user, their contact, and link them in a single request.
+    """
+    return user_crud.create_user_with_contact(db=db, user=user_in)
 
 
 @router.get("/",tags=["Users"], response_model=List[schemas.UserPublic])

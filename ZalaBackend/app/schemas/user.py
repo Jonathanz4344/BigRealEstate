@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional, List
 
 from app.models.contact import Contact
-from app.schemas.contact import ContactPublic, ContactBase
+from app.schemas.contact import ContactPublic, ContactBase, ContactCreate
 from app.schemas.summaries import LeadSummary
 
 
@@ -35,6 +35,13 @@ class UserCreate(UserBase):
     # Linking a contact to a user must be done with the link endpoint
     # POST /users/{user_id}/contacts/{contact_id}
     password: str
+
+
+class UserSignup(UserCreate):
+    """
+    Schema for signing up a user with a new contact record.
+    """
+    contact: ContactCreate
 
 
 class UserUpdate(BaseModel):
