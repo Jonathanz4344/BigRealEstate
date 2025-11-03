@@ -62,6 +62,20 @@ def get_campaign_emails_for_campaign(
     return query.offset(skip).limit(limit).all()
 
 
+def get_campaign_emails_by_lead(
+        db: Session,
+        campaign_id: int,
+        lead_id: int,
+        skip: int = 0,
+        limit: int = 100,
+) -> List[CampaignEmail]:
+    """
+    Fetch emails for a given campaign and lead.
+    """
+    query = _base_query(db).filter(CampaignEmail.campaign_id == campaign_id, CampaignEmail.lead_id == lead_id)
+
+    return query.offset(skip).limit(limit).all()
+
 
 def create_campaign_email(db: Session, message_in: schemas.CampaignEmailCreate) -> CampaignEmail:
     """
