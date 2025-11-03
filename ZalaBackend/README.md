@@ -277,6 +277,30 @@ SQL_DBNAME=zala
 
 ---
 
+## Fixing Database Structure
+
+Go to Pgadmin and right click your database ex. zala and go to query tool.
+Run the following commands to delete db:
+
+(**MAKE SURE NAMING OF UNAME AND DBNAME MATCHES YOUR CONFIG**)
+-- 1. Drop everything in the schema (irreversible)
+DROP SCHEMA IF EXISTS public CASCADE;
+
+-- 2. Recreate the schema owned by your app role
+CREATE SCHEMA public AUTHORIZATION postgresadmin;
+
+-- 3. Ensure the role keeps access
+GRANT ALL ON SCHEMA public TO postgresadmin;
+
+-- 4. Make sure new sessions see the schema automatically
+ALTER ROLE postgresadmin IN DATABASE zala SET search_path TO public;
+ALTER DATABASE zala SET search_path TO public;
+
+-- 5. Apply the setting for the current session
+SET search_path TO public;
+
+Rerun initalize_db.py to create tables
+
 ## Testing
 
 1. Ensure the server is running:
