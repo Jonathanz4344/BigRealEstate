@@ -108,10 +108,23 @@ You can also craft requests with tools such as `httpie`, `curl`, or Postman.
 
 Some features rely on external APIs (e.g., Google Maps). To enable them:
 
+Google Places
 1. Create or select a project at https://console.cloud.google.com/.
 2. Enable the **Geocoding API** (and any other required services).
 3. Generate an API key under **APIs & Services → Credentials**.
 4. Add the key to `.env` as `GOOGLE_API_KEY=...`.
+
+OpenAI
+1. Create an API key for OpenAI at https://platform.openai.com/api-keys
+2. Add funds to your OpenAI account at https://platform.openai.com/settings/organization/billing/overview
+3. Add the API key to `.env` as `OPENAI_API_KEY=...`.
+
+
+Brave
+1. Create a Brave account at https://brave.com/search/api/
+2. Subscribe to the Free AI plan at https://api-dashboard.search.brave.com/app/subscriptions/subscribe?tab=ai
+3. Create an API key at https://api-dashboard.search.brave.com/app/keys
+4. Add the API key to `.env` as `BRAVE_API_KEY=...`.
 
 Restart the server after updating `.env` so changes take effect.
 
