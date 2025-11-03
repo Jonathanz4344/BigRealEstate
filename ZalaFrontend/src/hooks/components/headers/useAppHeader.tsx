@@ -24,7 +24,7 @@ export const useAppHeader = () => {
   };
 
   const onSearchCore = async (q: string, s: DemoDataSource) => {
-    const { data, err } = await searchLeads({ query: q, source: s });
+    const { data, err } = await searchLeads({ query: q, sources: [s] });
 
     if (err || !data) {
       console.log("API Error:");
