@@ -119,7 +119,6 @@ OpenAI
 2. Add funds to your OpenAI account at https://platform.openai.com/settings/organization/billing/overview
 3. Add the API key to `.env` as `OPENAI_API_KEY=...`.
 
-
 Brave
 1. Create a Brave account at https://brave.com/search/api/
 2. Subscribe to the Free AI plan at https://api-dashboard.search.brave.com/app/subscriptions/subscribe?tab=ai
@@ -127,4 +126,3 @@ Brave
 4. Add the API key to `.env` as `BRAVE_API_KEY=...`.
 
 Restart the server after updating `.env` so changes take effect.
-
