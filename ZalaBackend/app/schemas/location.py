@@ -1,11 +1,16 @@
 from enum import Enum
+from typing import List, Optional
+
 from pydantic import BaseModel, Field
-from typing import Optional
+
 
 class DataSource(str, Enum):
     gpt = "gpt"
     rapidapi = "rapidapi"
     google_places = "google_places"
+    mock = "mock"
+    db = "db"
+
 
 class LocationFilter(BaseModel):
     zip: Optional[str] = Field(None, pattern=r"^\d{5}$")
@@ -14,11 +19,10 @@ class LocationFilter(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     location_text: Optional[str] = None
-    source: DataSource = DataSource.rapidapi  # default to RapidAPI
 
 
-class ExternalLeadSearch(LocationFilter):
+class LeadSearchRequest(LocationFilter):
     """
-    Request body for external lead searches. Inherits the same fields as LocationFilter.
+    Combined lead search request supporting multiple data sources.
     """
-    pass
+    sources: List[DataSource] = Field(default_factory=lambda: [DataSource.db])

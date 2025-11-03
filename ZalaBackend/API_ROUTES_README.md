@@ -166,14 +166,16 @@ Allowed file MIME types: `text/csv`, `application/vnd.ms-excel`, and `.xlsx`. Th
 
 ---
 
-## Location Filtering (`/api/search-location…`)
+## Lead Search (`/api/searchLeads`)
 
 | Method | Path | Purpose | Body Fields | Response |
 | --- | --- | --- | --- | --- |
-| POST | `/api/search-location/` | External geocode + mock properties | JSON per `LocationFilter` (any of: `zip`, `city`, `state`, `latitude`, `longitude`, `location_text`, `source`) | Normalized location + mock property list (within 50 miles) |
-| POST | `/api/search-location/db` | Geocode, then search DB leads near location | Same as above; if lat/long omitted, server geocodes | Normalized location + `nearby_leads` (serialized lead data + distance) |
+| POST | `/api/searchLeads` | Fan-out search across one or more data sources | Any `LocationFilter` fields (`zip`, `city`, `state`, `latitude`, `longitude`, `location_text`) plus `sources` (array containing any of `"mock"`, `"db"`, `"rapidapi"`, `"google_places"`, `"gpt"`) | `requested_sources`, per-source `results`, optional `aggregated_leads`, and per-source `errors` when a provider fails |
 
-`LocationFilter.source` defaults to `"rapidapi"` but you can pass `"gpt"` or `"google_places"` for tracing.
+Notes:
+- When a single source is requested, the matching entry in `results` mirrors the legacy payloads (for example, `mock` returns `nearby_properties`, while `rapidapi`/`google_places`/`gpt`/`db` return `leads` with `distance_miles`).
+- `aggregated_leads` flattens lead-producing sources for convenience.
+- If geocoding fails or a provider rejects the request, the reason is listed under `errors[source]`.
 
 ---
 
