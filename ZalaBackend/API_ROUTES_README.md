@@ -173,7 +173,7 @@ Allowed file MIME types: `text/csv`, `application/vnd.ms-excel`, and `.xlsx`. Th
 | POST | `/api/search-location/` | External geocode + mock properties | JSON per `LocationFilter` (any of: `zip`, `city`, `state`, `latitude`, `longitude`, `location_text`, `source`) | Normalized location + mock property list (within 50 miles) |
 | POST | `/api/search-location/db` | Geocode, then search DB leads near location | Same as above; if lat/long omitted, server geocodes | Normalized location + `nearby_leads` (serialized lead data + distance) |
 
-`LocationFilter.source` defaults to `"gpt"` but you can pass `"rapidapi"` or `"google places"` for tracing.
+`LocationFilter.source` defaults to `"rapidapi"` but you can pass `"gpt"` or `"google_places"` for tracing.
 
 ---
 

@@ -14,7 +14,7 @@ class LocationFilter(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     location_text: Optional[str] = None
-    source: DataSource = DataSource.gpt  # default to GPT
+    source: DataSource = DataSource.rapidapi  # default to RapidAPI
 
 
 class ExternalLeadSearch(LocationFilter):
