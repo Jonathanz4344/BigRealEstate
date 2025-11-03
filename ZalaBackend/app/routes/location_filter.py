@@ -370,7 +370,7 @@ def search_location_external(filter: ExternalLeadSearch):
         elif filter.source == DataSource.rapidapi:
             leads = rapidapi.search_agents(location_query)
         elif filter.source == DataSource.google_places:
-            radius_m = max(1, int(radius_miles * 1609.34))
+            radius_m = max(1, min(50000, int(radius_miles * 1609.34)))
             leads = google_places.search_agents(location_query, radius_m=radius_m)
         else:
             return JSONResponse(
