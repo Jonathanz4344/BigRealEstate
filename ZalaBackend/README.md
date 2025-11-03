@@ -105,7 +105,7 @@ Creating a virtual environment ensures dependencies are isolated to this project
 3. Install dependencies:
 
    ```
-   pip install -r requirements.txt
+   py -m pip install -r requirements.txt
    ```
 
 4. Run the application:
@@ -227,6 +227,7 @@ Each service requires a developer account to generate and manage API credentials
 1. Visit [RapidAPI](https://rapidapi.com) and log in or create an account.
 2. Navigate to the **"My Apps"** section from your dashboard.
 3. Select an existing application or create a new one.
+   Need to subscribe https://rapidapi.com/ntd119/api/zillow-com4/playground/apiendpoint_85a30d86-7f81-4503-b49e-0c6ffe1f5f97
 4. Copy your personal API key.
 5. Add it to your `.env` file as:
 

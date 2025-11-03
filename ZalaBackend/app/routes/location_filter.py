@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import json
 import os
@@ -13,8 +13,9 @@ from app.db.session import get_db
 from app.models.address import Address
 from app.models.lead import Lead
 from app.models.property import Property
-from app.schemas.location import LocationFilter
+from app.schemas.location import DataSource, ExternalLeadSearch, LocationFilter
 from app.utils.geocode import geocode_location, reverse_geocode
+from app.external_api import google_places, openai_api, rapidapi
 
 
 mock_data_path = os.path.join(os.path.dirname(__file__), "../data/mock_properties.json")
@@ -273,4 +274,165 @@ def search_location_db(filter: LocationFilter, db: Session = Depends(get_db)):
     return {
         # "normalized_location": normalized_location,
         "leads": nearby_leads,
+    }
+
+
+def _split_freeform_location(text: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+    if not text:
+        return (None, None)
+    lowered = text.lower()
+    idx = lowered.rfind(" in ")
+    if idx == -1:
+        return (None, text.strip())
+    before = text[:idx].strip()
+    after = text[idx + 4 :].strip()
+    if not after:
+        return (None, text.strip())
+    return (before or None, after)
+
+
+def _model_to_dict(model) -> Dict[str, object]:
+    if hasattr(model, "model_dump"):
+        return model.model_dump()
+    return model.dict()
+
+
+def _geocode_string(
+    value: Optional[str],
+    cache: Dict[str, Optional[Dict[str, float]]],
+) -> Optional[Dict[str, float]]:
+    if not value:
+        return None
+    cached = cache.get(value)
+    if cached is not None:
+        return cached
+    result = geocode_location(value)
+    cache[value] = result
+    return result
+
+
+@router.post("/searchLeads/external", summary="Search Lead External", tags=["Search Lead"])
+def search_location_external(filter: ExternalLeadSearch):
+    radius_miles = 50.0
+    max_searches = 10
+    dynamic_filter: Optional[str] = None
+
+    location_override = None
+    if filter.location_text:
+        query_fragment, location_fragment = _split_freeform_location(filter.location_text)
+        if query_fragment:
+            dynamic_filter = query_fragment
+        if location_fragment and location_fragment != filter.location_text.strip():
+            location_override = location_fragment
+
+    if location_override:
+        if hasattr(filter, "model_copy"):
+            filter_for_location = filter.model_copy(update={"location_text": location_override})
+        else:
+            filter_for_location = filter.copy(update={"location_text": location_override})
+    else:
+        filter_for_location = filter
+
+    lat = filter.latitude
+    lon = filter.longitude
+    normalized_location: Dict[str, Optional[float | str]]
+
+    location_query = _build_location_query(filter_for_location)
+
+    if lat is None or lon is None:
+        if not location_query:
+            return JSONResponse(status_code=400, content={"error": "No valid location input provided"})
+        geocoded = geocode_location(location_query)
+        if not geocoded:
+            return JSONResponse(status_code=400, content={"error": "Geocoding failed"})
+        lat = geocoded["latitude"]
+        lon = geocoded["longitude"]
+        normalized_location = {
+            "latitude": lat,
+            "longitude": lon,
+            "city": geocoded.get("city"),
+            "state": geocoded.get("state"),
+            "zip": geocoded.get("zip"),
+            "source": filter.source,
+        }
+    else:
+        if not location_query:
+            location_query = f"{lat},{lon}"
+        normalized_location = {
+            "latitude": lat,
+            "longitude": lon,
+            "source": filter.source,
+        }
+
+    try:
+        if filter.source == DataSource.gpt:
+            leads = openai_api.search_agents(location_query, dynamic_filter or "", max_searches)
+        elif filter.source == DataSource.rapidapi:
+            leads = rapidapi.search_agents(location_query)
+        elif filter.source == DataSource.google_places:
+            radius_m = max(1, int(radius_miles * 1609.34))
+            leads = google_places.search_agents(location_query, radius_m=radius_m)
+        else:
+            return JSONResponse(
+                status_code=400,
+                content={"error": f"Unsupported external source '{filter.source}'"},
+            )
+    except Exception as exc:
+        return JSONResponse(
+            status_code=502,
+            content={"error": "External provider request failed", "detail": str(exc)},
+        )
+
+    geo_cache: Dict[str, Optional[Dict[str, float]]] = {}
+    response_leads: List[Dict[str, object]] = []
+
+    for lead in leads or []:
+        lead_dict = _model_to_dict(lead)
+        address_value = lead_dict.get("address")
+        distance = None
+        geocoded_address = None
+
+        if isinstance(address_value, dict):
+            addr_lat = address_value.get("lat")
+            addr_lon = address_value.get("long")
+            if addr_lat is not None and addr_lon is not None:
+                distance = haversine(lat, lon, float(addr_lat), float(addr_lon))
+                geocoded_address = {
+                    "latitude": float(addr_lat),
+                    "longitude": float(addr_lon),
+                    "city": address_value.get("city"),
+                    "state": address_value.get("state"),
+                    "zip": address_value.get("zipcode"),
+                }
+        elif isinstance(address_value, str) and address_value:
+            geocoded_address = _geocode_string(address_value, geo_cache)
+            if geocoded_address:
+                distance = haversine(
+                    lat,
+                    lon,
+                    float(geocoded_address["latitude"]),
+                    float(geocoded_address["longitude"]),
+                )
+
+        if distance is not None and distance > radius_miles:
+            continue
+
+        lead_dict["distance_miles"] = round(distance, 2) if distance is not None else None
+        lead_dict["geocoded_address"] = geocoded_address
+        lead_dict["source"] = filter.source
+        response_leads.append(lead_dict)
+
+    response_leads.sort(
+        key=lambda item: (
+            item.get("distance_miles") is None,
+            item.get("distance_miles") if item.get("distance_miles") is not None else float("inf"),
+        )
+    )
+
+    return {
+        "normalized_location": normalized_location,
+        "radius_miles": radius_miles,
+        "dynamic_filter": dynamic_filter,
+        "source": filter.source,
+        "leads": response_leads,
     }
