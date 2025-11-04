@@ -13,6 +13,7 @@ import type {
   SearchLeadsProps,
 } from "./types";
 import { useFetch } from "./useFetch";
+import { DEFAULT_LEAD_SOURCES } from "../../stores";
 
 export const useApi = () => {
   // const defaultResponse: APIResponse<unknown> = {
@@ -29,9 +30,12 @@ export const useApi = () => {
       errors?: Record<string, string>;
     };
 
+    const requestedSources =
+      sources.length > 0 ? sources : [...DEFAULT_LEAD_SOURCES];
+
     const response = await post<CombinedSearchResponse>(`/api/searchLeads`, {
       location_text: query,
-      sources,
+      sources: requestedSources,
     });
 
     if (response.err || !response.data) {
@@ -41,14 +45,16 @@ export const useApi = () => {
       };
     }
 
-    const primarySource = sources[0];
-    const primaryResult = response.data.results?.[primarySource] ?? {};
+    const availableSources = requestedSources.filter(
+      (source) => response.data.results?.[source]
+    );
+    const primarySource = availableSources[0] ?? requestedSources[0];
+    const primaryResult =
+      (primarySource && response.data.results?.[primarySource]) ?? {};
 
     const normalizeLead = (lead: any): DemoData => {
       const contact = lead?.contact ?? {};
       const addressValue = lead?.address ?? {};
-      const geocoded = lead?.geocoded_address ?? {};
-
       const street =
         (addressValue && typeof addressValue === "object" && addressValue.street_1) ||
         (typeof lead?.address === "string" ? lead.address : undefined) ||
@@ -56,27 +62,19 @@ export const useApi = () => {
         "Unknown";
 
       const city =
-        (addressValue && typeof addressValue === "object" && addressValue.city) ||
-        geocoded?.city ||
-        "";
+        (addressValue && typeof addressValue === "object" && addressValue.city) || "";
 
       const state =
-        (addressValue && typeof addressValue === "object" && addressValue.state) ||
-        geocoded?.state ||
-        "";
+        (addressValue && typeof addressValue === "object" && addressValue.state) || "";
 
       const latitude =
         Number(
-          (addressValue && typeof addressValue === "object" && addressValue.lat) ??
-            geocoded?.latitude ??
-            0
+          (addressValue && typeof addressValue === "object" && addressValue.lat) ?? 0
         ) || 0;
 
       const longitude =
         Number(
-          (addressValue && typeof addressValue === "object" && addressValue.long) ??
-            geocoded?.longitude ??
-            0
+          (addressValue && typeof addressValue === "object" && addressValue.long) ?? 0
         ) || 0;
 
       const fullAddress =
@@ -101,17 +99,33 @@ export const useApi = () => {
       };
     };
 
+    const aggregatedLeads = Array.isArray(response.data.aggregated_leads)
+      ? response.data.aggregated_leads.map(normalizeLead)
+      : [];
+
     let nearby_properties: DemoData[] = [];
-    if (Array.isArray(primaryResult?.nearby_properties)) {
+    if (aggregatedLeads.length > 0) {
+      nearby_properties = aggregatedLeads;
+    } else if (Array.isArray(primaryResult?.nearby_properties)) {
       nearby_properties = primaryResult.nearby_properties as DemoData[];
     } else if (Array.isArray(primaryResult?.leads)) {
       nearby_properties = primaryResult.leads.map(normalizeLead);
-    } else if (Array.isArray(response.data.aggregated_leads)) {
-      nearby_properties = response.data.aggregated_leads.map(normalizeLead);
     }
 
+    const findNormalizedLocation = (): DemoLocationResult | null => {
+      for (const source of availableSources) {
+        const candidate = response.data.results?.[source]?.normalized_location;
+        if (candidate) return candidate as DemoLocationResult;
+      }
+      const fallback = Object.values(response.data.results ?? {}).find(
+        (item) => item?.normalized_location
+      ) as { normalized_location?: DemoLocationResult } | undefined;
+      if (fallback?.normalized_location) return fallback.normalized_location;
+      return null;
+    };
+
     const normalized_location: DemoLocationResult =
-      (primaryResult?.normalized_location as DemoLocationResult | undefined) ?? {
+      findNormalizedLocation() ?? {
         latitude: 0,
         longitude: 0,
         city: "",

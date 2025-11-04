@@ -1,5 +1,6 @@
 import type { DemoDataSource } from "../../../interfaces";
 import {
+  DEFAULT_LEAD_SOURCES,
   useSideNavControlStore,
   useSearchQueryStore,
   useSearchFilterStore,
@@ -11,7 +12,7 @@ export const useAppHeader = () => {
   const { location, toLeadSearchPage } = useAppNavigation();
   const openSideNav = useSideNavControlStore((state) => state.open);
   const { query, setData, setQuery } = useSearchQueryStore();
-  const { source } = useSearchFilterStore();
+  const { sources } = useSearchFilterStore();
 
   const { searchLeads } = useApi();
 
@@ -20,11 +21,23 @@ export const useAppHeader = () => {
 
     if (location.pathname != "/") toLeadSearchPage();
 
-    await onSearchCore(query, source);
+    await onSearchCore(query, sources);
   };
 
-  const onSearchCore = async (q: string, s: DemoDataSource) => {
-    const { data, err } = await searchLeads({ query: q, sources: [s] });
+  const onSearchCore = async (
+    q: string,
+    selectedSources: DemoDataSource | DemoDataSource[]
+  ) => {
+    const normalizedSources = Array.isArray(selectedSources)
+      ? selectedSources
+      : [selectedSources];
+    const activeSources =
+      normalizedSources.length > 0 ? normalizedSources : DEFAULT_LEAD_SOURCES;
+
+    const { data, err } = await searchLeads({
+      query: q,
+      sources: activeSources,
+    });
 
     if (err || !data) {
       console.log("API Error:");
