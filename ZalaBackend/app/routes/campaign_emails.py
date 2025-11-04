@@ -7,7 +7,7 @@ from app import schemas
 from app.db.crud import campaign_email as campaign_email_crud
 from app.db.session import get_db
 
-router = APIRouter(prefix="/campaign-messages", tags=["Campaign Messages"])
+router = APIRouter(prefix="/campaign-emails", tags=["Campaign Emails"])
 
 
 @router.post("/", response_model=schemas.CampaignEmailPublic, status_code=status.HTTP_201_CREATED)
@@ -20,7 +20,7 @@ def create_campaign_email(
     return campaign_email_crud.create_campaign_email(db, message_in)
 
 
-@router.get("/", summary="Get All Campaign Messages", response_model=List[schemas.CampaignEmailPublic])
+@router.get("/", summary="Get All Campaign Emails", response_model=List[schemas.CampaignEmailPublic])
 def list_campaign_emails(
         skip: int = 0,
         limit: int = 100,
@@ -37,30 +37,30 @@ def list_campaign_emails(
     return campaign_email_crud.get_campaign_emails(db, skip=skip, limit=limit)
 
 
-@router.get("/campaign/{campaign_id}", summary="Get Campaign Messages For Campaign By Id and Contact Method",
-            response_model=List[schemas.CampaignEmailPublic])
-def list_campaign_emails_by_contact(
-        campaign_id: int,
-        skip: int = 0,
-        limit: int = 100,
-        contact_method: Optional[schemas.ContactMethod] = None,
-        db: Session = Depends(get_db),
-):
-    """
-    List campaign emails for a specific campaign, optionally filtered by contact method.
-    """
-    contact_methods = [contact_method] if contact_method else None
+# @router.get("/campaign/{campaign_id}", summary="Get Campaign Emails For Campaign By Id and Contact Method",
+#             response_model=List[schemas.CampaignEmailPublic])
+# def list_campaign_emails_by_contact(
+#         campaign_id: int,
+#         skip: int = 0,
+#         limit: int = 100,
+#         contact_method: Optional[schemas.ContactMethod] = None,
+#         db: Session = Depends(get_db),
+# ):
+#     """
+#     List campaign emails for a specific campaign, optionally filtered by contact method.
+#     """
+#     contact_methods = [contact_method] if contact_method else None
+#
+#     return campaign_email_crud.get_campaign_emails_for_campaign(
+#         db,
+#         campaign_id=campaign_id,
+#         skip=skip,
+#         limit=limit,
+#         contact_methods=contact_methods,
+#     )
 
-    return campaign_email_crud.get_campaign_emails_for_campaign(
-        db,
-        campaign_id=campaign_id,
-        skip=skip,
-        limit=limit,
-        contact_methods=contact_methods,
-    )
 
-
-@router.get("/campaign/{campaign_id}/lead/{lead_id}", summary="Get Campaign Messages For Campaign By Lead ID",
+@router.get("/campaign/{campaign_id}/lead/{lead_id}", summary="Get Campaign Emails For Campaign By Lead ID",
             response_model=List[schemas.CampaignEmailPublic])
 def list_campaign_emails_by_lead(
         campaign_id: int,
@@ -82,7 +82,7 @@ def list_campaign_emails_by_lead(
     )
 
 
-@router.get("/{message_id}", summary="Get Campaign Message by id", response_model=schemas.CampaignEmailPublic)
+@router.get("/{message_id}", summary="Get Campaign Email by id", response_model=schemas.CampaignEmailPublic)
 def get_campaign_email(message_id: int, db: Session = Depends(get_db)):
     """
     Retrieve a campaign email by ID.
