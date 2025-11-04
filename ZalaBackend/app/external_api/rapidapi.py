@@ -86,12 +86,10 @@ def search_agents(city: str):
         raise RuntimeError(f"RapidAPI request failed: {text}") from exc
 
     payload: Dict[str, Any] = response.json()
-    professionals: List[Dict[str, Any]] = (
-        payload.get("data", {})
-        .get("results", {})
-        .get("professionals")
-        or []
-    )
+
+    data_block = payload.get("data") or {}
+    results_block = data_block.get("results") or {}
+    professionals: List[Dict[str, Any]] = results_block.get("professionals") or []
 
     if not professionals:
         raise RuntimeError("RapidAPI response did not include any professionals.")
