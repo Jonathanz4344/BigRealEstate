@@ -27,7 +27,7 @@ The output contains only characters that can be easily stored or parsed (no hidd
 Do not return anything except the clean JSON array.
 EACH ENTRY SHOULD CONTAIN FIRST NAME, LAST NAME, AND EMAIL AT MINIMUM! If you can't get this information for a lead, don't add it.
 Prioritize obtaining addresses over license numbers.
-Return up to 50 agents.
+Return up to 10 agents.
 If it's not possible to get that many agents with the information you have, then provide the best you have, but again, ONLY RETURN THE CLEAN JSON ARRAY, AND ONLY RETURN ENTRIES WHICH INCLUDE FULL NAMES AND EMAILS!
 """
 
@@ -84,8 +84,8 @@ tools = [
 # Get response from AI, providing web search results as needed
 # location can be any string that describes a location the LLM can attempt to search for agents in
 # dynamic_filter is a string that we prompt the LLM to try to find agents which fit the criteria of, for example "selling high value properties"
-# max_searches controls the maximum number of web searches the AI can request. Allowing up to 50 searches gives the model plenty of opportunities to gather data.
-def search_agents(location: str, dynamic_filter: str = "", max_searches: int = 50):
+# max_searches controls the maximum number of web searches the AI can request. Allowing up to 10 searches gives the model plenty of opportunities to gather data.
+def search_agents(location: str, dynamic_filter: str = "", max_searches: int = 10):
     prompt = prompt_start + location + prompt_end # create prompt string by adding the specified location to the middle of the prompt start and end strings
     if dynamic_filter != "":
         prompt += "\nIf possible, try to find agents which fit the following criteria: " + dynamic_filter

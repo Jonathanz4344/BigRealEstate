@@ -364,14 +364,14 @@ def _perform_db_search(filter: LocationFilter, db: Session) -> Dict[str, object]
 def _perform_external_search(filter: LocationFilter, source: DataSource) -> Dict[str, object]:
     radius_miles = 50.0
     max_results = 50
-    max_searches = 50
+    gpt_max_searches = 10
 
     filter_for_location, dynamic_filter = _prepare_external_filter(filter)
     lat, lon, normalized_location, location_query = _resolve_location(filter_for_location, source.value)
 
     try:
         if source == DataSource.gpt:
-            leads = openai_api.search_agents(location_query, dynamic_filter or "", max_searches)
+            leads = openai_api.search_agents(location_query, dynamic_filter or "", gpt_max_searches)
         elif source == DataSource.rapidapi:
             leads = rapidapi.search_agents(location_query, max_results=max_results)
         elif source == DataSource.google_places:
