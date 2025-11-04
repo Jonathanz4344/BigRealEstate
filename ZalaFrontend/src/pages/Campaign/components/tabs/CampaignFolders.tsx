@@ -10,6 +10,7 @@ type CampaignFoldersProps = {
   allLeads: DemoData[];
   currentLeadIndex: number;
   selectedLeadIndexs: number[];
+  onPrimary?: () => void;
   setViewing: (i: number) => void;
   unselectAll: () => void;
 };
@@ -18,6 +19,7 @@ export const CampaignFolders = ({
   allLeads,
   currentLeadIndex,
   selectedLeadIndexs,
+  onPrimary = () => {},
   setViewing,
   unselectAll,
 }: CampaignFoldersProps) => {
@@ -36,7 +38,7 @@ export const CampaignFolders = ({
   };
 
   const singleActions = {
-    onPrimary: () => {},
+    onPrimary: onPrimary,
     onSecondary: () => {
       if (viewing < allLeads.length - 1) setViewing(currentLeadIndex + 1);
     },

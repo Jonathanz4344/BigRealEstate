@@ -1,4 +1,4 @@
-import { Icons, LeadListSection } from "../../components";
+import { EmailModal, Icons, LeadListSection } from "../../components";
 import {
   useCampaignFolderStore,
   useCampaignStore,
@@ -22,6 +22,8 @@ export const CampaignPage = () => {
 
   const [selected, setSelected] = useState<number[]>([]);
   const [viewing, setViewing] = useState(-1);
+
+  const [showEmail, setShowEmail] = useState(false);
 
   const showSelectAllButton = selected.length !== campaign.leads.length;
 
@@ -83,6 +85,7 @@ export const CampaignPage = () => {
               allLeads={campaign.leads}
               currentLeadIndex={viewing}
               selectedLeadIndexs={selected}
+              onPrimary={() => setShowEmail(true)}
               setViewing={setViewing}
               unselectAll={unselectAll}
             />
@@ -119,6 +122,8 @@ export const CampaignPage = () => {
           },
         })}
       />
+
+      <EmailModal open={showEmail} onClose={() => setShowEmail(false)} />
     </div>
   );
 };

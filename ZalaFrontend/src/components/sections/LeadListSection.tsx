@@ -51,7 +51,7 @@ export const LeadListSection = ({
                 const props = getLeadProps(lead, i);
                 return (
                   <LeadCard
-                    key={i}
+                    key={lead.agent + i}
                     i={i}
                     lead={lead}
                     active={props.active}
