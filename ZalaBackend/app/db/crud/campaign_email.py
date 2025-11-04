@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app import schemas
 from app.models.campaign import Campaign
-from app.models.campaign_emails import CampaignEmail
+from app.models.campaign_email import CampaignEmail
 
 
 def _base_query(db: Session):
