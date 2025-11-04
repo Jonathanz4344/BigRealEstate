@@ -26,5 +26,5 @@ class Campaign(Base):
         "CampaignEmail", back_populates="campaign", cascade="all, delete-orphan"
     )
 
-    campaign_lead: Mapped[List["CampaignLead"]] = relationship(
+    leads: Mapped[List["CampaignLead"]] = relationship(
         "CampaignLead", back_populates="campaign", cascade="all, delete-orphan")
