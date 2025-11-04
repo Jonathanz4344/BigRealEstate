@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, computed_field
+from typing import Optional, List
 
 from .summaries import CampaignSummary, LeadSummary
 
@@ -36,8 +36,22 @@ class CampaignLeadPublic(CampaignLeadBase):
     campaign: CampaignSummary
     lead: LeadSummary
 
+    @computed_field
+    @property
+    def contact_methods(self) -> List[str]:
+        """
+        Generates array with used contact methods
+        """
+        methods = []
+        if self.phone_contacted:
+            methods.append("phone")
+        if self.sms_contacted:
+            methods.append("sms")
+        if self.email_contacted:
+            methods.append("email")
+        return methods
+
     class Config:
-        # Use from_attributes for Pydantic V2
         from_attributes = True
 
 
