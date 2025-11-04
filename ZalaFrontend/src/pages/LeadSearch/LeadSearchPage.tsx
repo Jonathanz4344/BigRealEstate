@@ -3,10 +3,11 @@ import {
   IconButtonVariant,
   Icons,
   LeadListSection,
+  Loader,
   Map,
 } from "../../components";
 import { useLeadSearchPage } from "../../hooks";
-import { SideNavControlVariant } from "../../stores";
+import { SideNavControlVariant, useSearchQueryStore } from "../../stores";
 import clsx from "clsx";
 import { CampaignCard } from "./components";
 import { COLORS } from "../../config";
@@ -43,6 +44,7 @@ export const LeadSearchPage = () => {
     onLeadButton,
     onStart,
   } = useLeadSearchPage();
+  const loading = useSearchQueryStore((state) => state.loading);
 
   return (
     <div className="flex flex-1 items-center">
@@ -86,6 +88,11 @@ export const LeadSearchPage = () => {
                 onClick: () => setActiveLead(i),
               }))}
             />
+            {loading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                <Loader />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -94,7 +101,8 @@ export const LeadSearchPage = () => {
         animated
         animationTrigger={showLeads}
         leads={leadData}
-        title={`${leadData.length} results`}
+        title={loading ? "Loading leads..." : `${leadData.length} results`}
+        loading={loading}
         getLeadProps={(lead, i) => ({
           active: i === activeLead,
           button: {
