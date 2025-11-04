@@ -45,14 +45,15 @@ def init_db():
         unit,
         user_authentication,
         campaign,
-        campaign_messages,
+        campaign_email,
+        campaign_lead
     )
 
     print("Dropping all database tables...")
     with engine.begin() as connection:
-        connection.execute(text("CREATE SCHEMA IF NOT EXISTS public"))
-        connection.execute(text("SET search_path TO public"))
-        Base.metadata.drop_all(bind=connection)
+        connection.execute(text("DROP SCHEMA IF EXISTS public CASCADE;"))
+        connection.execute(text("CREATE SCHEMA public;"))
+        connection.execute(text("SET search_path TO public;"))
 
     print("Creating all database tables...")
     with engine.begin() as connection:

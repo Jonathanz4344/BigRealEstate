@@ -3,7 +3,6 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from app.schemas.user import UserPublic
-from app.schemas.lead import LeadPublic
 
 
 class CampaignBase(BaseModel):
@@ -39,7 +38,8 @@ class CampaignPublic(CampaignBase):
 
     campaign_id: int
     user: Optional[UserPublic] = None
-    leads: List[LeadPublic] = Field(default_factory=list)
+    leads: List["CampaignLeadPublic"] = []
 
     class Config:
         from_attributes = True
+

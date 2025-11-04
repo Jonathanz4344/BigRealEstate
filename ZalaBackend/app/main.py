@@ -17,7 +17,7 @@ from app.routes import (
     leads,
     auth,
     campaigns,
-    campaign_messages,
+    campaign_emails,
 )
 
 app = FastAPI()
@@ -52,6 +52,6 @@ app.include_router(users.router, prefix="/api", include_in_schema=True)
 app.include_router(contacts.router, prefix="/api", include_in_schema=True) 
 
 
-app.include_router(campaign_messages.router, prefix="/api", include_in_schema=False)
+app.include_router(campaign_emails.router, prefix="/api", include_in_schema=False)
 
 app.include_router(csv_intake.router, prefix="/api", include_in_schema=False)
