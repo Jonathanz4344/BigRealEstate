@@ -25,4 +25,4 @@ class LeadSearchRequest(LocationFilter):
     """
     Combined lead search request supporting multiple data sources.
     """
-    sources: List[DataSource] = Field(default_factory=lambda: [DataSource.db])
+    sources: List[DataSource] = Field(default_factory=lambda: [DataSource.google_places])

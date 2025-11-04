@@ -492,7 +492,7 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
             unique_sources.append(src)
 
     if not unique_sources:
-        unique_sources = [DataSource.db]
+        unique_sources = [DataSource.google_places]
 
     results: Dict[str, object] = {}
     aggregated_leads: List[Dict[str, object]] = []
