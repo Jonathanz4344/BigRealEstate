@@ -18,6 +18,6 @@ class CampaignLead(Base):
     sms_contacted: Mapped[bool] = mapped_column(default=False)
     email_contacted: Mapped[bool] = mapped_column(default=False)
 
-    campaign: Mapped["Campaign"] = relationship("Campaign", back_populates="campaign_lead")
-    lead: Mapped["Lead"] = relationship("Lead", back_populates="campaign_lead")
+    campaign: Mapped["Campaign"] = relationship("Campaign", back_populates="leads")
+    lead: Mapped["Lead"] = relationship("Lead", back_populates="campaigns")
 
