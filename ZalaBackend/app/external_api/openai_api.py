@@ -1,7 +1,7 @@
 import requests, sys, re, pprint, json
 from openai import OpenAI
-from __init__ import OPENAI_API_KEY, BRAVE_API_KEY
-from to_leads import openai_to_leads
+from . import OPENAI_API_KEY, BRAVE_API_KEY
+from .to_leads import openai_to_leads
 import time
 
 client = OpenAI(api_key=OPENAI_API_KEY)

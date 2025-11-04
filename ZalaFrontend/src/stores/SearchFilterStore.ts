@@ -9,7 +9,7 @@ type ISearchFilterStore = {
 };
 
 export const useSearchFilterStore = create<ISearchFilterStore>()((set) => ({
-  source: "gpt",
+  source: "rapidapi",
   sortBy: "None",
   setSortBy: (v: string) => set({ sortBy: v }),
   setSource: (v: DemoDataSource) => set({ source: v }),

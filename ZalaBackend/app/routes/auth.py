@@ -11,7 +11,7 @@ from app.utils.google_oauth import (
 
 router = APIRouter(
     prefix="/login",
-    tags=["Authentication"],
+    tags=["Login"],
 )
 
 

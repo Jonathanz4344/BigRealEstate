@@ -14,26 +14,25 @@ class ContactMethod(str, Enum):
     EMAIL = "email"
 
 
-class CampaignMessageBase(BaseModel):
+class CampaignEmailBase(BaseModel):
     """
-    Shared fields for CampaignMessage schema variants.
+    Shared fields for CampaignEmail schema variants.
     """
 
     campaign_id: int
     lead_id: Optional[int] = None
-    contact_method: ContactMethod
     message_subject: str
     message_body: str
 
 
-class CampaignMessageCreate(CampaignMessageBase):
+class CampaignEmailCreate(CampaignEmailBase):
     """
     Schema for creating a campaign message.
     """
     pass
 
 
-class CampaignMessageUpdate(BaseModel):
+class CampaignEmailUpdate(BaseModel):
     """
     Schema for updating a campaign message.
     """
@@ -44,7 +43,7 @@ class CampaignMessageUpdate(BaseModel):
     message_body: Optional[str] = None
 
 
-class CampaignMessagePublic(CampaignMessageBase):
+class CampaignEmailPublic(CampaignEmailBase):
     """
     Schema returned from Campaign Message endpoints.
     """

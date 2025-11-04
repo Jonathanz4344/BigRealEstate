@@ -1,6 +1,6 @@
 import requests, sys, re, pprint
-from __init__ import GOOGLE_API_KEY
-from to_leads import gplaces_to_leads
+from . import GOOGLE_API_KEY
+from .to_leads import gplaces_to_leads
 
 GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 PLACES_NEARBY_URL = "https://places.googleapis.com/v1/places:searchNearby"
@@ -62,6 +62,10 @@ def search_agents(place_text_or_zip: str, radius_m=10000):
     r = requests.post(PLACES_NEARBY_URL, headers=headers, json=payload, timeout=10)
     if r.status_code == 403:
         raise PlacesError("Forbidden: check Places API key restrictions & that Places API is enabled.")
+    if r.status_code >= 400:
+        raise PlacesError(
+            f"searchNearby failed (status={r.status_code}): {r.text or 'No response body'}"
+        )
     r.raise_for_status()
     places = r.json().get("places", [])
 

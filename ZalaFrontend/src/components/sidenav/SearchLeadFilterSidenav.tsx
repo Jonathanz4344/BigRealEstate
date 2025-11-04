@@ -36,9 +36,11 @@ export const SearchLeadFilterSidenav = () => {
           setValue={(v) => setGlobalSource(v as DemoDataSource)}
           includeEmptyEnding={false}
           options={[
-            { value: "gpt" },
-            { value: "rapidapi" },
-            { value: "google" },
+            { value: "rapidapi", text: "RapidAPI (Zillow)" },
+            { value: "google_places", text: "Google Places" },
+            { value: "gpt", text: "OpenAI" },
+            { value: "db", text: "Database" },
+            { value: "mock", text: "Mock Data" },
           ]}
         />
         <Select

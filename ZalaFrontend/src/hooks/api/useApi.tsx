@@ -21,14 +21,112 @@ export const useApi = () => {
   // };
   const { post, get } = useFetch();
 
-  const searchLeads = async ({ query, source }: SearchLeadsProps) => {
-    return await post<{
-      normalized_location: DemoLocationResult;
-      nearby_properties: DemoData[];
-    }>(`/api/search-location/`, {
+  const searchLeads = async ({ query, sources }: SearchLeadsProps) => {
+    type CombinedSearchResponse = {
+      requested_sources: string[];
+      results: Record<string, any>;
+      aggregated_leads?: any[];
+      errors?: Record<string, string>;
+    };
+
+    const response = await post<CombinedSearchResponse>(`/api/searchLeads`, {
       location_text: query,
-      source,
+      sources,
     });
+
+    if (response.err || !response.data) {
+      return {
+        data: null,
+        err: response.err ?? "No data returned",
+      };
+    }
+
+    const primarySource = sources[0];
+    const primaryResult = response.data.results?.[primarySource] ?? {};
+
+    const normalizeLead = (lead: any): DemoData => {
+      const contact = lead?.contact ?? {};
+      const addressValue = lead?.address ?? {};
+      const geocoded = lead?.geocoded_address ?? {};
+
+      const street =
+        (addressValue && typeof addressValue === "object" && addressValue.street_1) ||
+        (typeof lead?.address === "string" ? lead.address : undefined) ||
+        lead?.business ||
+        "Unknown";
+
+      const city =
+        (addressValue && typeof addressValue === "object" && addressValue.city) ||
+        geocoded?.city ||
+        "";
+
+      const state =
+        (addressValue && typeof addressValue === "object" && addressValue.state) ||
+        geocoded?.state ||
+        "";
+
+      const latitude =
+        Number(
+          (addressValue && typeof addressValue === "object" && addressValue.lat) ??
+            geocoded?.latitude ??
+            0
+        ) || 0;
+
+      const longitude =
+        Number(
+          (addressValue && typeof addressValue === "object" && addressValue.long) ??
+            geocoded?.longitude ??
+            0
+        ) || 0;
+
+      const fullAddress =
+        city || state ? [street, [city, state].filter(Boolean).join(", ")].filter(Boolean).join(", ") : street;
+
+      const agentName = [contact?.first_name, contact?.last_name]
+        .filter((v) => v && v.length > 0)
+        .join(" ")
+        .trim();
+
+      return {
+        address: fullAddress || "Unknown",
+        agent: agentName || lead?.business || "Unknown",
+        contact: contact?.email || contact?.phone || "",
+        price: lead?.notes || lead?.business || "N/A",
+        bedrooms: 0,
+        bathrooms: 0,
+        latitude,
+        longitude,
+        distance_miles:
+          typeof lead?.distance_miles === "number" ? lead.distance_miles : 0,
+      };
+    };
+
+    let nearby_properties: DemoData[] = [];
+    if (Array.isArray(primaryResult?.nearby_properties)) {
+      nearby_properties = primaryResult.nearby_properties as DemoData[];
+    } else if (Array.isArray(primaryResult?.leads)) {
+      nearby_properties = primaryResult.leads.map(normalizeLead);
+    } else if (Array.isArray(response.data.aggregated_leads)) {
+      nearby_properties = response.data.aggregated_leads.map(normalizeLead);
+    }
+
+    const normalized_location: DemoLocationResult =
+      (primaryResult?.normalized_location as DemoLocationResult | undefined) ?? {
+        latitude: 0,
+        longitude: 0,
+        city: "",
+        state: "",
+        zip: "",
+        source: primarySource ?? "db",
+      };
+
+    return {
+      data: {
+        normalized_location,
+        nearby_properties,
+      },
+      err: null,
+    };
   };
 
   const createContact = async (body: CreateContactProps) => {

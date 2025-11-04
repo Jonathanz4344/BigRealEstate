@@ -26,3 +26,14 @@ class PropertySummary(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class CampaignSummary(BaseModel):
+    """
+    A lightweight summary of a Campaign.
+    """
+    campaign_id: int
+    campaign_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True

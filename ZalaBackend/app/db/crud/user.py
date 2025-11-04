@@ -1,4 +1,6 @@
 import re
+from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.contact import Contact
@@ -252,6 +254,94 @@ def create_user(db: Session, user: schemas.UserCreate):
 
     db.commit()
     db.refresh(db_user)
+
+    return db_user
+
+
+def create_user_with_contact(db: Session, user: schemas.UserSignup) -> User:
+    """
+    Create a new user along with a brand new contact atomically.
+    """
+    existing_user = get_user_by_username(db, user.username)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A user with this username already exists.",
+        )
+
+    contact_in = user.contact
+
+    if contact_in.email:
+        existing = db.query(Contact).filter(Contact.email == contact_in.email).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A contact with this email already exists.",
+            )
+
+    if contact_in.phone:
+        existing = db.query(Contact).filter(Contact.phone == contact_in.phone).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A contact with this phone already exists.",
+            )
+
+    db_contact = Contact(
+        first_name=contact_in.first_name,
+        last_name=contact_in.last_name,
+        email=contact_in.email,
+        phone=contact_in.phone,
+    )
+
+    db.add(db_contact)
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to create contact for user signup.",
+        ) from exc
+
+    db_user = User(
+        username=user.username,
+        profile_pic=user.profile_pic,
+        role=user.role,
+        contact_id=db_contact.contact_id,
+    )
+
+    db.add(db_user)
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A user with this username already exists.",
+        ) from exc
+
+    hashed_password = security.get_password_hash(user.password)
+    db_auth = UserAuthentication(
+        user_id=db_user.user_id,
+        password_hash=hashed_password,
+        auth_provider="local",
+    )
+    db.add(db_auth)
+
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to complete user signup.",
+        ) from exc
+
+    db.refresh(db_user)
+    # ensure relationship resolved without extra DB hits later
+    if db_user.contact is None:
+        db_user.contact = db_contact
 
     return db_user
 

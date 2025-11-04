@@ -105,7 +105,7 @@ Creating a virtual environment ensures dependencies are isolated to this project
 3. Install dependencies:
 
    ```
-   pip install -r requirements.txt
+   py -m pip install -r requirements.txt
    ```
 
 4. Run the application:
@@ -227,6 +227,7 @@ Each service requires a developer account to generate and manage API credentials
 1. Visit [RapidAPI](https://rapidapi.com) and log in or create an account.
 2. Navigate to the **"My Apps"** section from your dashboard.
 3. Select an existing application or create a new one.
+   Need to subscribe https://rapidapi.com/ntd119/api/zillow-com4/playground/apiendpoint_85a30d86-7f81-4503-b49e-0c6ffe1f5f97
 4. Copy your personal API key.
 5. Add it to your `.env` file as:
 
@@ -275,6 +276,30 @@ SQL_DBNAME=zala
 ⚠️ Do not commit your `.env` file or share credentials publicly.
 
 ---
+
+## Fixing Database Structure
+
+Go to Pgadmin and right click your database ex. zala and go to query tool.
+Run the following commands to delete db:
+
+(**MAKE SURE NAMING OF UNAME AND DBNAME MATCHES YOUR CONFIG**)
+-- 1. Drop everything in the schema (irreversible)
+DROP SCHEMA IF EXISTS public CASCADE;
+
+-- 2. Recreate the schema owned by your app role
+CREATE SCHEMA public AUTHORIZATION postgresadmin;
+
+-- 3. Ensure the role keeps access
+GRANT ALL ON SCHEMA public TO postgresadmin;
+
+-- 4. Make sure new sessions see the schema automatically
+ALTER ROLE postgresadmin IN DATABASE zala SET search_path TO public;
+ALTER DATABASE zala SET search_path TO public;
+
+-- 5. Apply the setting for the current session
+SET search_path TO public;
+
+Rerun initalize_db.py to create tables
 
 ## Testing
 
