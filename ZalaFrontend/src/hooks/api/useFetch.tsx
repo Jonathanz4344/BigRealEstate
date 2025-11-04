@@ -1,6 +1,8 @@
 import { CONFIG } from "../../config";
 import type { APIResponse } from "./types";
 
+const OK_STATUS_CODES = [200, 201];
+
 export const useFetch = () => {
   const jsonHeader = {
     "Content-Type": "application/json",
@@ -49,7 +51,7 @@ export const useFetch = () => {
       });
       const json = await response.json();
 
-      if (response.status !== 200 || json.err || json.error)
+      if (!OK_STATUS_CODES.includes(response.status) || json.err || json.error)
         throw new Error(
           json.err ?? json.error ?? "Error communicating with API"
         );

@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { SideNavControlVariant, useSideNavControlStore } from "../../stores";
 import { SearchLeadFilterSidenav } from "./SearchLeadFilterSidenav";
+import { UserSidenav } from "./UserSidenav";
 
 export const Sidenav = () => {
   const { isOpen, variant } = useSideNavControlStore();
@@ -8,7 +9,7 @@ export const Sidenav = () => {
   const Component =
     variant === SideNavControlVariant.LeadFilters
       ? SearchLeadFilterSidenav
-      : () => <div>The None component</div>;
+      : UserSidenav;
 
   return (
     <div

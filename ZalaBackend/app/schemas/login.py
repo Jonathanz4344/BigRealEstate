@@ -7,3 +7,10 @@ class Login(BaseModel):
     """
     username: str
     password: str
+
+
+class GoogleLogin(BaseModel):
+    """
+    Schema for Google Sign-In
+    """
+    id_token: str

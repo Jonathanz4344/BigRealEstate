@@ -8,10 +8,12 @@ import {
 } from "./ButtonVariant";
 import clsx from "clsx";
 import { useBoolean } from "../../hooks";
+import { COLORS } from "../../config";
 
-type ButtonProps = {
+export type ButtonProps = {
   text: string;
   icon?: Icons;
+  disabled?: boolean;
   variant?: ButtonVariant;
   activeVariant?: ButtonVariant;
   onClick?: () => void;
@@ -21,6 +23,7 @@ export const Button = ({
   text,
   icon,
   variant: initialVariant = ButtonVariant.Primary,
+  disabled,
   activeVariant,
   onClick,
 }: ButtonProps) => {
@@ -32,24 +35,35 @@ export const Button = ({
 
   const variant = isActive ? activeVariant ?? initialVariant : initialVariant;
 
+  const disabledColors = {
+    bg: "bg-secondary-50",
+    text: "text-white",
+    textHex: COLORS.white,
+  };
+
   return (
     <div
       onMouseEnter={active}
       onMouseLeave={inactive}
       className={clsx(
-        "text-sm w-full flex flex-row items-center justify-center cursor-pointer relative group",
+        "text-sm w-full flex flex-row items-center justify-center relative group",
         "rounded-[7.5px] py-[10px] space-x-[15px]",
         "transition-[scale] duration-75 active:scale-[.95]",
         "hover:font-bold",
-        getBgColor(variant),
-        getTextColor(variant)
+        disabled ? "cursor-not-allowed" : "cursor-pointer",
+        disabled ? disabledColors.bg : getBgColor(variant),
+        disabled ? disabledColors.text : getTextColor(variant)
       )}
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
     >
       <span className="z-1">{text}</span>
       {icon && (
         <div className="z-1">
-          <Icon scale={0.8} color={getTextHexColor(variant)} name={icon} />
+          <Icon
+            scale={0.8}
+            color={disabled ? disabledColors.textHex : getTextHexColor(variant)}
+            name={icon}
+          />
         </div>
       )}
       <div

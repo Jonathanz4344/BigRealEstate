@@ -1,3 +1,6 @@
+import re
+from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.contact import Contact
@@ -10,6 +13,7 @@ from app import schemas
 
 from app.models.user_authentication import UserAuthentication
 from app.utils import security
+from app.db.crud import contact as contact_crud
 
 """GET FUNCTIONS"""
 
@@ -65,6 +69,145 @@ def get_users_by_ids(db: Session, user_ids: Sequence[int]) -> List[User]:
     return [users_by_id[user_id] for user_id in user_ids if user_id in users_by_id]
 
 
+def get_user_by_provider(db: Session, provider: str, provider_subject: str) -> Optional[User]:
+    """
+    Look up a user by external auth provider identifier.
+    """
+    if not provider_subject:
+        return None
+
+    return (
+        db.query(User)
+        .join(UserAuthentication, UserAuthentication.user_id == User.user_id)
+        .options(joinedload(User.contact), joinedload(User.properties))
+        .filter(
+            UserAuthentication.auth_provider == provider,
+            UserAuthentication.provider_subject == provider_subject,
+        )
+        .first()
+    )
+
+
+def _sanitize_username_seed(seed: Optional[str]) -> str:
+    sanitized = re.sub(r"[^a-zA-Z0-9_]", "", seed or "")
+    sanitized = sanitized.lower()
+    return sanitized or "user"
+
+
+def _generate_unique_username(db: Session, seed: Optional[str]) -> str:
+    base_seed = _sanitize_username_seed(seed)
+    base = base_seed[:15]
+    candidate = base or "user"
+    counter = 1
+
+    while get_user_by_username(db, candidate):
+        suffix = str(counter)
+        available_length = max(1, 15 - len(suffix))
+        candidate = f"{base_seed[:available_length]}{suffix}" if base_seed else f"user{suffix}"
+        counter += 1
+
+    return candidate
+
+
+def _ensure_contact_for_google_profile(db: Session, profile: dict) -> Contact:
+    email = profile.get("email")
+    if email:
+        existing = db.query(Contact).filter(Contact.email == email).first()
+        if existing:
+            return existing
+
+    first_name = (
+        profile.get("given_name")
+        or profile.get("name")
+        or (email.split("@")[0] if email else "Google")
+    )
+    last_name = profile.get("family_name")
+
+    contact = Contact(
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        phone=None,
+    )
+    db.add(contact)
+    db.flush()
+    return contact
+
+
+def _attach_google_identity_to_user(db: Session, db_user: User, profile: dict) -> User:
+    db_auth = (
+        db.query(UserAuthentication)
+        .filter(UserAuthentication.user_id == db_user.user_id)
+        .first()
+    )
+
+    if not db_auth:
+        db_auth = UserAuthentication(user_id=db_user.user_id)
+
+    db_auth.auth_provider = "google"
+    db_auth.provider_subject = profile.get("sub")
+    db_auth.provider_email = profile.get("email")
+
+    if profile.get("picture") and not db_user.profile_pic:
+        db_user.profile_pic = profile["picture"]
+
+    if not db_user.contact_id:
+        contact = _ensure_contact_for_google_profile(db, profile)
+        db_user.contact_id = contact.contact_id
+
+    db.add(db_user)
+    db.add(db_auth)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+def _create_user_from_google_profile(db: Session, profile: dict) -> User:
+    contact = _ensure_contact_for_google_profile(db, profile)
+    username_seed = profile.get("email") or profile.get("given_name") or profile.get("name")
+    username = _generate_unique_username(db, username_seed)
+
+    db_user = User(
+        username=username,
+        profile_pic=profile.get("picture"),
+        role="user",
+        contact_id=contact.contact_id if contact else None,
+    )
+    db.add(db_user)
+    db.flush()
+
+    db_auth = UserAuthentication(
+        user_id=db_user.user_id,
+        auth_provider="google",
+        provider_subject=profile.get("sub"),
+        provider_email=profile.get("email"),
+    )
+    db.add(db_auth)
+
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+def upsert_google_user(db: Session, profile: dict) -> Optional[User]:
+    """
+    Find or create a user using Google profile information.
+    """
+    provider_subject = profile.get("sub")
+    email = profile.get("email")
+
+    user = get_user_by_provider(db, "google", provider_subject)
+    if user:
+        return user
+
+    if email:
+        user = get_user_by_email(db, email)
+        if user:
+            return _attach_google_identity_to_user(db, user, profile)
+
+    return _create_user_from_google_profile(db, profile)
+
+
 """CREATE FUNCTIONS"""
 
 
@@ -104,12 +247,101 @@ def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = security.get_password_hash(user.password)
     db_auth = UserAuthentication(
         user_id=db_user.user_id,
-        password_hash=hashed_password
+        password_hash=hashed_password,
+        auth_provider="local",
     )
     db.add(db_auth)
 
     db.commit()
     db.refresh(db_user)
+
+    return db_user
+
+
+def create_user_with_contact(db: Session, user: schemas.UserSignup) -> User:
+    """
+    Create a new user along with a brand new contact atomically.
+    """
+    existing_user = get_user_by_username(db, user.username)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A user with this username already exists.",
+        )
+
+    contact_in = user.contact
+
+    if contact_in.email:
+        existing = db.query(Contact).filter(Contact.email == contact_in.email).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A contact with this email already exists.",
+            )
+
+    if contact_in.phone:
+        existing = db.query(Contact).filter(Contact.phone == contact_in.phone).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A contact with this phone already exists.",
+            )
+
+    db_contact = Contact(
+        first_name=contact_in.first_name,
+        last_name=contact_in.last_name,
+        email=contact_in.email,
+        phone=contact_in.phone,
+    )
+
+    db.add(db_contact)
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to create contact for user signup.",
+        ) from exc
+
+    db_user = User(
+        username=user.username,
+        profile_pic=user.profile_pic,
+        role=user.role,
+        contact_id=db_contact.contact_id,
+    )
+
+    db.add(db_user)
+    try:
+        db.flush()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A user with this username already exists.",
+        ) from exc
+
+    hashed_password = security.get_password_hash(user.password)
+    db_auth = UserAuthentication(
+        user_id=db_user.user_id,
+        password_hash=hashed_password,
+        auth_provider="local",
+    )
+    db.add(db_auth)
+
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to complete user signup.",
+        ) from exc
+
+    db.refresh(db_user)
+    # ensure relationship resolved without extra DB hits later
+    if db_user.contact is None:
+        db_user.contact = db_contact
 
     return db_user
 
@@ -286,6 +518,12 @@ def authenticate_user(db: Session, username: str, password: str) -> User | None:
         return None
 
     db_auth = db.query(UserAuthentication).filter(UserAuthentication.user_id == db_user.user_id).first()
+
+    if not db_auth:
+        return None
+
+    if db_auth.auth_provider != "local":
+        return None
 
     if not db_auth.password_hash:
         return None

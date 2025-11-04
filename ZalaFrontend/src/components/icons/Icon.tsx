@@ -1,7 +1,7 @@
 import type { Icons } from "./IconsEnum";
 import { getMaterialIcon } from "./MaterialIcons";
 import { COLORS } from "../../config";
-import { useBoolean } from "../../hooks";
+import { useHover } from "../../hooks";
 
 export type IconProps = {
   name: Icons;
@@ -10,6 +10,8 @@ export type IconProps = {
   size?: number;
   scale?: number;
   hoverScale?: number;
+  className?: string;
+  onClick?: () => void;
 };
 
 export const Icon = ({
@@ -19,8 +21,10 @@ export const Icon = ({
   size = 24,
   scale: propScale = 1,
   hoverScale = propScale,
+  className,
+  onClick,
 }: IconProps) => {
-  const [isHovered, onHover, onHoverDone] = useBoolean();
+  const [isHovered, hoverProps] = useHover();
   const MaterialIcon = getMaterialIcon(name) ?? (() => <></>);
 
   const scale = isHovered ? hoverScale : propScale;
@@ -29,8 +33,9 @@ export const Icon = ({
 
   return (
     <MaterialIcon
-      onMouseEnter={onHover}
-      onMouseLeave={onHoverDone}
+      onClick={onClick}
+      className={className}
+      {...hoverProps}
       sx={{ color, fontSize: fontSize }}
     />
   );

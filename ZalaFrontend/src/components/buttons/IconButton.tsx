@@ -15,6 +15,7 @@ type IconButtonProps = {
   scale?: number;
   shadow?: boolean;
   borderRadius?: number;
+  disableOpacity?: boolean;
 
   onClick?: () => void;
 };
@@ -25,6 +26,7 @@ export const IconButton = ({
   size,
   scale,
   shadow = true,
+  disableOpacity = false,
   borderRadius = 15,
   onClick,
 }: IconButtonProps) => {
@@ -48,7 +50,7 @@ export const IconButton = ({
         onClick={onClick}
         className={clsx(
           "absolute z-1 top-0 left-0 bottom-0 right-0",
-          onClick
+          onClick && !disableOpacity
             ? "bg-[var(--color-secondary)] opacity-0 hover:opacity-25"
             : ""
         )}

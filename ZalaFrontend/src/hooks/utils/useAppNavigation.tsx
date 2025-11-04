@@ -6,10 +6,20 @@ export const useAppNavigation = () => {
 
   const toLeadSearchPage = () => navigate("/");
 
+  const toCampaignPage = (campaignId: number) =>
+    navigate("/campaign/" + campaignId);
+
+  const toLoginPage = () => navigate("/login");
+
+  const toSignupPage = () => navigate("/signup");
+
   return {
     location,
     navigate,
 
     toLeadSearchPage,
+    toCampaignPage,
+    toLoginPage,
+    toSignupPage,
   };
 };
