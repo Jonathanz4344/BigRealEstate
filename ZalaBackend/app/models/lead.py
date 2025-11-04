@@ -6,12 +6,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..db.session import Base
 
 
-campaign_leads = Table(
-    "campaign_leads",
-    Base.metadata,
-    Column("campaign_id", ForeignKey("campaigns.campaign_id"), primary_key=True),
-    Column("lead_id", ForeignKey("leads.lead_id"), primary_key=True),
-)
+# campaign_leads = Table(
+#     "campaign_leads",
+#     Base.metadata,
+#     Column("campaign_id", ForeignKey("campaigns.campaign_id"), primary_key=True),
+#     Column("lead_id", ForeignKey("leads.lead_id"), primary_key=True),
+# )
 
 
 class Lead(Base):
@@ -35,11 +35,14 @@ class Lead(Base):
     contact: Mapped["Contact"] = relationship("Contact", back_populates="leads", uselist=False)
     address: Mapped["Address"] = relationship("Address", back_populates="leads", uselist=False)
     properties: Mapped[List["Property"]] = relationship("Property", back_populates="lead")
-    campaign_messages: Mapped[List["CampaignMessage"]] = relationship(
-        "CampaignMessage", back_populates="lead", cascade="all, delete-orphan"
+    campaign_emails: Mapped[List["CampaignEmail"]] = relationship(
+        "CampaignEmail", back_populates="lead", cascade="all, delete-orphan"
     )
-    campaigns: Mapped[List["Campaign"]] = relationship(
-        "Campaign",
-        secondary=campaign_leads,
-        back_populates="leads",
-    )
+    # campaigns: Mapped[List["Campaign"]] = relationship(
+    #     "Campaign",
+    #     secondary=campaign_leads,
+    #     back_populates="leads",
+    # )
+
+    campaign_lead: Mapped[List["CampaignLead"]] = relationship(
+        "CampaignLead", back_populates="lead", cascade="all, delete-orphan")
