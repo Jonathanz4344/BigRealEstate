@@ -96,6 +96,10 @@ export const useApi = () => {
         longitude,
         distance_miles:
           typeof lead?.distance_miles === "number" ? lead.distance_miles : 0,
+        source:
+          typeof lead?.source === "string"
+            ? (lead.source as DemoData["source"])
+            : primarySource,
       };
     };
 
