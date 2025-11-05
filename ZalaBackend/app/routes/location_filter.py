@@ -428,7 +428,6 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
         unique_sources = [DataSource.google_places]
 
     results: Dict[str, object] = {}
-    aggregated_leads: List[Dict[str, object]] = []
     errors: Dict[str, str] = {}
     temp_id_counter = 1
 
@@ -437,11 +436,11 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
             if source == DataSource.db:
                 db_result = _perform_db_search(request, db)
                 results[source.value] = db_result
-                aggregated_leads.extend(db_result.get("leads", []))
+                temp_id_counter = assign_temp_ids(db_result.get("leads", []), temp_id_counter)
             elif source in {DataSource.gpt, DataSource.rapidapi, DataSource.google_places}:
                 ext_result = _perform_external_search(request, source)
                 results[source.value] = ext_result
-                aggregated_leads.extend(ext_result.get("leads", []))
+                temp_id_counter = assign_temp_ids(ext_result.get("leads", []), temp_id_counter)
             else:
                 errors[source.value] = "Unsupported source requested."
         except LocationResolutionError as exc:
@@ -451,18 +450,10 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
         except Exception as exc:
             errors[source.value] = f"Unexpected error: {exc}"
 
-    for source in unique_sources:
-        result_payload = results.get(source.value)
-        if isinstance(result_payload, dict):
-            temp_id_counter = assign_temp_ids(result_payload.get("leads", []), temp_id_counter)
-    temp_id_counter = assign_temp_ids(aggregated_leads, temp_id_counter)
-
     response: Dict[str, object] = {
         "results": results,
     }
 
-    if aggregated_leads:
-        response["aggregated_leads"] = aggregated_leads
     if errors:
         response["errors"] = errors
 
