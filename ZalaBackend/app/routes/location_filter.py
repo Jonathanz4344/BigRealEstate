@@ -13,7 +13,7 @@ from app.models.address import Address
 from app.models.lead import Lead
 from app.models.property import Property
 from app.schemas.location import DataSource, LeadSearchRequest, LocationFilter
-from app.utils.geocode import geocode_location, reverse_geocode
+from app.utils.geocode import geocode_location
 from app.external_api import google_places, openai_api, rapidapi
 
 
@@ -63,54 +63,39 @@ def get_mock_properties(lat: float, lon: float) -> List[Dict[str, object]]:
 
 
 def _build_location_query(filter: LocationFilter) -> Optional[str]:
-    zip_match = re.match(r"^\d{5}$", filter.location_text or "")
+    location_text = (filter.location_text or "").strip()
+    if not location_text:
+        return None
+
+    zip_match = re.match(r"^\d{5}$", location_text)
     if zip_match:
         return zip_match.group()
 
-    parts: List[str] = []
-    if filter.city:
-        parts.append(filter.city)
-    if filter.state:
-        parts.append(filter.state)
-    if filter.location_text:
-        parts.append(filter.location_text)
-
-    if not parts:
-        return None
-
-    return ", ".join(parts)
+    return location_text
 
 
 def _resolve_location(
     filter: LocationFilter,
     source_label: Optional[str] = None,
 ) -> Tuple[float, float, Dict[str, object], str]:
-    lat = filter.latitude
-    lon = filter.longitude
     location_query = _build_location_query(filter)
 
-    if lat is None or lon is None:
-        if not location_query:
-            raise LocationResolutionError("No valid location input provided")
-        geocoded = geocode_location(location_query)
-        if not geocoded:
-            raise LocationResolutionError("Geocoding failed")
-        lat = geocoded["latitude"]
-        lon = geocoded["longitude"]
-        normalized_location: Dict[str, object] = {
-            "latitude": lat,
-            "longitude": lon,
-            "city": geocoded.get("city"),
-            "state": geocoded.get("state"),
-            "zip": geocoded.get("zip"),
-        }
-    else:
-        normalized_location = {
-            "latitude": lat,
-            "longitude": lon,
-        }
-        if not location_query:
-            location_query = f"{lat},{lon}"
+    if not location_query:
+        raise LocationResolutionError("No valid location input provided")
+
+    geocoded = geocode_location(location_query)
+    if not geocoded:
+        raise LocationResolutionError("Geocoding failed")
+
+    lat = geocoded["latitude"]
+    lon = geocoded["longitude"]
+    normalized_location: Dict[str, object] = {
+        "latitude": lat,
+        "longitude": lon,
+        "city": geocoded.get("city"),
+        "state": geocoded.get("state"),
+        "zip": geocoded.get("zip"),
+    }
 
     if source_label:
         normalized_location["source"] = source_label
@@ -276,41 +261,10 @@ def _prepare_external_filter(filter: LocationFilter) -> Tuple[LocationFilter, Op
 
 
 def _perform_mock_search(filter: LocationFilter) -> Dict[str, object]:
-    if filter.latitude is not None and filter.longitude is not None:
-        result = reverse_geocode(filter.latitude, filter.longitude)
-        if not result:
-            raise LocationResolutionError("Reverse geocoding failed")
-        result["source"] = DataSource.mock.value
-        mock_properties = get_mock_properties(float(result["latitude"]), float(result["longitude"]))
-        return {
-            "normalized_location": result,
-            "nearby_properties": mock_properties,
-        }
-
-    zip_match = re.match(r"^\d{5}$", filter.location_text or "")
-    if zip_match:
-        location_text = zip_match.group()
-    else:
-        location_text = filter.location_text or ""
-        if filter.city and filter.state:
-            location_text = f"{filter.city}, {filter.state}"
-        elif filter.city:
-            location_text = filter.city
-        elif filter.state:
-            location_text = filter.state
-
-    if not location_text:
-        raise LocationResolutionError("No valid location input provided")
-
-    result = geocode_location(location_text)
-    if not result:
-        raise LocationResolutionError("Geocoding failed")
-
-    result["source"] = DataSource.mock.value
-    mock_properties = get_mock_properties(float(result["latitude"]), float(result["longitude"]))
-
+    lat, lon, normalized_location, _ = _resolve_location(filter, DataSource.mock.value)
+    mock_properties = get_mock_properties(lat, lon)
     return {
-        "normalized_location": result,
+        "normalized_location": normalized_location,
         "nearby_properties": mock_properties,
     }
 
