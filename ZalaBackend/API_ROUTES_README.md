@@ -177,6 +177,7 @@ Notes:
 - `aggregated_leads` flattens lead-producing sources for convenience.
 - If geocoding fails or a provider rejects the request, the reason is listed under `errors[source]`.
 - `location_text` can be a zip code or free-form description; the backend geocodes and extracts any dynamic filters automatically.
+- Leads returned from external sources include a temporary positive `lead_id` so frontends can key list items consistently; IDs increment across sources within the same response.
 
 ---
 

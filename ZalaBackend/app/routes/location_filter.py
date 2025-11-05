@@ -411,6 +411,14 @@ def _perform_external_search(filter: LocationFilter, source: DataSource) -> Dict
 
 @router.post("/searchLeads", summary="Search Lead Combined", tags=["Search Lead"])
 def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
+    def assign_temp_ids(leads: List[Dict[str, object]], counter: int) -> int:
+        for lead in leads or []:
+            current_id = lead.get("lead_id")
+            if not isinstance(current_id, int) or current_id <= 0:
+                lead["lead_id"] = counter
+                counter += 1
+        return counter
+
     unique_sources: List[DataSource] = []
     for src in request.sources or []:
         if src not in unique_sources:
@@ -422,6 +430,7 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
     results: Dict[str, object] = {}
     aggregated_leads: List[Dict[str, object]] = []
     errors: Dict[str, str] = {}
+    temp_id_counter = 1
 
     for source in unique_sources:
         try:
@@ -441,6 +450,12 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
             errors[source.value] = f"External provider request failed: {exc.message}"
         except Exception as exc:
             errors[source.value] = f"Unexpected error: {exc}"
+
+    for source in unique_sources:
+        result_payload = results.get(source.value)
+        if isinstance(result_payload, dict):
+            temp_id_counter = assign_temp_ids(result_payload.get("leads", []), temp_id_counter)
+    temp_id_counter = assign_temp_ids(aggregated_leads, temp_id_counter)
 
     response: Dict[str, object] = {
         "results": results,
