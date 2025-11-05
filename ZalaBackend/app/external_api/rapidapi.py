@@ -1,73 +1,18 @@
 import json
 import pprint
-from datetime import datetime
-from pathlib import Path
-from threading import Lock
 from typing import Any, Dict, List, Set
 
 import requests
 
 from . import RAPIDAPI_KEY
 from .to_leads import rapid_to_leads
+from .usage_tracker import reserve_call
 
 MAX_RAPIDAPI_CALLS_PER_MONTH = 95
-_USAGE_FILE = Path(__file__).resolve().parent / "rapidapi_usage.json"
-_USAGE_LOCK = Lock()
-
-
-def _current_period() -> str:
-    """Return the current calendar period in UTC (YYYY-MM)."""
-    return datetime.utcnow().strftime("%Y-%m")
-
-
-def _load_usage() -> Dict[str, Any]:
-    if not _USAGE_FILE.exists():
-        return {"period": None, "count": 0}
-
-    try:
-        data = json.loads(_USAGE_FILE.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        return {"period": None, "count": 0}
-
-    if not isinstance(data, dict):
-        return {"period": None, "count": 0}
-
-    return data
-
-
-def _save_usage(data: Dict[str, Any]) -> None:
-    try:
-        _USAGE_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
-    except OSError as exc:
-        raise RuntimeError("Unable to persist RapidAPI usage tracker.") from exc
-
-
-def _reserve_rapidapi_call() -> None:
-    with _USAGE_LOCK:
-        usage = _load_usage()
-        period = _current_period()
-
-        stored_period = usage.get("period")
-        try:
-            count = int(usage.get("count", 0))
-        except (TypeError, ValueError):
-            count = 0
-
-        if stored_period != period:
-            stored_period = period
-            count = 0
-
-        if count >= MAX_RAPIDAPI_CALLS_PER_MONTH:
-            raise RuntimeError(
-                f"RapidAPI monthly quota exceeded ({MAX_RAPIDAPI_CALLS_PER_MONTH} calls)."
-            )
-
-        count += 1
-        _save_usage({"period": stored_period, "count": count})
 
 
 def _fetch_agents_page(city: str, page: int, page_size: int, allow_retry: bool = True) -> List[Dict[str, Any]]:
-    _reserve_rapidapi_call()
+    reserve_call("rapidapi", MAX_RAPIDAPI_CALLS_PER_MONTH, label="RapidAPI")
 
     url = "https://zillow-com4.p.rapidapi.com/agents/search"
     querystring: Dict[str, Any] = {"location": city, "specialty": "BuyersAgent"}

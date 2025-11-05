@@ -178,6 +178,7 @@ Notes:
 - If geocoding fails or a provider rejects the request, the reason is listed under `errors[source]`.
 - `location_text` can be a zip code or free-form description; the backend geocodes and extracts any dynamic filters automatically.
 - Leads returned from external sources include a temporary positive `lead_id` so frontends can key list items consistently; IDs increment across sources within the same response.
+- External provider quotas: RapidAPI requests reset monthly with a cap of 95 calls, and Brave search requests (used by the GPT integration) are limited to 1,950 calls per month.
 
 ---
 

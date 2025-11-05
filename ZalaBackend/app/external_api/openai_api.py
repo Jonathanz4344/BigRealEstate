@@ -2,11 +2,14 @@ import requests, sys, re, pprint, json
 from openai import OpenAI
 from . import OPENAI_API_KEY, BRAVE_API_KEY
 from .to_leads import openai_to_leads
+from .usage_tracker import reserve_call
 import time
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 gpt_model = "gpt-5-mini"
+
+MAX_BRAVE_CALLS_PER_MONTH = 1950
 
 prompt_start = "I am a real estate agent, and I am looking to contact real estate agents in "
 
@@ -33,6 +36,7 @@ If it's not possible to get that many agents with the information you have, then
 
 # Search with Brave API
 def web_search(query: str, count: int = 10):
+    reserve_call("gpt", MAX_BRAVE_CALLS_PER_MONTH, label="Brave search")
     time.sleep(1)  # Add 1 second delay between searches because of API rate limit with free tier
 
     # restrict count to allowed sizes
