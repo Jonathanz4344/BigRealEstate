@@ -8,7 +8,6 @@ class DataSource(str, Enum):
     gpt = "gpt"
     rapidapi = "rapidapi"
     google_places = "google_places"
-    mock = "mock"
     db = "db"
 
 

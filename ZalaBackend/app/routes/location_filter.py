@@ -1,7 +1,5 @@
 from typing import Dict, List, Optional, Tuple
 
-import json
-import os
 import re
 from math import atan2, cos, radians, sin, sqrt
 
@@ -15,11 +13,6 @@ from app.models.property import Property
 from app.schemas.location import DataSource, LeadSearchRequest, LocationFilter
 from app.utils.geocode import geocode_location
 from app.external_api import google_places, openai_api, rapidapi
-
-
-mock_data_path = os.path.join(os.path.dirname(__file__), "../data/mock_properties.json")
-with open(mock_data_path, "r") as f:
-    MOCK_PROPERTIES = json.load(f)
 
 
 router = APIRouter()
@@ -49,17 +42,6 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c
-
-
-def get_mock_properties(lat: float, lon: float) -> List[Dict[str, object]]:
-    """Filter bundled mock properties by distance."""
-    results = []
-    for prop in MOCK_PROPERTIES:
-        distance = haversine(lat, lon, prop["latitude"], prop["longitude"])
-        if distance <= 50:
-            prop["distance_miles"] = round(distance, 2)
-            results.append(prop)
-    return results
 
 
 def _build_location_query(filter: LocationFilter) -> Optional[str]:
@@ -260,15 +242,6 @@ def _prepare_external_filter(filter: LocationFilter) -> Tuple[LocationFilter, Op
     return filter, dynamic_filter
 
 
-def _perform_mock_search(filter: LocationFilter) -> Dict[str, object]:
-    lat, lon, normalized_location, _ = _resolve_location(filter, DataSource.mock.value)
-    mock_properties = get_mock_properties(lat, lon)
-    return {
-        "normalized_location": normalized_location,
-        "nearby_properties": mock_properties,
-    }
-
-
 def _perform_db_search(filter: LocationFilter, db: Session) -> Dict[str, object]:
     lat, lon, normalized_location, _ = _resolve_location(filter, DataSource.db.value)
 
@@ -454,9 +427,7 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
 
     for source in unique_sources:
         try:
-            if source == DataSource.mock:
-                results[source.value] = _perform_mock_search(request)
-            elif source == DataSource.db:
+            if source == DataSource.db:
                 db_result = _perform_db_search(request, db)
                 results[source.value] = db_result
                 aggregated_leads.extend(db_result.get("leads", []))
