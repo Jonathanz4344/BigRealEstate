@@ -5,9 +5,9 @@ from pydantic import BaseModel, Field
 
 
 class DataSource(str, Enum):
+    google_places = "google_places"
     gpt = "gpt"
     rapidapi = "rapidapi"
-    google_places = "google_places"
     db = "db"
 
 

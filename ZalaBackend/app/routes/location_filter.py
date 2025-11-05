@@ -243,7 +243,7 @@ def _prepare_external_filter(filter: LocationFilter) -> Tuple[LocationFilter, Op
 
 
 def _perform_db_search(filter: LocationFilter, db: Session) -> Dict[str, object]:
-    lat, lon, normalized_location, _ = _resolve_location(filter, DataSource.db.value)
+    lat, lon, _, _ = _resolve_location(filter, DataSource.db.value)
 
     leads = (
         db.query(Lead)
@@ -283,7 +283,6 @@ def _perform_db_search(filter: LocationFilter, db: Session) -> Dict[str, object]
             nearby_leads.append(_serialize_lead(lead, round(best_distance, 2)))
 
     return {
-        "normalized_location": normalized_location,
         "leads": nearby_leads,
     }
 
@@ -294,7 +293,7 @@ def _perform_external_search(filter: LocationFilter, source: DataSource) -> Dict
     gpt_max_searches = 10
 
     filter_for_location, dynamic_filter = _prepare_external_filter(filter)
-    lat, lon, normalized_location, location_query = _resolve_location(filter_for_location, source.value)
+    lat, lon, _, location_query = _resolve_location(filter_for_location, source.value)
 
     try:
         if source == DataSource.gpt:
@@ -402,13 +401,12 @@ def _perform_external_search(filter: LocationFilter, source: DataSource) -> Dict
     )
     trimmed_leads = response_leads[:max_results]
 
-    return {
-        "normalized_location": normalized_location,
-        "radius_miles": radius_miles,
-        "dynamic_filter": dynamic_filter,
-        "source": source.value,
+    response: Dict[str, object] = {
         "leads": trimmed_leads,
     }
+    if dynamic_filter:
+        response["dynamic_filter"] = dynamic_filter
+    return response
 
 
 @router.post("/searchLeads", summary="Search Lead Combined", tags=["Search Lead"])
@@ -445,7 +443,6 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
             errors[source.value] = f"Unexpected error: {exc}"
 
     response: Dict[str, object] = {
-        "requested_sources": [src.value if isinstance(src, DataSource) else str(src) for src in unique_sources],
         "results": results,
     }
 

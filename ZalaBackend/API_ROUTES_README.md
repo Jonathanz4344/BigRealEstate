@@ -170,7 +170,7 @@ Allowed file MIME types: `text/csv`, `application/vnd.ms-excel`, and `.xlsx`. Th
 
 | Method | Path | Purpose | Body Fields | Response |
 | --- | --- | --- | --- | --- |
-| POST | `/api/searchLeads` | Fan-out search across one or more data sources | `location_text` (string) plus `sources` (array containing any of `"db"`, `"rapidapi"`, `"google_places"`, `"gpt"`) | `requested_sources`, per-source `results`, optional `aggregated_leads`, and per-source `errors` when a provider fails |
+| POST | `/api/searchLeads` | Fan-out search across one or more data sources | `location_text` (string) plus `sources` (array containing any of `"db"`, `"rapidapi"`, `"google_places"`, `"gpt"`) | Per-source `results` (each with `leads` and optional metadata), optional `aggregated_leads`, and per-source `errors` when a provider fails |
 
 Notes:
 - When a single source is requested, the matching entry in `results` mirrors the legacy payloads (for example, `rapidapi`/`google_places`/`gpt`/`db` return `leads` with `distance_miles`).
