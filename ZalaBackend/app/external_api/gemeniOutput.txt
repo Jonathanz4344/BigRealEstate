@@ -1,0 +1,75 @@
+sdk_http_response=HttpResponse(
+  headers=<dict len=11>
+) candidates=[Candidate(
+  content=Content(
+    parts=[
+      Part(
+        text='[]'
+      ),
+    ],
+    role='model'
+  ),
+  finish_reason=<FinishReason.STOP: 'STOP'>,
+  grounding_metadata=GroundingMetadata(
+    grounding_chunks=[
+      GroundingChunk(
+        maps=GroundingChunkMaps(
+          place_id='places/ChIJ2fyr9YS22YgRD0X77u2qCnY',
+          title='Miami Realty Solution Group',
+          uri='https://maps.google.com/?cid=8505798785136018703'
+        )
+      ),
+      GroundingChunk(
+        maps=GroundingChunkMaps(
+          place_id='places/ChIJSyyHNuS12YgRW6nb09X6z98',
+          title='David Freed Realtor | Miami Is Home | Keller Williams Realty',
+          uri='https://maps.google.com/?cid=16127384586926401883'
+        )
+      ),
+      GroundingChunk(
+        maps=GroundingChunkMaps(
+          place_id='places/ChIJSRezmXa12YgR5XzRG4vqHtw',
+          title='Real Brokers Miami – Real Estate Broker & Concierge',
+          uri='https://maps.google.com/?cid=15861372820833533157'
+        )
+      ),
+      GroundingChunk(
+        maps=GroundingChunkMaps(
+          place_id='places/ChIJB_mcFD232YgR2GdRHxw3ffc',
+          title='Sebastian Acosta, Realtor in Miami ️',
+          uri='https://maps.google.com/?cid=17833470693381072856'
+        )
+      ),
+      GroundingChunk(
+        maps=GroundingChunkMaps(
+          place_id='places/ChIJDcKH3B252YgRhyK8uUt2Mes',
+          title='Guillermo Teran Group Real Estate',
+          uri='https://maps.google.com/?cid=16947456940382626439'
+        )
+      ),
+      <... 15 more items ...>,
+    ],
+    web_search_queries=[
+      'real estate agents in Miami, FL',
+    ]
+  ),
+  index=0
+)] create_time=None model_version='gemini-2.5-flash' prompt_feedback=None response_id='ttkMadm7GM3TjMcPjdT2oAM' usage_metadata=GenerateContentResponseUsageMetadata(
+  candidates_token_count=17,
+  prompt_token_count=293,
+  prompt_tokens_details=[
+    ModalityTokenCount(
+      modality=<MediaModality.TEXT: 'TEXT'>,
+      token_count=293
+    ),
+  ],
+  thoughts_token_count=1031,
+  tool_use_prompt_token_count=1063,
+  tool_use_prompt_tokens_details=[
+    ModalityTokenCount(
+      modality=<MediaModality.TEXT: 'TEXT'>,
+      token_count=1063
+    ),
+  ],
+  total_token_count=2404
+) automatic_function_calling_history=[] parsed=None
