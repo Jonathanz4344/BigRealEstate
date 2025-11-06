@@ -1,17 +1,22 @@
 import { produce } from "immer";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  useCampaignStore,
   useSearchFilterStore,
   useSearchQueryStore,
   useSideNavControlStore,
 } from "../../stores";
 import { stringify } from "../../utils";
 import type { MapRefHandle } from "../components";
+import { useAppNavigation } from "../utils";
 
 export const useLeadSearchPage = () => {
   const leadData = useSearchQueryStore((state) => state.data);
+  const setCampaign = useCampaignStore((state) => state.setCampaign);
   const sortBy = useSearchFilterStore((state) => state.sortBy);
   const openSideNav = useSideNavControlStore((state) => state.open);
+
+  const { toCampaignPage } = useAppNavigation();
 
   const mapRef = useRef<MapRefHandle>(null);
 
@@ -63,6 +68,14 @@ export const useLeadSearchPage = () => {
     });
   }, [stringify(leadData), sortBy]);
 
+  const onStart = (skipNav = false) => {
+    // some async method gets campaign id
+    const campaignId = 1234;
+    const leads = leadData.filter((_lead, i) => campaignLeads.includes(i));
+    setCampaign({ campaignId, leads });
+    if (!skipNav) toCampaignPage(campaignId);
+  };
+
   return {
     showLeads,
     openSideNav,
@@ -76,5 +89,6 @@ export const useLeadSearchPage = () => {
     campaignHasAllLeads,
     onAllLeadsButton,
     onLeadButton,
+    onStart,
   };
 };

@@ -10,6 +10,8 @@
   --color-white: #ffffff;
 
   --color-secondary-50: #1e1e1e80;
+
+  --color-error: #d64545;
 }
 
 :root {
@@ -29,10 +31,6 @@ body {
   @apply w-screen h-screen;
 }
 
-/* .gradient-background {
-  @apply -bg-linear-45 from-secondary to-secondary-light shadow-xl p-4 rounded-lg;
-} */
-
 .box-shadow {
   box-shadow: 5px 5px 15px var(--color-secondary-50);
 }
@@ -43,6 +41,23 @@ body {
 
 .card-base {
   @apply bg-primary rounded-[15px];
+}
+
+.border-text-input {
+  @apply outline-0 border-b-2 border-secondary-50 focus:border-accent;
+}
+
+.text-area-style {
+  @apply outline-0 border-b-2 border-secondary-50 focus:border-accent;
+  @apply text-base w-full resize-none field-sizing-content;
+}
+
+.absolute-fill {
+  @apply absolute top-0 left-0 right-0 bottom-0;
+}
+
+.full {
+  @apply w-full h-full;
 }
 
 .grenze {

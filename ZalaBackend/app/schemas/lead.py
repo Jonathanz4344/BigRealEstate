@@ -1,11 +1,12 @@
 from typing import Optional, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.schemas.address import AddressPublic
 from app.schemas.contact import ContactPublic
 from app.schemas.summaries import UserSummary
 from app.schemas.property import PropertyPublic
+
 class LeadBase(BaseModel):
     """
     Base Schema for a Lead.
@@ -56,6 +57,8 @@ class LeadPublic(LeadBase):
     contact: Optional[ContactPublic] = None
     address: Optional[AddressPublic] = None
     properties: List[PropertyPublic] = []
+    campaigns: List["CampaignLeadPublic"] = []
 
     class Config:
         from_attributes = True
+

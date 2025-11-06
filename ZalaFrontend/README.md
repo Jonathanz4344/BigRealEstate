@@ -1,119 +1,147 @@
-# README: Zala CRM – UI
+# README: Zala CRM – Frontend (Vite + React)
 
-Description:
-This repository contains the frontend user interface for the Zala CRM application.
-It is built using Vite and React to provide a fast, modern, and responsive user experience.
+## 📘 Overview
 
-How to Run:
+This repository contains the **frontend user interface (UI)** for the **Zala CRM** application — a modern, responsive, and efficient customer relationship management platform designed for real estate professionals.
 
-- Navigate to the UI project root directory:
-  `cd <path-to-ui-root>`
-- Install required dependencies:
-  `npm install`
-- Configure environment variables (see section below)
-- Start the Python API (refer to the Python project README for details)
-- Launch the development server:
-  `npm run dev`
-- The UI will be available at:
-  `http://localhost:5173/`
+The frontend is built with **React** and **Vite**, leveraging **TypeScript**, **TailwindCSS**, and **Material UI (MUI)** to deliver a performant and polished user experience.
 
-Environment Variables Setup:
+---
 
-- In the project root directory, create a file named ".env"
-- Add the following variables with appropriate values:
-  ```
-  VITE_GOOGLE_MAPS_KEY=<your_google_maps_api_key>
-  VITE_API_URL=<your_python_api_url>
-  ```
+## 🚀 Getting Started
 
-Tech Stack:
+### 1. Navigate to the Project Directory
 
-- Vite – Frontend build tool
-- React – User interface framework
-- Node.js – Runtime and package manager
-- .env – Environment configuration
-
-Notes:
-
-- Ensure both the Python API and the UI are running concurrently for full functionality.
-- Environment variables are automatically loaded from the ".env" file during development.
-
-Author:
-Zala Development Team
-
-License:
-MIT
-
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+cd <path-to-zala-frontend-root>
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Install Dependencies
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+Use `npm` to install all required packages defined in `package.json`.
 
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+npm install
 ```
+
+---
+
+### 3. Configure Environment Variables
+
+Create a `.env` file in the project root directory and include the following variables:
+
+```bash
+# ─── API Endpoint ───────────────────────────────
+VITE_API_URL=http://127.0.0.1:8000
+
+# ─── Google Cloud API Configuration ─────────────
+VITE_GOOGLE_MAPS_KEY=<your_google_maps_api_key>
+
+# ─── Google OAuth 2.0 Authentication ────────────
+VITE_GOOGLE_CLIENT_ID=<your_google_oauth_client_id>
+```
+
+> **Note:**
+>
+> - Instructions for obtaining `VITE_GOOGLE_CLIENT_ID` and `VITE_GOOGLE_MAPS_KEY` can be found in the **Zala API README** under their respective environment variable setup sections.
+> - Ensure that `VITE_API_URL` points to your locally running or deployed Zala API instance.
+
+---
+
+### 4. Run the Application
+
+#### Development Mode
+
+```bash
+npm run dev
+```
+
+Access the UI at:
+
+```
+http://localhost:5173/
+```
+
+#### Production Build
+
+```bash
+npm run build
+```
+
+#### Preview Production Build
+
+```bash
+npm run preview
+```
+
+---
+
+## ⚙️ Project Structure
+
+```
+ZalaFrontend/
+├── src/
+│   ├── components/       # Reusable UI components
+│   ├── pages/            # Page-level views
+│   ├── store/            # Zustand state management
+│   ├── hooks/            # Custom React hooks
+│   ├── utils/            # Helper and utility functions
+│   ├── assets/           # Images, icons, and other static files
+│   └── main.tsx          # React entry point
+├── public/               # Static assets served at runtime
+├── index.html            # HTML entry template
+├── package.json          # Project metadata and dependencies
+├── tsconfig.json         # TypeScript configuration
+├── tailwind.config.js    # TailwindCSS configuration
+└── vite.config.ts        # Vite build configuration
+```
+
+---
+
+## 🧩 Tech Stack
+
+| Category                   | Technology                         |
+| -------------------------- | ---------------------------------- |
+| **Frontend Framework**     | React (TypeScript)                 |
+| **Build Tool**             | Vite                               |
+| **Styling**                | TailwindCSS, Material UI, Emotion  |
+| **State Management**       | Zustand                            |
+| **Notifications**          | Notistack                          |
+| **Mapping**                | Google Maps via `google-map-react` |
+| **Icons**                  | Lucide React                       |
+| **Animation**              | Motion                             |
+| **Environment Management** | dotenv                             |
+| **Routing**                | React Router v7                    |
+
+---
+
+## 🔧 Scripts
+
+| Command           | Description                         |
+| ----------------- | ----------------------------------- |
+| `npm run dev`     | Starts development server           |
+| `npm run build`   | Builds project for production       |
+| `npm run lint`    | Runs ESLint checks                  |
+| `npm run preview` | Serves the production build locally |
+
+---
+
+## 🧠 Notes
+
+- The **frontend** relies on the **Zala API** backend to function properly. Ensure the backend server is running and accessible at the URL set in `VITE_API_URL`.
+- The `.env` file is **not version controlled** — you must create it manually before running the app.
+- Any changes to environment variables require restarting the development server.
+
+---
+
+## 👥 Author
+
+**Zala Development Team**
+For inquiries, visit [colintondreau.com](https://colintondreau.com) or contact [colin.d.m.tondreau@gmail.com](mailto:colin.d.m.tondreau@gmail.com).
+
+---
+
+## 🪪 License
+
+This project is licensed under the **MIT License**.
+See the `LICENSE` file for more details.

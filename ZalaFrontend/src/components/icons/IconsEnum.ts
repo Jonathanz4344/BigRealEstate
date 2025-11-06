@@ -11,4 +11,12 @@ export enum Icons {
   Connect = "Connect",
   Minus = "Minus",
   Close = "Close",
+  Arrow = "Arrow",
+  Chevron = "Chevron",
+  CheckboxOutline = "CheckboxOutline",
+  CheckboxChecked = "CheckboxChecked",
+  Phone = "Phone",
+  Txt = "Txt",
+  Skip = "Skip",
+  Lock = "Lock",
 }

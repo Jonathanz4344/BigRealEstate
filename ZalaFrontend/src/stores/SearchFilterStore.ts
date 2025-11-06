@@ -2,15 +2,20 @@ import { create } from "zustand";
 import type { DemoDataSource } from "../interfaces";
 
 type ISearchFilterStore = {
-  source: DemoDataSource;
+  sources: DemoDataSource[];
   sortBy: string;
   setSortBy: (v: string) => void;
-  setSource: (v: DemoDataSource) => void;
+  setSources: (v: DemoDataSource[]) => void;
 };
 
+export const DEFAULT_LEAD_SOURCES: DemoDataSource[] = ["google_places"];
+
 export const useSearchFilterStore = create<ISearchFilterStore>()((set) => ({
-  source: "gpt",
+  sources: [...DEFAULT_LEAD_SOURCES],
   sortBy: "None",
   setSortBy: (v: string) => set({ sortBy: v }),
-  setSource: (v: DemoDataSource) => set({ source: v }),
+  setSources: (v: DemoDataSource[]) =>
+    set({
+      sources: v.length > 0 ? [...new Set(v)] : [...DEFAULT_LEAD_SOURCES],
+    }),
 }));

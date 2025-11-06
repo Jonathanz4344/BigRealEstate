@@ -43,22 +43,78 @@ For a detailed endpoint catalogue, see `API_ROUTES_README.md`.
 
 ---
 
-## Local Environment Setup (Windows)
+## Project Overview
 
-1. **Verify Python installation**
-   ```powershell
-   py --version
+The backend handles core application logic for Zala, including:
+
+- User management and authentication
+- Lead, property, and campaign handling
+- Integration with external APIs (Google Maps, OAuth, etc.)
+- RESTful endpoints consumed by the Zala frontend
+
+For detailed API documentation, see `API_ROUTES_README.md`.
+
+---
+
+## Virtual Environment Setup
+
+Creating a virtual environment ensures dependencies are isolated to this project.
+
+### 🖥️ macOS / Linux
+
+1. Navigate to the project root and create a virtual environment:
+
    ```
-   Ensure the reported version is **3.13+**.
+   cd ZalaBackend
+   python3 -m venv venv
+   ```
 
-2. **Install dependencies**
-   ```powershell
+2. Activate the virtual environment:
+
+   ```
+   source venv/bin/activate
+   ```
+
+3. Install dependencies:
+
+   ```
+   pip install -r requirements.txt
+   ```
+
+4. Run the application:
+
+   ```
+   uvicorn app.main:app --reload
+   ```
+
+### 🪟 Windows (PowerShell)
+
+1. Navigate to the project root and create a virtual environment:
+
+   ```
+   cd ZalaBackend
+   py -m venv venv
+   ```
+
+2. Activate the virtual environment:
+
+   ```
+   .\venv\Scripts\activate
+   ```
+
+3. Install dependencies:
+
+   ```
    py -m pip install -r requirements.txt
    ```
 
-3. **Configure environment variables**
-   - Duplicate `.env.example` to `.env` if available, otherwise create `.env`.
-   - For geocoding features, set `GOOGLE_API_KEY=<your_api_key>`.
+4. Run the application:
+
+   ```
+   py -m uvicorn app.main:app --reload
+   ```
+
+💡 Use `deactivate` to exit the virtual environment when finished.
 
 ---
 
@@ -66,52 +122,228 @@ For a detailed endpoint catalogue, see `API_ROUTES_README.md`.
 
 From the project root (`ZalaBackend/`):
 
-```powershell
-py -m uvicorn app.main:app --reload
+```
+uvicorn app.main:app --reload
 ```
 
-- API base URL: http://127.0.0.1:8000
-- Interactive docs (Swagger): http://127.0.0.1:8000/docs
-- Alternate docs (ReDoc): http://127.0.0.1:8000/redoc
+- **API Base URL:** [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- **Swagger Docs:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- **ReDoc Docs:** [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 
-If you start inside the `app/` directory, adjust the module path:
+If running from the `app/` directory, use:
 
-```powershell
-py -m uvicorn main:app --reload
+```
+uvicorn main:app --reload
 ```
 
-Use `--reload` during development to auto-restart on file changes.
+Use `--reload` in development to automatically restart on file changes.
 
 ---
 
+## Environment Variables
+
+All environment variables are defined in a single `.env` file located in the project root (`ZalaBackend/`).
+
+```
+# ─── Database Configuration ─────────────────────────────
+SQL_UNAME=<your_postgres_username>
+SQL_PASSWORD=<your_postgres_password>
+SQL_HOST=localhost
+SQL_PORT=5432
+SQL_DBNAME=zala_db
+
+# ─── Google Cloud API Configuration (Maps / Geocoding) ─
+GOOGLE_API_KEY=<your_google_maps_api_key>
+
+# ─── Google OAuth 2.0 Authentication ────────────────────
+GOOGLE_CLIENT_ID=<your_google_oauth_client_id>
+GOOGLE_CLIENT_SECRET=<your_google_oauth_client_secret>
+
+# ─── Lead Generation API Keys ────────────────────
+
+RAPIDAPI_KEY=<your_rapid_api_key>
+OPENAI_API_KEY=<your_open_ai_api_key>
+BRAVE_API_KEY=<your_brave_api_key>
+
+# ─── Frontend OAuth Integration (for React/Vite) ────────
+VITE_GOOGLE_CLIENT_ID=<same_as_GOOGLE_CLIENT_ID_or_OAuth_client_id>
+```
+
+### How to Get These Values
+
+#### 🗺️ Google API Key (for Maps and Geocoding)
+
+1. Visit [Google Cloud Console](https://console.cloud.google.com/).
+2. Create or select an existing project.
+3. Enable the **Geocoding API**, **Places API**, and **Maps JavaScript API**.
+4. Go to **APIs & Services → Credentials → Create Credentials → API Key**.
+5. Copy the key and add it to your `.env` file:
+
+   ```
+   GOOGLE_API_KEY=<your_api_key>
+   ```
+
+#### 🔐 Google OAuth Client (for Sign-In)
+
+1. In **Google Cloud Console**, open **APIs & Services → OAuth consent screen** and configure your app.
+2. Go to **Credentials → Create Credentials → OAuth client ID → Web application**.
+3. Add development origins:
+
+   ```
+   http://localhost:3000
+   http://127.0.0.1:3000
+   http://localhost:5173
+   http://127.0.0.1:5173
+   http://localhost:8000
+   ```
+
+4. Add redirect URIs:
+
+   ```
+   http://localhost:3000/auth/google/callback
+   http://localhost:8000/docs/oauth2-redirect
+   ```
+
+5. Copy the generated Client ID and Secret into `.env`:
+
+   ```
+   GOOGLE_CLIENT_ID=<your_client_id>
+   GOOGLE_CLIENT_SECRET=<your_client_secret>
+   ```
+
+6. Add the same Client ID to your frontend `.env`:
+
+   ```
+   VITE_GOOGLE_CLIENT_ID=<your_client_id>
+   ```
+
+#### 🧠 Lead Generation API Keys (RapidAPI, OpenAI, Brave Search)
+
+These keys are used for intelligent lead generation, AI processing, and web data enrichment features.
+Each service requires a developer account to generate and manage API credentials.
+
+##### ⚡ RapidAPI Key
+
+1. Visit [RapidAPI](https://rapidapi.com) and log in or create an account.
+2. Navigate to the **"My Apps"** section from your dashboard.
+3. Select an existing application or create a new one.
+   Need to subscribe https://rapidapi.com/ntd119/api/zillow-com4/playground/apiendpoint_85a30d86-7f81-4503-b49e-0c6ffe1f5f97
+4. Copy your personal API key.
+5. Add it to your `.env` file as:
+
+   ```
+   RAPIDAPI_KEY=<your_rapid_api_key>
+   ```
+
+##### 🤖 OpenAI API Key
+
+1. Go to [OpenAI API Keys](https://platform.openai.com/account/api-keys).
+2. Sign in with your OpenAI account.
+3. Click **“Create new secret key.”**
+4. Copy the key immediately (it won’t be shown again).
+5. Add it to your `.env` file as:
+
+   ```
+   OPENAI_API_KEY=<your_open_ai_api_key>
+   ```
+
+##### 🦁 Brave Search API Key
+
+1. Visit [Brave Search API](https://api.search.brave.com).
+2. Sign up or log in with your Brave account.
+3. Go to your **Developer Dashboard**.
+4. Locate your **Brave Search API key** under API credentials.
+5. Add it to your `.env` file as:
+
+   ```
+   BRAVE_API_KEY=<your_brave_api_key>
+   ```
+
+#### 🧩 Database Variables
+
+Use your PostgreSQL credentials to connect to your local or hosted database.
+
+Example:
+
+```
+SQL_UNAME=postgres
+SQL_PASSWORD=admin
+SQL_HOST=localhost
+SQL_PORT=5432
+SQL_DBNAME=zala
+```
+
+⚠️ Do not commit your `.env` file or share credentials publicly.
+
+---
+
+## Fixing Database Structure
+
+Go to Pgadmin and right click your database ex. zala and go to query tool.
+Run the following commands to delete db:
+
+(**MAKE SURE NAMING OF UNAME AND DBNAME MATCHES YOUR CONFIG**)
+-- 1. Drop everything in the schema (irreversible)
+DROP SCHEMA IF EXISTS public CASCADE;
+
+-- 2. Recreate the schema owned by your app role
+CREATE SCHEMA public AUTHORIZATION postgresadmin;
+
+-- 3. Ensure the role keeps access
+GRANT ALL ON SCHEMA public TO postgresadmin;
+
+-- 4. Make sure new sessions see the schema automatically
+ALTER ROLE postgresadmin IN DATABASE zala SET search_path TO public;
+ALTER DATABASE zala SET search_path TO public;
+
+-- 5. Apply the setting for the current session
+SET search_path TO public;
+
+Rerun initalize_db.py to create tables
+
 ## Testing
 
-1. Start the server as shown above.
-2. Visit the autogenerated docs to exercise endpoints:
-   - Swagger UI: http://127.0.0.1:8000/docs
-   - ReDoc: http://127.0.0.1:8000/redoc
+1. Ensure the server is running:
 
-You can also craft requests with tools such as `httpie`, `curl`, or Postman.
+   ```
+   uvicorn app.main:app --reload
+   ```
+
+2. Access documentation and test endpoints:
+
+   - **Swagger UI:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+   - **ReDoc UI:** [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+
+3. You can also test endpoints with:
+
+   - [Postman](https://www.postman.com/)
+   - [HTTPie](https://httpie.io/)
+   - `curl` commands
 
 ---
 
 ## Development Notes
 
-- Environment-specific configuration belongs in `.env`; keep secrets out of version control.
-- The `/api` prefix is applied to every router included in `app/main.py`.
-- When linking related entities (e.g., lead ↔ property), prefer the dedicated link/unlink endpoints rather than embedding IDs in create requests.
-- Keep `API_ROUTES_README.md` up to date when you add or change endpoints so the UI team has accurate guidance.
-
----
-
-## ENV & External Services
-
-Some features rely on external APIs (e.g., Google Maps). To enable them:
-
+- Store sensitive configuration only in `.env`.
+- The `/api` prefix is automatically applied to all routers in `app/main.py`.
+- Use dedicated link/unlink endpoints for entity relationships instead of embedding IDs in create requests.
+- Keep `API_ROUTES_README.md` updated with endpoint changes for frontend synchronization.
+- Restart your FastAPI server after modifying `.env`.
+Google Places
 1. Create or select a project at https://console.cloud.google.com/.
 2. Enable the **Geocoding API** (and any other required services).
 3. Generate an API key under **APIs & Services → Credentials**.
 4. Add the key to `.env` as `GOOGLE_API_KEY=...`.
 
-Restart the server after updating `.env` so changes take effect.
+OpenAI
+1. Create an API key for OpenAI at https://platform.openai.com/api-keys
+2. Add funds to your OpenAI account at https://platform.openai.com/settings/organization/billing/overview
+3. Add the API key to `.env` as `OPENAI_API_KEY=...`.
 
+Brave
+1. Create a Brave account at https://brave.com/search/api/
+2. Subscribe to the Free AI plan at https://api-dashboard.search.brave.com/app/subscriptions/subscribe?tab=ai
+3. Create an API key at https://api-dashboard.search.brave.com/app/keys
+4. Add the API key to `.env` as `BRAVE_API_KEY=...`.
+
+Restart the server after updating `.env` so changes take effect.

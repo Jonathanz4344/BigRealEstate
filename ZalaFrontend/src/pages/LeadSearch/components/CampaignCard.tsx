@@ -4,12 +4,14 @@ type CampaignCardProps = {
   campaignLeads: number;
   title: string;
   setTitle: (v: string) => void;
+  onStart: () => void;
 };
 
 export const CampaignCard = ({
   campaignLeads,
   title,
   setTitle,
+  onStart,
 }: CampaignCardProps) => {
   const onChange = ({
     target: { value },
@@ -20,7 +22,7 @@ export const CampaignCard = ({
         Campaign
       </span>
       <textarea
-        className="text-base w-full max-h-12 resize-none field-sizing-content outline-0 border-b-2 border-secondary-50 focus:border-accent"
+        className="text-area-style max-h-12"
         placeholder="Campaign title"
         value={title}
         onChange={onChange}
@@ -29,7 +31,12 @@ export const CampaignCard = ({
         <span className="text-secondary-50">Leads:</span>
         <span className="text-secondary-50">{campaignLeads}</span>
       </div>
-      <Button text="Start" icon={Icons.Flag} />
+      <Button
+        text="Start"
+        icon={Icons.Flag}
+        disabled={campaignLeads === 0}
+        onClick={onStart}
+      />
     </div>
   );
 };
