@@ -1,6 +1,9 @@
-from pydantic import BaseModel, computed_field
 from typing import Optional, List
 
+from pydantic import BaseModel, computed_field
+
+from .campaign import CampaignPublic
+from .lead import LeadPublic
 from .summaries import CampaignSummary, LeadSummary
 
 class CampaignLeadBase(BaseModel):
@@ -29,12 +32,10 @@ class CampaignLeadUpdate(BaseModel):
     email_contacted: Optional[bool] = None
 
 
-class CampaignLeadPublic(CampaignLeadBase):
+class CampaignLeadResponseBase(CampaignLeadBase):
     """
-    Schema for get a CampaignLead
+    Shared response fields for CampaignLead payloads.
     """
-    campaign: CampaignSummary
-    lead: LeadSummary
 
     @computed_field
     @property
@@ -54,4 +55,19 @@ class CampaignLeadPublic(CampaignLeadBase):
     class Config:
         from_attributes = True
 
+
+class CampaignLeadPublic(CampaignLeadResponseBase):
+    """
+    Compact schema used by collection endpoints.
+    """
+    campaign: CampaignSummary
+    lead: LeadSummary
+
+
+class CampaignLeadDetailedPublic(CampaignLeadResponseBase):
+    """
+    Detailed schema that embeds full campaign and lead details.
+    """
+    campaign: CampaignPublic
+    lead: LeadPublic
 
