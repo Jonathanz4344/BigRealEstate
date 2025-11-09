@@ -1,4 +1,4 @@
-import requests, sys, re, pprint
+import requests, sys, re, pprint, time
 from . import GOOGLE_API_KEY
 from .to_leads import gplaces_to_leads
 
@@ -47,30 +47,58 @@ def get_place_contact(place_id: str) -> dict:
         "maps_url": d.get("googleMapsUri"),
     }
 
-def search_agents(place_text_or_zip: str, radius_m=10000):
+def search_agents(place_text_or_zip: str, radius_m=10000, max_results: int = 50):
+    max_results = max(1, min(50, max_results))
     lat, lng = geocode(place_text_or_zip)
 
-    payload = {
-        "includedTypes": ["real_estate_agency"],
-        "locationRestriction": {"circle": {"center": {"latitude": lat, "longitude": lng}, "radius": radius_m}},
-    }
+    collected_places: list[dict] = []
+    seen_ids: set[str] = set()
+    next_page_token: str | None = None
+
     headers = {
         "X-Goog-Api-Key": GOOGLE_API_KEY,
         # Basic fields returned by searchNearby
         "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location",
     }
-    r = requests.post(PLACES_NEARBY_URL, headers=headers, json=payload, timeout=10)
-    if r.status_code == 403:
-        raise PlacesError("Forbidden: check Places API key restrictions & that Places API is enabled.")
-    if r.status_code >= 400:
-        raise PlacesError(
-            f"searchNearby failed (status={r.status_code}): {r.text or 'No response body'}"
-        )
-    r.raise_for_status()
-    places = r.json().get("places", [])
+
+    while len(collected_places) < max_results:
+        payload = {
+            "includedTypes": ["real_estate_agency"],
+            "locationRestriction": {"circle": {"center": {"latitude": lat, "longitude": lng}, "radius": radius_m}},
+        }
+        if next_page_token:
+            payload["pageToken"] = next_page_token
+
+        r = requests.post(PLACES_NEARBY_URL, headers=headers, json=payload, timeout=10)
+        if r.status_code == 403:
+            raise PlacesError("Forbidden: check Places API key restrictions & that Places API is enabled.")
+        if r.status_code >= 400:
+            raise PlacesError(
+                f"searchNearby failed (status={r.status_code}): {r.text or 'No response body'}"
+            )
+        r.raise_for_status()
+
+        data = r.json()
+        places = data.get("places", []) or []
+        for p in places:
+            place_id = p.get("id")
+            if place_id and place_id in seen_ids:
+                continue
+            if place_id:
+                seen_ids.add(place_id)
+            collected_places.append(p)
+            if len(collected_places) >= max_results:
+                break
+
+        next_page_token = data.get("nextPageToken")
+        if not next_page_token or len(collected_places) >= max_results or not places:
+            break
+
+        # The nextPageToken can take a moment to become valid.
+        time.sleep(2)
 
     results = []
-    for p in places:
+    for p in collected_places[:max_results]:
         base = {
             "id": p["id"],
             "name": p["displayName"]["text"],

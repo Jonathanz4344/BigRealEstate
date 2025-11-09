@@ -2,6 +2,8 @@ import clsx from "clsx";
 import type { DemoData } from "../../interfaces";
 import { LeadCard, type LeadCardProps } from "../cards";
 import { Button, type ButtonProps } from "../buttons";
+import { Loader } from "../feedback";
+import { COLORS } from "../../config";
 
 type LeadListSectionProps = {
   leads: DemoData[];
@@ -9,6 +11,7 @@ type LeadListSectionProps = {
   animationTrigger?: boolean;
   title?: string;
   footerBtn?: ButtonProps;
+  loading?: boolean;
   getLeadProps: (
     lead: DemoData,
     i: number
@@ -21,6 +24,7 @@ export const LeadListSection = ({
   animated,
   animationTrigger,
   footerBtn,
+  loading = false,
   getLeadProps,
 }: LeadListSectionProps) => {
   const showLeads = animated ? animationTrigger : true;
@@ -74,6 +78,15 @@ export const LeadListSection = ({
             )}
           >
             <Button {...footerBtn} />
+          </div>
+        )}
+
+        {loading && (
+          <div
+            className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm"
+            style={{ backgroundColor: `${COLORS.background}cc` }}
+          >
+            <Loader />
           </div>
         )}
       </div>
