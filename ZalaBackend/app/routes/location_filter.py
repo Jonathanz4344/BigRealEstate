@@ -1,7 +1,5 @@
 from typing import Dict, List, Optional, Tuple
 
-import json
-import os
 import re
 from math import atan2, cos, radians, sin, sqrt
 
@@ -13,13 +11,8 @@ from app.models.address import Address
 from app.models.lead import Lead
 from app.models.property import Property
 from app.schemas.location import DataSource, LeadSearchRequest, LocationFilter
-from app.utils.geocode import geocode_location, reverse_geocode
+from app.utils.geocode import geocode_location
 from app.external_api import google_places, openai_api, rapidapi
-
-
-mock_data_path = os.path.join(os.path.dirname(__file__), "../data/mock_properties.json")
-with open(mock_data_path, "r") as f:
-    MOCK_PROPERTIES = json.load(f)
 
 
 router = APIRouter()
@@ -51,66 +44,40 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return R * c
 
 
-def get_mock_properties(lat: float, lon: float) -> List[Dict[str, object]]:
-    """Filter bundled mock properties by distance."""
-    results = []
-    for prop in MOCK_PROPERTIES:
-        distance = haversine(lat, lon, prop["latitude"], prop["longitude"])
-        if distance <= 50:
-            prop["distance_miles"] = round(distance, 2)
-            results.append(prop)
-    return results
-
-
 def _build_location_query(filter: LocationFilter) -> Optional[str]:
-    zip_match = re.match(r"^\d{5}$", filter.location_text or "")
+    location_text = (filter.location_text or "").strip()
+    if not location_text:
+        return None
+
+    zip_match = re.match(r"^\d{5}$", location_text)
     if zip_match:
         return zip_match.group()
 
-    parts: List[str] = []
-    if filter.city:
-        parts.append(filter.city)
-    if filter.state:
-        parts.append(filter.state)
-    if filter.location_text:
-        parts.append(filter.location_text)
-
-    if not parts:
-        return None
-
-    return ", ".join(parts)
+    return location_text
 
 
 def _resolve_location(
     filter: LocationFilter,
     source_label: Optional[str] = None,
 ) -> Tuple[float, float, Dict[str, object], str]:
-    lat = filter.latitude
-    lon = filter.longitude
     location_query = _build_location_query(filter)
 
-    if lat is None or lon is None:
-        if not location_query:
-            raise LocationResolutionError("No valid location input provided")
-        geocoded = geocode_location(location_query)
-        if not geocoded:
-            raise LocationResolutionError("Geocoding failed")
-        lat = geocoded["latitude"]
-        lon = geocoded["longitude"]
-        normalized_location: Dict[str, object] = {
-            "latitude": lat,
-            "longitude": lon,
-            "city": geocoded.get("city"),
-            "state": geocoded.get("state"),
-            "zip": geocoded.get("zip"),
-        }
-    else:
-        normalized_location = {
-            "latitude": lat,
-            "longitude": lon,
-        }
-        if not location_query:
-            location_query = f"{lat},{lon}"
+    if not location_query:
+        raise LocationResolutionError("No valid location input provided")
+
+    geocoded = geocode_location(location_query)
+    if not geocoded:
+        raise LocationResolutionError("Geocoding failed")
+
+    lat = geocoded["latitude"]
+    lon = geocoded["longitude"]
+    normalized_location: Dict[str, object] = {
+        "latitude": lat,
+        "longitude": lon,
+        "city": geocoded.get("city"),
+        "state": geocoded.get("state"),
+        "zip": geocoded.get("zip"),
+    }
 
     if source_label:
         normalized_location["source"] = source_label
@@ -275,48 +242,8 @@ def _prepare_external_filter(filter: LocationFilter) -> Tuple[LocationFilter, Op
     return filter, dynamic_filter
 
 
-def _perform_mock_search(filter: LocationFilter) -> Dict[str, object]:
-    if filter.latitude is not None and filter.longitude is not None:
-        result = reverse_geocode(filter.latitude, filter.longitude)
-        if not result:
-            raise LocationResolutionError("Reverse geocoding failed")
-        result["source"] = DataSource.mock.value
-        mock_properties = get_mock_properties(float(result["latitude"]), float(result["longitude"]))
-        return {
-            "normalized_location": result,
-            "nearby_properties": mock_properties,
-        }
-
-    zip_match = re.match(r"^\d{5}$", filter.location_text or "")
-    if zip_match:
-        location_text = zip_match.group()
-    else:
-        location_text = filter.location_text or ""
-        if filter.city and filter.state:
-            location_text = f"{filter.city}, {filter.state}"
-        elif filter.city:
-            location_text = filter.city
-        elif filter.state:
-            location_text = filter.state
-
-    if not location_text:
-        raise LocationResolutionError("No valid location input provided")
-
-    result = geocode_location(location_text)
-    if not result:
-        raise LocationResolutionError("Geocoding failed")
-
-    result["source"] = DataSource.mock.value
-    mock_properties = get_mock_properties(float(result["latitude"]), float(result["longitude"]))
-
-    return {
-        "normalized_location": result,
-        "nearby_properties": mock_properties,
-    }
-
-
 def _perform_db_search(filter: LocationFilter, db: Session) -> Dict[str, object]:
-    lat, lon, normalized_location, _ = _resolve_location(filter, DataSource.db.value)
+    lat, lon, _, _ = _resolve_location(filter, DataSource.db.value)
 
     leads = (
         db.query(Lead)
@@ -356,7 +283,6 @@ def _perform_db_search(filter: LocationFilter, db: Session) -> Dict[str, object]
             nearby_leads.append(_serialize_lead(lead, round(best_distance, 2)))
 
     return {
-        "normalized_location": normalized_location,
         "leads": nearby_leads,
     }
 
@@ -367,7 +293,7 @@ def _perform_external_search(filter: LocationFilter, source: DataSource) -> Dict
     gpt_max_searches = 10
 
     filter_for_location, dynamic_filter = _prepare_external_filter(filter)
-    lat, lon, normalized_location, location_query = _resolve_location(filter_for_location, source.value)
+    lat, lon, _, location_query = _resolve_location(filter_for_location, source.value)
 
     try:
         if source == DataSource.gpt:
@@ -475,17 +401,24 @@ def _perform_external_search(filter: LocationFilter, source: DataSource) -> Dict
     )
     trimmed_leads = response_leads[:max_results]
 
-    return {
-        "normalized_location": normalized_location,
-        "radius_miles": radius_miles,
-        "dynamic_filter": dynamic_filter,
-        "source": source.value,
+    response: Dict[str, object] = {
         "leads": trimmed_leads,
     }
+    if dynamic_filter:
+        response["dynamic_filter"] = dynamic_filter
+    return response
 
 
 @router.post("/searchLeads", summary="Search Lead Combined", tags=["Search Lead"])
 def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
+    def assign_temp_ids(leads: List[Dict[str, object]], counter: int) -> int:
+        for lead in leads or []:
+            current_id = lead.get("lead_id")
+            if not isinstance(current_id, int) or current_id <= 0:
+                lead["lead_id"] = counter
+                counter += 1
+        return counter
+
     unique_sources: List[DataSource] = []
     for src in request.sources or []:
         if src not in unique_sources:
@@ -495,21 +428,19 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
         unique_sources = [DataSource.google_places]
 
     results: Dict[str, object] = {}
-    aggregated_leads: List[Dict[str, object]] = []
     errors: Dict[str, str] = {}
+    temp_id_counter = 1
 
     for source in unique_sources:
         try:
-            if source == DataSource.mock:
-                results[source.value] = _perform_mock_search(request)
-            elif source == DataSource.db:
+            if source == DataSource.db:
                 db_result = _perform_db_search(request, db)
                 results[source.value] = db_result
-                aggregated_leads.extend(db_result.get("leads", []))
+                temp_id_counter = assign_temp_ids(db_result.get("leads", []), temp_id_counter)
             elif source in {DataSource.gpt, DataSource.rapidapi, DataSource.google_places}:
                 ext_result = _perform_external_search(request, source)
                 results[source.value] = ext_result
-                aggregated_leads.extend(ext_result.get("leads", []))
+                temp_id_counter = assign_temp_ids(ext_result.get("leads", []), temp_id_counter)
             else:
                 errors[source.value] = "Unsupported source requested."
         except LocationResolutionError as exc:
@@ -520,12 +451,9 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
             errors[source.value] = f"Unexpected error: {exc}"
 
     response: Dict[str, object] = {
-        "requested_sources": [src.value if isinstance(src, DataSource) else str(src) for src in unique_sources],
         "results": results,
     }
 
-    if aggregated_leads:
-        response["aggregated_leads"] = aggregated_leads
     if errors:
         response["errors"] = errors
 

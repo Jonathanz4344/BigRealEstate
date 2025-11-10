@@ -170,12 +170,27 @@ Allowed file MIME types: `text/csv`, `application/vnd.ms-excel`, and `.xlsx`. Th
 
 | Method | Path | Purpose | Body Fields | Response |
 | --- | --- | --- | --- | --- |
-| POST | `/api/searchLeads` | Fan-out search across one or more data sources | Any `LocationFilter` fields (`zip`, `city`, `state`, `latitude`, `longitude`, `location_text`) plus `sources` (array containing any of `"mock"`, `"db"`, `"rapidapi"`, `"google_places"`, `"gpt"`) | `requested_sources`, per-source `results`, optional `aggregated_leads`, and per-source `errors` when a provider fails |
+| POST | `/api/searchLeads` | Fan-out search across one or more data sources | `location_text` (string) plus `sources` (array containing any of `"db"`, `"rapidapi"`, `"google_places"`, `"gpt"`) | Per-source `results` (each with `leads` and optional metadata) and per-source `errors` when a provider fails |
 
 Notes:
-- When a single source is requested, the matching entry in `results` mirrors the legacy payloads (for example, `mock` returns `nearby_properties`, while `rapidapi`/`google_places`/`gpt`/`db` return `leads` with `distance_miles`).
-- `aggregated_leads` flattens lead-producing sources for convenience.
+- When a single source is requested, the matching entry in `results` mirrors the legacy payloads (for example, `rapidapi`/`google_places`/`gpt`/`db` return `leads` with `distance_miles`).
 - If geocoding fails or a provider rejects the request, the reason is listed under `errors[source]`.
+- `location_text` can be a zip code or free-form description; the backend geocodes and extracts any dynamic filters automatically.
+- Leads returned from external sources include a temporary positive `lead_id` so frontends can key list items consistently; IDs increment across sources within the same response.
+- External provider quotas: RapidAPI requests reset monthly with a cap of 95 calls, and Brave search requests (used by the GPT integration) are limited to 1,950 calls per month.
+
+---
+
+## Send Campaign Email (`/api/campaign-emails/send`)
+
+| Method | Path | Purpose | Body Fields | Response |
+| --- | --- | --- | --- | --- |
+| POST | `/api/campaign-emails/send` | Send one email template to multiple leads already linked to the campaign | `campaign_id` (int), `lead_id` (array of lead IDs), `message_subject` (string), `message_body` (string) | Hydrated `CampaignPublic` object for the campaign after the messages are queued |
+
+Notes:
+- `lead_id` must include at least one ID, and every ID must already be linked to the specified campaign via `/api/campaign-leads`.
+- The endpoint records one `CampaignEmail` per lead and flips the `email_contacted` flag for each matching campaign-lead link.
+- Useful for bulk drip sends where the UI already has a campaign selection and filtered lead list.
 
 ---
 

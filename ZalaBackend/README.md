@@ -16,8 +16,6 @@ Backend service for the **Zala** project, built with [FastAPI](https://fastapi.t
 ```text
 ZalaBackend/
 ├── app/
-│   ├── data/
-│   │   └── mock_properties.json           # Mock property inventory used by search endpoints
 │   ├── db/
 │   │   ├── crud/                          # CRUD helpers (addresses, leads, campaigns, etc.)
 │   │   ├── schema.sql                     # Core PostgreSQL schema
