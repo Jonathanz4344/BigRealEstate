@@ -12,16 +12,27 @@ import type {
   LoginGoogleProps,
   SearchLeadsProps,
   SendTestEmailProps,
+  CreateCampaignEmailDraftProps,
+  SendCampaignEmailProps as SendCampaignEmailPayload,
+  CampaignEmailQueryParams,
+  UpdateCampaignEmailDraftProps,
+  DeleteCampaignEmailDraftProps,
+  ListCampaignsParams,
 } from "./types";
 import { useFetch } from "./useFetch";
 import { DEFAULT_LEAD_SOURCES } from "../../stores";
+import type {
+  ACampaignEmail,
+  ACampaignEmailSendResponse,
+  ACampaignSummary,
+} from "../../interfaces";
 
 export const useApi = () => {
   // const defaultResponse: APIResponse<unknown> = {
   //   data: null,
   //   err: "Method not implemented",
   // };
-  const { post, get } = useFetch();
+  const { post, get, put, del } = useFetch();
 
   const searchLeads = async ({ query, sources }: SearchLeadsProps) => {
     type CombinedSearchResponse = {
@@ -196,6 +207,97 @@ export const useApi = () => {
     });
   };
 
+  const listCampaignEmails = async ({
+    campaignId,
+    skip,
+    limit,
+  }: CampaignEmailQueryParams = {}) => {
+    const params = new URLSearchParams();
+    if (typeof campaignId === "number") {
+      params.append("campaign_id", String(campaignId));
+    }
+    if (typeof skip === "number") {
+      params.append("skip", String(skip));
+    }
+    if (typeof limit === "number") {
+      params.append("limit", String(limit));
+    }
+    const query = params.toString();
+    const path =
+      "/api/campaign-emails" + (query.length > 0 ? `?${query}` : "");
+    return await get<ACampaignEmail[]>(path);
+  };
+
+  const createCampaignEmailDraft = async ({
+    campaignId,
+    leadId,
+    subject,
+    body,
+    fromName,
+  }: CreateCampaignEmailDraftProps) => {
+    return await post<ACampaignEmail>(`/api/campaign-emails/`, {
+      campaign_id: campaignId,
+      lead_id: leadId,
+      message_subject: subject,
+      message_body: body,
+      from_name: fromName,
+    });
+  };
+
+  const sendCampaignEmail = async ({
+    campaignId,
+    leadIds,
+    subject,
+    body,
+    fromName,
+  }: SendCampaignEmailPayload) => {
+    return await post<ACampaignEmailSendResponse>(
+      `/api/campaign-emails/send`,
+      {
+        campaign_id: campaignId,
+        lead_id: leadIds,
+        message_subject: subject,
+        message_body: body,
+        from_name: fromName,
+      }
+    );
+  };
+
+  const updateCampaignEmailDraft = async ({
+    messageId,
+    subject,
+    body,
+    fromName,
+    leadId,
+  }: UpdateCampaignEmailDraftProps) => {
+    const payload: Record<string, unknown> = {};
+    if (typeof subject === "string") payload.message_subject = subject;
+    if (typeof body === "string") payload.message_body = body;
+    if (typeof fromName === "string") payload.from_name = fromName;
+    if (typeof leadId === "number") payload.lead_id = leadId;
+    else if (leadId === null) payload.lead_id = null;
+    return await put<ACampaignEmail>(
+      `/api/campaign-emails/${messageId}`,
+      payload
+    );
+  };
+
+  const deleteCampaignEmailDraft = async ({
+    messageId,
+  }: DeleteCampaignEmailDraftProps) => {
+    return await del<void>(`/api/campaign-emails/${messageId}`);
+  };
+
+  const listCampaigns = async ({ skip, limit }: ListCampaignsParams = {}) => {
+    const params = new URLSearchParams();
+    if (typeof skip === "number") params.append("skip", String(skip));
+    if (typeof limit === "number") params.append("limit", String(limit));
+    const query = params.toString();
+    return await get<ACampaignSummary[]>(
+      `/api/campaigns${query ? `?${query}` : ""}`
+    );
+  };
+
   return {
     searchLeads,
     createContact,
@@ -205,5 +307,11 @@ export const useApi = () => {
     getUser,
     loginGoogle,
     sendTestEmail,
+    listCampaignEmails,
+    createCampaignEmailDraft,
+    sendCampaignEmail,
+    updateCampaignEmailDraft,
+    deleteCampaignEmailDraft,
+    listCampaigns,
   };
 };

@@ -42,3 +42,42 @@ export type SendTestEmailProps = {
   html: string;
   fromName?: string;
 };
+
+export type CreateCampaignEmailDraftProps = {
+  campaignId: number;
+  subject: string;
+  body: string;
+  leadId?: number;
+  fromName?: string;
+};
+
+export type SendCampaignEmailProps = {
+  campaignId: number;
+  leadIds: number[];
+  subject: string;
+  body: string;
+  fromName?: string;
+};
+
+export type CampaignEmailQueryParams = {
+  campaignId?: number;
+  skip?: number;
+  limit?: number;
+};
+
+export type UpdateCampaignEmailDraftProps = {
+  messageId: number;
+  subject?: string;
+  body?: string;
+  fromName?: string;
+  leadId?: number | null;
+};
+
+export type DeleteCampaignEmailDraftProps = {
+  messageId: number;
+};
+
+export type ListCampaignsParams = {
+  skip?: number;
+  limit?: number;
+};

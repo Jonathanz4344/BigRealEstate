@@ -1,7 +1,7 @@
 import { CONFIG } from "../../config";
 import type { APIResponse } from "./types";
 
-const OK_STATUS_CODES = [200, 201];
+const OK_STATUS_CODES = [200, 201, 202, 204];
 
 export const useFetch = () => {
   const jsonHeader = {
@@ -49,14 +49,25 @@ export const useFetch = () => {
         headers: header,
         signal: abortController.signal,
       });
-      const json = await response.json();
+      let parsed: any = null;
+      const rawBody = await response.text();
+      if (rawBody && rawBody.length > 0) {
+        try {
+          parsed = JSON.parse(rawBody);
+        } catch {
+          throw new Error("Invalid JSON response from API");
+        }
+      }
 
-      if (!OK_STATUS_CODES.includes(response.status) || json.err || json.error)
+      if (
+        !OK_STATUS_CODES.includes(response.status) ||
+        (parsed && (parsed.err || parsed.error))
+      )
         throw new Error(
-          json.err ?? json.error ?? "Error communicating with API"
+          parsed?.err ?? parsed?.error ?? "Error communicating with API"
         );
 
-      return requestSuccess<T>(json);
+      return requestSuccess<T>(parsed as T);
     } catch (err) {
       return requestError<T>(err);
     }
