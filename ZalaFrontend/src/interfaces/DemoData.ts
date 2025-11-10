@@ -19,7 +19,7 @@ export type DemoData = {
   distance_miles: number;
 };
 
-export type DemoDataSource = "gpt" | "rapidapi" | "google_places" | "db" | "mock";
+export type DemoDataSource = "gpt" | "rapidapi" | "google_places";
 
 export const DEMO_DATA: DemoData[] = [
   {

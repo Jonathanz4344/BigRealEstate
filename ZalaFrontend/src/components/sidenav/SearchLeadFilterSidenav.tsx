@@ -9,8 +9,6 @@ const SOURCE_OPTIONS: { value: DemoDataSource; text: string }[] = [
   { value: "rapidapi", text: "RapidAPI (Zillow)" },
   { value: "google_places", text: "Google Places" },
   { value: "gpt", text: "OpenAI" },
-  { value: "db", text: "Database" },
-  { value: "mock", text: "Mock Data" },
 ];
 
 export const SearchLeadFilterSidenav = () => {

@@ -136,7 +136,7 @@ export const useApi = () => {
         city: "",
         state: "",
         zip: "",
-        source: primarySource ?? "db",
+        source: primarySource ?? "google_places",
       };
 
     return {
