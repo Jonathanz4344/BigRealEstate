@@ -1,4 +1,4 @@
-import type { AContact, DemoDataSource } from "../../interfaces";
+import type { AContact, DemoDataSource, ILead } from "../../interfaces";
 
 export type APIResponse<T> = {
   data: T | null;
@@ -38,4 +38,15 @@ export type LoginAPIProps = {
 
 export type LoginGoogleProps = {
   token: string;
+};
+
+export type CreateCampaignProps = {
+  title: string;
+  userId: number;
+  leads: number[];
+};
+
+export type CreateLeadProps = {
+  lead: ILead;
+  createdById: number;
 };

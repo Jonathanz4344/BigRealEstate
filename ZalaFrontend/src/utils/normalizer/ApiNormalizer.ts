@@ -1,7 +1,19 @@
-import type { IContact, ILead, ISourceResult } from "../../interfaces";
-import type { IAddress } from "../../interfaces/Address";
+import type {
+  AContact,
+  ALead,
+  IContact,
+  ILead,
+  ISourceResult,
+  IAddress,
+  AAddress,
+  ASourceResult,
+  ACampaign,
+  ICampaign,
+  ACampaignLead,
+  ICampaignLead,
+} from "../../interfaces";
 
-const contact = (data: never): IContact => {
+const contact = (data: AContact): IContact => {
   return {
     contactId: data["contact_id"],
     firstName: data["first_name"],
@@ -11,7 +23,7 @@ const contact = (data: never): IContact => {
   };
 };
 
-const address = (data: never): IAddress => {
+const address = (data: AAddress): IAddress => {
   return {
     addressId: data["address_id"],
     street1: data["street_1"],
@@ -24,7 +36,7 @@ const address = (data: never): IAddress => {
   };
 };
 
-const lead = (data: never): ILead => {
+const lead = (data: ALead): ILead => {
   return {
     leadId: data["lead_id"],
     licenseNum: data["license_num"],
@@ -40,7 +52,10 @@ const lead = (data: never): ILead => {
   };
 };
 
-const sourceResult = <T>(data: never, result: T): ISourceResult<T> => {
+const sourceResult = <T, B>(
+  data: ASourceResult<T>,
+  result: B
+): ISourceResult<B> => {
   return {
     ...result,
     distanceMiles: data["distance_miles"],
@@ -48,7 +63,32 @@ const sourceResult = <T>(data: never, result: T): ISourceResult<T> => {
   };
 };
 
+const sourceLead = (d: ASourceResult<ALead>): ISourceResult<ILead> =>
+  sourceResult<ALead, ILead>(d, lead(d));
+
+const campaignLead = (data: ACampaignLead): ICampaignLead => {
+  const contactMethods = [];
+  if (data["email_contacted"]) contactMethods.push("email");
+  if (data["sms_contacted"]) contactMethods.push("sms");
+  if (data["phone_contacted"]) contactMethods.push("phone");
+  return {
+    campaignId: data["campaign"]["campaign_id"],
+    contactMethods: contactMethods,
+    leadId: data["lead"]["lead_id"],
+  };
+};
+
+const campaign = (data: ACampaign): ICampaign => {
+  return {
+    campaignId: data["campaign_id"],
+    userId: data["user_id"],
+    campaignName: data["campaign_name"],
+    leads: data["leads"].map(campaignLead),
+  };
+};
+
 export const APINormalizer = {
   lead,
-  sourceResult,
+  sourceLead,
+  campaign,
 };

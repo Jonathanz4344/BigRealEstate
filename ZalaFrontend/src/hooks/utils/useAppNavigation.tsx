@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "react-router";
+import type { ILead } from "../../interfaces";
 
 export const useAppNavigation = () => {
   const location = useLocation();
@@ -6,8 +7,8 @@ export const useAppNavigation = () => {
 
   const toLeadSearchPage = () => navigate("/");
 
-  const toCampaignPage = (campaignId: number) =>
-    navigate("/campaign/" + campaignId);
+  const toCampaignPage = (campaignId: number, leads: ILead[]) =>
+    navigate("/campaign/" + campaignId, { state: { leads } });
 
   const toLoginPage = () => navigate("/login");
 

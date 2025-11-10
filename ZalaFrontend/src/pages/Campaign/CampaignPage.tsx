@@ -11,14 +11,16 @@ import { CampaignTab, DEFAULT_CAMPAIGN } from "../../interfaces";
 import { useAppHeader, useLeadSearchPage, useTimeoutEffect } from "../../hooks";
 import { ButtonVariant } from "../../components/buttons/ButtonVariant";
 import { CampaignFolders } from "./components";
+import { useGetCampaignLeads } from "./hooks";
 
 export const CampaignPage = () => {
   const campaign = useCampaignStore((state) => state.campaign);
-  const { data: leadData, setQuery } = useSearchQueryStore();
+  // const { data: leadData, setQuery } = useSearchQueryStore();
   const { tab, setTab } = useCampaignFolderStore();
 
-  const { onSearchCore } = useAppHeader();
-  const { campaignLeads, onAllLeadsButton, onStart } = useLeadSearchPage();
+  // const { onSearchCore } = useAppHeader();
+  // const { campaignLeads, onAllLeadsButton, onStart } = useLeadSearchPage();
+  const [leads] = useGetCampaignLeads(campaign);
 
   const [selected, setSelected] = useState<number[]>([]);
   const [viewing, setViewing] = useState(-1);
@@ -34,26 +36,26 @@ export const CampaignPage = () => {
 
   // Debug get leads when load fake api call
 
-  useEffect(() => {
-    if (campaignLeads.length === 0) return;
-    onStart(true);
-  }, [stringify(campaignLeads)]);
+  // useEffect(() => {
+  //   if (campaignLeads.length === 0) return;
+  //   onStart(true);
+  // }, [stringify(campaignLeads)]);
 
-  useEffect(() => {
-    if (leadData.length === 0) return;
-    onAllLeadsButton();
-  }, [stringify(leadData)]);
+  // useEffect(() => {
+  //   if (leadData.length === 0) return;
+  //   onAllLeadsButton();
+  // }, [stringify(leadData)]);
 
-  useTimeoutEffect(
-    () => {
-      if (campaign.campaignId === DEFAULT_CAMPAIGN.campaignId) {
-        setQuery("Henrietta NY");
-        onSearchCore("Henrietta NY", "gpt");
-      }
-    },
-    [],
-    250
-  );
+  // useTimeoutEffect(
+  //   () => {
+  //     if (campaign.campaignId === DEFAULT_CAMPAIGN.campaignId) {
+  //       setQuery("Henrietta NY");
+  //       onSearchCore("Henrietta NY", "gpt");
+  //     }
+  //   },
+  //   [],
+  //   250
+  // );
 
   // End Debug
 
@@ -82,7 +84,7 @@ export const CampaignPage = () => {
           </div>
           <div className="grow-1 w-full">
             <CampaignFolders
-              allLeads={campaign.leads}
+              allLeads={leads}
               currentLeadIndex={viewing}
               selectedLeadIndexs={selected}
               onPrimary={() => setShowEmail(true)}
@@ -93,7 +95,7 @@ export const CampaignPage = () => {
         </div>
       </div>
       <LeadListSection
-        leads={campaign.leads}
+        leads={leads}
         footerBtn={{
           text: showSelectAllButton ? "Select all" : "Unselect all",
           icon: showSelectAllButton

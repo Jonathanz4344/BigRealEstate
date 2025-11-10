@@ -4,4 +4,5 @@ export * from "./pages";
 export * from "./User";
 export * from "./Lead";
 export * from "./contact";
+export * from "./Address";
 export * from "./SourceResult";

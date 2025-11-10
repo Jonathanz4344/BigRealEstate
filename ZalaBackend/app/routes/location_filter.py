@@ -16,6 +16,9 @@ from app.schemas.location import DataSource, LeadSearchRequest, LocationFilter
 from app.utils.geocode import geocode_location, reverse_geocode
 from app.external_api import google_places, openai_api, rapidapi
 
+from app.db.crud import lead as lead_crud
+from app.db.session import get_db
+
 
 mock_data_path = os.path.join(os.path.dirname(__file__), "../data/mock_properties.json")
 with open(mock_data_path, "r") as f:
@@ -46,7 +49,10 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     R = 3958.8  # miles
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
-    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    a = (
+        sin(dlat / 2) ** 2
+        + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    )
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c
 
@@ -142,18 +148,20 @@ def _serialize_lead(lead: Lead, distance: float) -> Dict[str, object]:
                 "mls_number": getattr(prop, "mls_number", None),
                 "notes": getattr(prop, "notes", None),
                 "address_id": address.address_id if address else None,
-                "address": {
-                    "address_id": address.address_id if address else None,
-                    "street_1": address.street_1 if address else None,
-                    "street_2": address.street_2 if address else None,
-                    "city": address.city if address else None,
-                    "state": address.state if address else None,
-                    "zipcode": address.zipcode if address else None,
-                    "lat": address.lat if address else None,
-                    "long": address.long if address else None,
-                }
-                if address
-                else None,
+                "address": (
+                    {
+                        "address_id": address.address_id if address else None,
+                        "street_1": address.street_1 if address else None,
+                        "street_2": address.street_2 if address else None,
+                        "city": address.city if address else None,
+                        "state": address.state if address else None,
+                        "zipcode": address.zipcode if address else None,
+                        "lat": address.lat if address else None,
+                        "long": address.long if address else None,
+                    }
+                    if address
+                    else None
+                ),
                 "units": units,
             }
         )
@@ -192,24 +200,28 @@ def _serialize_lead(lead: Lead, distance: float) -> Dict[str, object]:
         "created_by_user": created_by_user,
         "contact_id": lead.contact_id,
         "contact": contact,
-        "address": {
-            "address_id": lead_address.address_id if lead_address else None,
-            "street_1": lead_address.street_1 if lead_address else None,
-            "street_2": lead_address.street_2 if lead_address else None,
-            "city": lead_address.city if lead_address else None,
-            "state": lead_address.state if lead_address else None,
-            "zipcode": lead_address.zipcode if lead_address else None,
-            "lat": lead_address.lat if lead_address else None,
-            "long": lead_address.long if lead_address else None,
-        }
-        if lead_address
-        else None,
+        "address": (
+            {
+                "address_id": lead_address.address_id if lead_address else None,
+                "street_1": lead_address.street_1 if lead_address else None,
+                "street_2": lead_address.street_2 if lead_address else None,
+                "city": lead_address.city if lead_address else None,
+                "state": lead_address.state if lead_address else None,
+                "zipcode": lead_address.zipcode if lead_address else None,
+                "lat": lead_address.lat if lead_address else None,
+                "long": lead_address.long if lead_address else None,
+            }
+            if lead_address
+            else None
+        ),
         "properties": props,
         "distance_miles": distance,
     }
 
 
-def _split_freeform_location(text: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+def _split_freeform_location(
+    text: Optional[str],
+) -> Tuple[Optional[str], Optional[str]]:
     if not text:
         return (None, None)
     lowered = text.lower()
@@ -252,7 +264,9 @@ def _geocode_string(
     return result
 
 
-def _prepare_external_filter(filter: LocationFilter) -> Tuple[LocationFilter, Optional[str]]:
+def _prepare_external_filter(
+    filter: LocationFilter,
+) -> Tuple[LocationFilter, Optional[str]]:
     """
     Returns a filter instance with a location string suitable for geocoding and
     an optional dynamic qualifier extracted from free-form text.
@@ -261,7 +275,9 @@ def _prepare_external_filter(filter: LocationFilter) -> Tuple[LocationFilter, Op
     location_override = None
 
     if filter.location_text:
-        query_fragment, location_fragment = _split_freeform_location(filter.location_text)
+        query_fragment, location_fragment = _split_freeform_location(
+            filter.location_text
+        )
         if query_fragment:
             dynamic_filter = query_fragment
         if location_fragment and location_fragment != filter.location_text.strip():
@@ -269,7 +285,10 @@ def _prepare_external_filter(filter: LocationFilter) -> Tuple[LocationFilter, Op
 
     if location_override:
         if hasattr(filter, "model_copy"):
-            return filter.model_copy(update={"location_text": location_override}), dynamic_filter
+            return (
+                filter.model_copy(update={"location_text": location_override}),
+                dynamic_filter,
+            )
         return filter.copy(update={"location_text": location_override}), dynamic_filter  # type: ignore[attr-defined]
 
     return filter, dynamic_filter
@@ -281,7 +300,9 @@ def _perform_mock_search(filter: LocationFilter) -> Dict[str, object]:
         if not result:
             raise LocationResolutionError("Reverse geocoding failed")
         result["source"] = DataSource.mock.value
-        mock_properties = get_mock_properties(float(result["latitude"]), float(result["longitude"]))
+        mock_properties = get_mock_properties(
+            float(result["latitude"]), float(result["longitude"])
+        )
         return {
             "normalized_location": result,
             "nearby_properties": mock_properties,
@@ -307,7 +328,9 @@ def _perform_mock_search(filter: LocationFilter) -> Dict[str, object]:
         raise LocationResolutionError("Geocoding failed")
 
     result["source"] = DataSource.mock.value
-    mock_properties = get_mock_properties(float(result["latitude"]), float(result["longitude"]))
+    mock_properties = get_mock_properties(
+        float(result["latitude"]), float(result["longitude"])
+    )
 
     return {
         "normalized_location": result,
@@ -361,24 +384,34 @@ def _perform_db_search(filter: LocationFilter, db: Session) -> Dict[str, object]
     }
 
 
-def _perform_external_search(filter: LocationFilter, source: DataSource) -> Dict[str, object]:
+def _perform_external_search(
+    filter: LocationFilter, source: DataSource
+) -> Dict[str, object]:
     radius_miles = 50.0
     max_results = 50
     gpt_max_searches = 10
 
     filter_for_location, dynamic_filter = _prepare_external_filter(filter)
-    lat, lon, normalized_location, location_query = _resolve_location(filter_for_location, source.value)
+    lat, lon, normalized_location, location_query = _resolve_location(
+        filter_for_location, source.value
+    )
 
     try:
         if source == DataSource.gpt:
-            leads = openai_api.search_agents(location_query, dynamic_filter or "", gpt_max_searches)
+            leads = openai_api.search_agents(
+                location_query, dynamic_filter or "", gpt_max_searches
+            )
         elif source == DataSource.rapidapi:
             leads = rapidapi.search_agents(location_query, max_results=max_results)
         elif source == DataSource.google_places:
             radius_m = max(1, min(50000, int(radius_miles * 1609.34)))
-            leads = google_places.search_agents(location_query, radius_m=radius_m, max_results=max_results)
+            leads = google_places.search_agents(
+                location_query, radius_m=radius_m, max_results=max_results
+            )
         else:
-            raise LocationResolutionError(f"Unsupported external source '{source.value}'")
+            raise LocationResolutionError(
+                f"Unsupported external source '{source.value}'"
+            )
     except LocationResolutionError:
         raise
     except Exception as exc:
@@ -398,7 +431,9 @@ def _perform_external_search(filter: LocationFilter, source: DataSource) -> Dict
             addr_lat = _coerce_float(address_value.get("lat"))
             addr_lon = _coerce_float(address_value.get("long"))
 
-            needs_geocode = addr_lat is None or addr_lon is None or not address_value.get("zipcode")
+            needs_geocode = (
+                addr_lat is None or addr_lon is None or not address_value.get("zipcode")
+            )
             if needs_geocode:
                 address_parts = [
                     address_value.get("street_1"),
@@ -412,11 +447,17 @@ def _perform_external_search(filter: LocationFilter, source: DataSource) -> Dict
                     address_string = lead_dict["notes"]
 
                 if address_string:
-                    address_geocoded_from_text = _geocode_string(address_string, geo_cache)
+                    address_geocoded_from_text = _geocode_string(
+                        address_string, geo_cache
+                    )
 
                 if address_geocoded_from_text:
-                    lat_candidate = _coerce_float(address_geocoded_from_text.get("latitude"))
-                    lon_candidate = _coerce_float(address_geocoded_from_text.get("longitude"))
+                    lat_candidate = _coerce_float(
+                        address_geocoded_from_text.get("latitude")
+                    )
+                    lon_candidate = _coerce_float(
+                        address_geocoded_from_text.get("longitude")
+                    )
                     if lat_candidate is not None:
                         addr_lat = lat_candidate
                         address_value["lat"] = lat_candidate
@@ -424,10 +465,16 @@ def _perform_external_search(filter: LocationFilter, source: DataSource) -> Dict
                         addr_lon = lon_candidate
                         address_value["long"] = lon_candidate
                     if not address_value.get("zipcode"):
-                        address_value["zipcode"] = address_geocoded_from_text.get("zip") or ""
-                    if not address_value.get("city") and address_geocoded_from_text.get("city"):
+                        address_value["zipcode"] = (
+                            address_geocoded_from_text.get("zip") or ""
+                        )
+                    if not address_value.get("city") and address_geocoded_from_text.get(
+                        "city"
+                    ):
                         address_value["city"] = address_geocoded_from_text["city"]
-                    if not address_value.get("state") and address_geocoded_from_text.get("state"):
+                    if not address_value.get(
+                        "state"
+                    ) and address_geocoded_from_text.get("state"):
                         address_value["state"] = address_geocoded_from_text["state"]
 
             if addr_lat is not None and addr_lon is not None:
@@ -462,7 +509,9 @@ def _perform_external_search(filter: LocationFilter, source: DataSource) -> Dict
         if distance is not None and distance > radius_miles:
             continue
 
-        lead_dict["distance_miles"] = round(distance, 2) if distance is not None else None
+        lead_dict["distance_miles"] = (
+            round(distance, 2) if distance is not None else None
+        )
         lead_dict.pop("geocoded_address", None)
         lead_dict["source"] = source.value
         response_leads.append(lead_dict)
@@ -470,7 +519,11 @@ def _perform_external_search(filter: LocationFilter, source: DataSource) -> Dict
     response_leads.sort(
         key=lambda item: (
             item.get("distance_miles") is None,
-            item.get("distance_miles") if item.get("distance_miles") is not None else float("inf"),
+            (
+                item.get("distance_miles")
+                if item.get("distance_miles") is not None
+                else float("inf")
+            ),
         )
     )
     trimmed_leads = response_leads[:max_results]
@@ -506,7 +559,11 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
                 db_result = _perform_db_search(request, db)
                 results[source.value] = db_result
                 aggregated_leads.extend(db_result.get("leads", []))
-            elif source in {DataSource.gpt, DataSource.rapidapi, DataSource.google_places}:
+            elif source in {
+                DataSource.gpt,
+                DataSource.rapidapi,
+                DataSource.google_places,
+            }:
                 ext_result = _perform_external_search(request, source)
                 results[source.value] = ext_result
                 aggregated_leads.extend(ext_result.get("leads", []))
@@ -520,7 +577,10 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
             errors[source.value] = f"Unexpected error: {exc}"
 
     response: Dict[str, object] = {
-        "requested_sources": [src.value if isinstance(src, DataSource) else str(src) for src in unique_sources],
+        "requested_sources": [
+            src.value if isinstance(src, DataSource) else str(src)
+            for src in unique_sources
+        ],
         "results": results,
     }
 

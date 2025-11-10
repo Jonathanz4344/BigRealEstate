@@ -34,8 +34,7 @@ export const useAutoLogin = () => {
   const autoLogin = () => {
     const userId = cookies.userId;
 
-    if (!userId || userId === "undefined") return;
-
+    if (!userId || userId === "undefined") return onUserNotFound();
     (async () => {
       const user = await login(userId);
       if (!user) return onUserNotFound();

@@ -1,21 +1,27 @@
 import { produce } from "immer";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  useAuthStore,
   useCampaignStore,
   useSearchFilterStore,
   useSearchQueryStore,
   useSideNavControlStore,
 } from "../../stores";
-import { stringify } from "../../utils";
+import { Normalizer, stringify } from "../../utils";
 import type { MapRefHandle } from "../components";
-import { useAppNavigation } from "../utils";
+import { useAppNavigation, useSnack } from "../utils";
+import { useApi } from "../api";
+import type { ILead } from "../../interfaces";
 
 export const useLeadSearchPage = () => {
+  const user = useAuthStore((state) => state.user);
   const leadData = useSearchQueryStore((state) => state.data);
   const setCampaign = useCampaignStore((state) => state.setCampaign);
   const sortBy = useSearchFilterStore((state) => state.sortBy);
   const openSideNav = useSideNavControlStore((state) => state.open);
 
+  const { createCampaign, createLead } = useApi();
+  const [_successSnack, errorSnack] = useSnack();
   const { toCampaignPage } = useAppNavigation();
 
   const mapRef = useRef<MapRefHandle>(null);
@@ -23,14 +29,15 @@ export const useLeadSearchPage = () => {
   const [activeLead, setActiveLead] = useState<number>(-1);
   const [campaignLeads, setCampaignLeads] = useState<number[]>([]);
   const [campaignTitle, setCampaignTitle] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!mapRef.current) return;
 
     if (leadData.length > 0) {
       mapRef.current?.centerMap({
-        lat: leadData[0].latitude,
-        lng: leadData[0].longitude,
+        lat: leadData[0].address.lat,
+        lng: leadData[0].address.long,
       });
     }
 
@@ -58,8 +65,14 @@ export const useLeadSearchPage = () => {
   const sortLeads = useCallback(() => {
     if (sortBy === "None" || sortBy.length === 0) return leadData;
     return leadData.sort((a, b) => {
+      const ambFirstName = a.contact.firstName.localeCompare(
+        b.contact.firstName
+      );
+      const ambLastName = a.contact.firstName.localeCompare(
+        b.contact.firstName
+      );
       if (sortBy === "Name")
-        return a.agent < b.agent ? -1 : a.agent > b.agent ? 1 : 0;
+        return ambFirstName === 0 ? ambLastName : ambFirstName;
       if (sortBy === "Email")
         return a.contact < b.contact ? -1 : a.contact > b.contact ? 1 : 0;
       if (sortBy === "Address")
@@ -68,12 +81,48 @@ export const useLeadSearchPage = () => {
     });
   }, [stringify(leadData), sortBy]);
 
-  const onStart = (skipNav = false) => {
-    // some async method gets campaign id
-    const campaignId = 1234;
-    const leads = leadData.filter((_lead, i) => campaignLeads.includes(i));
-    setCampaign({ campaignId, leads });
-    if (!skipNav) toCampaignPage(campaignId);
+  const onStart = async (skipNav = false) => {
+    if (campaignLeads.length == 0) return;
+
+    const title =
+      campaignTitle.length > 0
+        ? campaignTitle
+        : `${new Date().toDateString()} Campaign`;
+    const leadsToAddToCampaign = leadData.filter((_lead, i) =>
+      campaignLeads.includes(i)
+    );
+
+    setLoading(true);
+    const apiLeads: ILead[] = (
+      await Promise.all(
+        leadsToAddToCampaign.map(async (lead) => {
+          console.log(`Creating ${lead.leadId}`);
+          return (await createLead({ lead, createdById: user!.userId })).data
+            ?.lead;
+        })
+      )
+    )
+      .map((apiLead) => apiLead && Normalizer.APINormalizer.lead(apiLead))
+      .filter((apiLead) => apiLead) as ILead[];
+    const leadIds = apiLeads.map((lead) => lead.leadId);
+
+    const res = await createCampaign({
+      title,
+      leads: leadIds,
+      userId: user!.userId,
+    });
+
+    if (res.err || !res.data) {
+      console.log(`Internal api error:`);
+      console.log(res.err);
+      errorSnack(`Connection unstable... please try again later`);
+      return;
+    }
+
+    const campaign = Normalizer.APINormalizer.campaign(res.data);
+    setCampaign(campaign);
+
+    if (!skipNav) toCampaignPage(campaign.campaignId, leadsToAddToCampaign);
   };
 
   return {
@@ -82,6 +131,8 @@ export const useLeadSearchPage = () => {
     campaignLeads,
     campaignTitle,
     setCampaignTitle,
+    loading,
+    setLoading,
     mapRef,
     leadData: sortLeads(),
     activeLead,
