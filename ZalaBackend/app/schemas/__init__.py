@@ -24,6 +24,7 @@ from .campaign_lead import (
     CampaignLeadCreate,
     CampaignLeadUpdate,
     CampaignLeadPublic,
+    CampaignLeadDetailedPublic,
 )
 from .location import LocationFilter, DataSource
 from .summaries import UserSummary, LeadSummary, PropertySummary, CampaignSummary # Add CampaignSummary
@@ -32,3 +33,4 @@ from .summaries import UserSummary, LeadSummary, PropertySummary, CampaignSummar
 CampaignPublic.model_rebuild()
 LeadPublic.model_rebuild()
 CampaignLeadPublic.model_rebuild()
+CampaignLeadDetailedPublic.model_rebuild()
