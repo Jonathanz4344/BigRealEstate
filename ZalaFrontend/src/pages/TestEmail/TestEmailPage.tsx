@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { TextInput, Button, IconButtonVariant, Icons } from "../../components";
+import {
+  TextInput,
+  Button,
+  IconButtonVariant,
+  Icons,
+  RichTextEditor,
+} from "../../components";
 import { useApi } from "../../hooks";
 import { useAuthStore } from "../../stores";
 import { useSnack } from "../../hooks/utils";
@@ -104,16 +110,12 @@ export const TestEmailPage = () => {
             iconVariant={IconButtonVariant.Clear}
             icon={Icons.User}
           />
-          <div className="space-y-2">
-            <label className="text-secondary text-sm font-semibold">
-              HTML Body
-            </label>
-            <textarea
-              className="w-full min-h-[200px] rounded-md border-2 border-secondary p-3 text-secondary focus:outline-none focus:border-accent"
-              value={html}
-              onChange={(e) => setHtml(e.target.value)}
-            />
-          </div>
+          <RichTextEditor
+            label="Email Body"
+            value={html}
+            onChange={setHtml}
+            placeholder="Write your message and format it with the toolbar..."
+          />
         </div>
 
         <Button
