@@ -1,5 +1,9 @@
-import { Button } from "../buttons";
-import { useAppNavigation, useLogout } from "../../hooks";
+import { Button, GoogleAuthButton } from "../buttons";
+import {
+  useAppNavigation,
+  useGoogleAuthButtonCallback,
+  useLogout,
+} from "../../hooks";
 import { useAuthStore, useSideNavControlStore } from "../../stores";
 import Avatar from "@mui/material/Avatar";
 import { COLORS } from "../../config";
@@ -9,6 +13,9 @@ export const UserSidenav = () => {
   const closeSideNav = useSideNavControlStore((state) => state.close);
   const logout = useLogout();
   const { toEmailTestPage } = useAppNavigation();
+  const googleConnectCallback = useGoogleAuthButtonCallback({
+    onMsg: () => "Google account connected!",
+  });
 
   const onLogout = () => (closeSideNav(), logout());
   const onOpenTestPage = () => {
@@ -56,11 +63,15 @@ export const UserSidenav = () => {
             >
               {user.gmailConnected ? "Connected" : "Not connected"}
             </p>
-            <Button
-              text="Open Gmail Test"
-              onClick={onOpenTestPage}
-              disabled={!user.gmailConnected}
-            />
+            {user.gmailConnected ? (
+              <Button text="Open Gmail Test" onClick={onOpenTestPage} />
+            ) : (
+              <GoogleAuthButton
+                callback={googleConnectCallback}
+                text="Connect Google"
+                getExtraPayload={() => ({ targetUserId: user.userId })}
+              />
+            )}
           </div>
         </div>
         <div className="p-[30px]">

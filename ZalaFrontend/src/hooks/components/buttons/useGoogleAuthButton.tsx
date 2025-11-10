@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CONFIG } from "../../../config";
 import { useApi } from "../../api";
+import type { LoginGoogleProps } from "../../api";
 import { stringify } from "../../../utils";
 import { AUserToIUser, type IUser } from "../../../interfaces";
 
@@ -51,9 +52,13 @@ export type UseGoogleAuthButtonCallbackProps = {
 
 type UseGoogleAuthButtonProps = {
   callback: (v: UseGoogleAuthButtonCallbackProps) => void;
+  getExtraPayload?: () => Partial<Omit<LoginGoogleProps, "code" | "scope">> | undefined;
 };
 
-export const useGoogleAuthButton = ({ callback }: UseGoogleAuthButtonProps) => {
+export const useGoogleAuthButton = ({
+  callback,
+  getExtraPayload,
+}: UseGoogleAuthButtonProps) => {
   const codeClientRef = useRef<GoogleCodeClient | null>(null);
   const [scriptReady, setScriptReady] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -124,7 +129,8 @@ export const useGoogleAuthButton = ({ callback }: UseGoogleAuthButtonProps) => {
       callback({ loading: true });
       setLoading(true);
 
-      const userRes = await loginGoogle({ code, scope });
+      const extra = getExtraPayload?.() ?? {};
+      const userRes = await loginGoogle({ code, scope, ...extra });
 
       setLoading(false);
       if (userRes.err || !userRes.data) {
@@ -139,7 +145,7 @@ export const useGoogleAuthButton = ({ callback }: UseGoogleAuthButtonProps) => {
       const user = AUserToIUser(userRes.data);
       callback({ loading: false, user });
     },
-    [callback, loginGoogle]
+    [callback, loginGoogle, getExtraPayload]
   );
 
   useEffect(() => {

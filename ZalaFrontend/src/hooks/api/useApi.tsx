@@ -171,8 +171,12 @@ export const useApi = () => {
     return await get<AUser>(`/api/users/${userId}`);
   };
 
-  const loginGoogle = async ({ code, scope }: LoginGoogleProps) => {
-    return await post<AUser>(`/api/login/google`, { code, scope });
+  const loginGoogle = async ({ code, scope, targetUserId }: LoginGoogleProps) => {
+    const payload: Record<string, unknown> = { code, scope };
+    if (typeof targetUserId === "number") {
+      payload.target_user_id = targetUserId;
+    }
+    return await post<AUser>(`/api/login/google`, payload);
   };
 
   const sendTestEmail = async ({

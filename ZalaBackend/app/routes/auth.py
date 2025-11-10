@@ -56,12 +56,41 @@ def login_with_google(login_data: GoogleLogin, db: Session = Depends(get_db)):
             detail=str(exc),
         ) from exc
 
+    target_user = None
+    google_email = (google_profile.get("email") or "").lower()
+
+    if login_data.target_user_id is not None:
+        target_user = user_crud.get_user_by_id(db, login_data.target_user_id)
+        if not target_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found for Google linking.",
+            )
+
+        target_email = ""
+        if target_user.authentication and target_user.authentication.provider_email:
+            target_email = target_user.authentication.provider_email.lower()
+        elif target_user.contact and target_user.contact.email:
+            target_email = target_user.contact.email.lower()
+
+        if not google_email or not target_email or google_email != target_email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Please sign into Google with the same email as your Zala account to connect it.",
+            )
+
     user = user_crud.upsert_google_user(db, google_profile)
 
     if not user:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Unable to process Google sign-in.",
+        )
+
+    if target_user and user.user_id != target_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Google account is already linked to another user.",
         )
 
     if oauth_tokens:

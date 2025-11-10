@@ -386,6 +386,7 @@ The Gmail integration now requires full OAuth consent with the `https://www.goog
 If Gmail stops working for a user, have them re-run Google sign-in so a new refresh token is issued.
 
 > **Note:** The Gmail API must be enabled for the same Google Cloud project that owns your OAuth client. Visit https://console.cloud.google.com/apis/api/gmail.googleapis.com/overview?project=<your_project_id> and click **Enable** (or re-enable) before testing email sends, otherwise Google will return `SERVICE_DISABLED / accessNotConfigured`.
+> **Account linking rule:** Connecting Gmail to an existing Zala account requires using the exact same email address during Google sign-in. If the emails do not match, the backend will reject the link so the wrong Google account cannot be attached.
 
 ### Adding Google test users (required while the app is in Testing mode)
 

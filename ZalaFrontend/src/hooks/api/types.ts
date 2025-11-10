@@ -32,6 +32,7 @@ export type LoginAPIProps = {
 export type LoginGoogleProps = {
   code: string;
   scope?: string;
+  targetUserId?: number;
 };
 
 export type SendTestEmailProps = {
