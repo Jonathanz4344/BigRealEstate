@@ -1,5 +1,5 @@
 import { useCampaignFolderStore } from "../../../../stores";
-import { CampaignTab, type DemoData } from "../../../../interfaces";
+import { CampaignTab, type ILead } from "../../../../interfaces";
 import { ContactFolder } from "./ContactFolder";
 import { NotesFolder } from "./NotesFolder";
 import { InfoFolder } from "./InfoFolder";
@@ -7,7 +7,7 @@ import { MultiFolder } from "./MultiFolder";
 import type { CampaignFolderChildPropsState } from "./types";
 
 type CampaignFoldersProps = {
-  allLeads: DemoData[];
+  allLeads: ILead[];
   currentLeadIndex: number;
   selectedLeadIndexs: number[];
   onPrimary?: () => void;

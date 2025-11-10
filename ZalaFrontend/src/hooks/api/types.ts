@@ -10,6 +10,13 @@ export type SearchLeadsProps = {
   sources: DemoDataSource[];
 };
 
+export type SearchLeadsResponse = {
+  requested_sources: string[];
+  results: Record<string, never>;
+  aggregated_leads: never[];
+  errors?: Record<string, string>;
+};
+
 export type CreateContactProps = Omit<AContact, "contact_id">;
 
 export type CreateUserProps = {

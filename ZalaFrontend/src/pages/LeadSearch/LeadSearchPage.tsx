@@ -11,7 +11,7 @@ import { SideNavControlVariant, useSearchQueryStore } from "../../stores";
 import clsx from "clsx";
 import { CampaignCard } from "./components";
 import { COLORS } from "../../config";
-import type { DemoData } from "../../interfaces";
+import type { ILead, ISourceResult } from "../../interfaces";
 
 const SOURCE_COLOR_MAP: Record<string, string> = {
   rapidapi: "#60A5FA", // blue
@@ -21,7 +21,7 @@ const SOURCE_COLOR_MAP: Record<string, string> = {
   mock: "#A8A29E", // cool gray
 };
 
-const getSourceColor = (lead: DemoData): string => {
+const getSourceColor = (lead: ISourceResult<ILead>): string => {
   if (lead.source && SOURCE_COLOR_MAP[lead.source]) {
     return SOURCE_COLOR_MAP[lead.source];
   }
@@ -78,8 +78,8 @@ export const LeadSearchPage = () => {
               ref={mapRef}
               pins={leadData.map((lead, i) => ({
                 center: {
-                  lat: lead.latitude,
-                  lng: lead.longitude,
+                  lat: lead.address.lat,
+                  lng: lead.address.long,
                 },
                 iconName: Icons.UserPin,
                 active: i === activeLead,
@@ -106,87 +106,24 @@ export const LeadSearchPage = () => {
         getLeadProps={(lead, i) => ({
           active: i === activeLead,
           button: {
-            text: campaignLeads.includes(i)
-              ? "Remove from campaign"
-              : "Add to campaign",
+            text: campaignLeads.includes(i) ? "Remove Lead" : "Add Lead",
             icon: campaignLeads.includes(i) ? Icons.Minus : Icons.Flag,
             onClick: () => onLeadButton(i),
           },
           onTitleClick: () => (
             mapRef.current?.centerMap({
-              lat: lead.latitude,
-              lng: lead.longitude,
+              lat: lead.address.lat,
+              lng: lead.address.long,
             }),
             setActiveLead(i)
           ),
         })}
         footerBtn={{
-          text: campaignHasAllLeads
-            ? "Remove all from campaign"
-            : "Add all to campaign",
+          text: campaignHasAllLeads ? "Remove all leads" : "Add all leads",
           icon: campaignHasAllLeads ? Icons.Minus : Icons.Flag,
           onClick: onAllLeadsButton,
         }}
       />
-
-      {/* <div
-        className={clsx(
-          "flex flex-col h-full py-[60px]",
-          "transition-[flex] duration-250",
-          showLeads ? "flex-[.4]" : "flex-0"
-        )}
-      >
-        <div className="relative h-full flex-1">
-          <div
-            className={clsx(
-              "absolute top-0 left-0 w-full h-full overflow-scroll",
-              "transition-transform duration-1000 delay-100",
-              showLeads ? "translate-y-0" : "translate-y-[-150%]"
-            )}
-          >
-            {showLeads && (
-              <span className="block sticky top-0 z-1 bg-background w-full text-center text-base pb-[5px]">
-                {leadData.length} results
-              </span>
-            )}
-            <div className="w-full flex flex-col space-y-[30px] py-[30px] pl-[30px] pr-[60px]  ">
-              {leadData.map((lead, i) => (
-                <LeadCard
-                  key={i}
-                  i={i}
-                  lead={lead}
-                  active={i === activeLead}
-                  onTitleClick={() => (
-                    mapRef.current?.centerMap({
-                      lat: lead.latitude,
-                      lng: lead.longitude,
-                    }),
-                    setActiveLead(i)
-                  )}
-                  button={{
-                    text: campaignLeads.includes(i)
-                      ? "Remove from campaign"
-                      : "Add to campaign",
-                    icon: campaignLeads.includes(i) ? Icons.Minus : Icons.Flag,
-                    onClick: () => onLeadButton(i),
-                  }}
-                />
-              ))}
-            </div>
-            <div className="sticky bottom-0 left-0 z-1 bg-background w-full flex justify-center p-[15px] pb-0">
-              <Button
-                text={
-                  campaignHasAllLeads
-                    ? "Remove all from campaign"
-                    : "Add all to campaign"
-                }
-                icon={campaignHasAllLeads ? Icons.Minus : Icons.Flag}
-                onClick={onAllLeadsButton}
-              />
-            </div>
-          </div>
-        </div>
-      </div> */}
     </div>
   );
 };

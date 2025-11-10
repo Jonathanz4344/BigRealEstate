@@ -1,19 +1,19 @@
 import clsx from "clsx";
-import type { DemoData } from "../../interfaces";
+import type { ILead, ISourceResult } from "../../interfaces";
 import { LeadCard, type LeadCardProps } from "../cards";
 import { Button, type ButtonProps } from "../buttons";
 import { Loader } from "../feedback";
 import { COLORS } from "../../config";
 
 type LeadListSectionProps = {
-  leads: DemoData[];
+  leads: ILead[] | ISourceResult<ILead>[];
   animated?: boolean;
   animationTrigger?: boolean;
   title?: string;
   footerBtn?: ButtonProps;
   loading?: boolean;
   getLeadProps: (
-    lead: DemoData,
+    lead: ILead,
     i: number
   ) => Omit<Omit<LeadCardProps, "i">, "lead">;
 };
@@ -55,9 +55,14 @@ export const LeadListSection = ({
                 const props = getLeadProps(lead, i);
                 return (
                   <LeadCard
-                    key={lead.agent + i}
+                    key={lead.leadId + i}
                     i={i}
                     lead={lead}
+                    sourceResult={
+                      (lead as ISourceResult<ILead>).source
+                        ? (lead as ISourceResult<ILead>)
+                        : undefined
+                    }
                     active={props.active}
                     onTitleClick={props.onTitleClick}
                     button={props.button}
@@ -69,10 +74,10 @@ export const LeadListSection = ({
           </div>
         </div>
 
-        {footerBtn && (
+        {footerBtn && showLeads && (
           <div
             className={clsx(
-              "absolute bottom-0 left-0 z-1 w-full flex justify-center p-[15px] bg-background pb-0",
+              "absolute bottom-0 left-0 z-1 w-full flex justify-center p-[15px] bg-background pb-0 !bg-green",
               "transition-transform duration-1000 delay-100",
               showLeads ? "translate-y-0" : "translate-y-[-150%]"
             )}
@@ -81,12 +86,12 @@ export const LeadListSection = ({
           </div>
         )}
 
-        {loading && (
+        {loading && showLeads && (
           <div
             className="absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm"
             style={{ backgroundColor: `${COLORS.background}cc` }}
           >
-            <Loader />
+            <Loader darkMode />
           </div>
         )}
       </div>

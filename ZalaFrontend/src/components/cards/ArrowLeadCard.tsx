@@ -1,12 +1,12 @@
 import clsx from "clsx";
-import type { DemoData } from "../../interfaces";
+import type { ILead } from "../../interfaces";
 import { IMAGES_ARR } from "../../assets";
 import { IconButton, IconButtonVariant } from "../buttons";
 import { Icons } from "../icons";
 import { useHover } from "../../hooks";
 
 type ArrowLeadCardProps = {
-  lead: DemoData;
+  lead: ILead;
   i: number;
   border?: boolean;
   onClick?: () => void;
@@ -51,13 +51,16 @@ export const ArrowLeadCard = ({
               cardActive ? "text-accent" : "text-secondary"
             )}
           >
-            {lead.agent}
+            {lead.contact.firstName} {lead.contact.lastName}
           </p>
           <span className="overflow-ellipsis line-clamp-2 text-base text-secondary-50">
-            {lead.address}
+            {lead.contact.email}
           </span>
           <span className="overflow-ellipsis line-clamp-1 text-base  text-secondary-50">
-            {lead.contact}
+            {lead.contact.phone}
+          </span>
+          <span className="overflow-ellipsis line-clamp-2 text-base  text-secondary-50">
+            {lead.notes}
           </span>
         </div>
         <div className="flex items-center justify-center">

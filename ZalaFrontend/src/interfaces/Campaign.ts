@@ -1,8 +1,9 @@
 import type { DemoData } from "./DemoData";
+import type { ILead } from "./Lead";
 
 export type ICampaign = {
   campaignId: number;
-  leads: DemoData[];
+  leads: ILead[];
 };
 
 export const DEFAULT_CAMPAIGN: ICampaign = {

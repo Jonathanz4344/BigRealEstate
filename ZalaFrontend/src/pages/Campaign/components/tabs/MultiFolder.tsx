@@ -1,13 +1,13 @@
 import type { CampaignFolderChildProps } from "./types";
-import { CampaignTab, type DemoData } from "../../../../interfaces";
+import { CampaignTab, type ILead } from "../../../../interfaces";
 import { useFolderIcons } from "../../hooks";
 import { Folder, LeadButtons } from "../layout";
 import { ArrowLeadCard, Icons } from "../../../../components";
 import { useCampaignFolderStore } from "../../../../stores";
 
 type MultiFolderProps = Omit<CampaignFolderChildProps, "lead"> & {
-  allLeads: DemoData[];
-  leads: DemoData[];
+  allLeads: ILead[];
+  leads: ILead[];
   setViewing: (i: number) => void;
 };
 
@@ -48,7 +48,7 @@ export const MultiFolder = ({
           <div className="absolute-fill overflow-y-scroll px-[15px] space-y-[30px]">
             {leads.map((lead, i) => (
               <ArrowLeadCard
-                key={lead.agent + i}
+                key={lead.leadId + i}
                 lead={lead}
                 i={allLeads.indexOf(lead)}
                 onClick={() => (

@@ -10,7 +10,7 @@ import { useAppNavigation } from "../../utils";
 
 export const useAppHeader = () => {
   const { location, toLeadSearchPage } = useAppNavigation();
-  const openSideNav = useSideNavControlStore((state) => state.open);
+  const { open: openSideNav, close: closeSideNav } = useSideNavControlStore();
   const { query, setData, setQuery, setLoading } = useSearchQueryStore();
   const { sources } = useSearchFilterStore();
 
@@ -34,6 +34,7 @@ export const useAppHeader = () => {
     const activeSources =
       normalizedSources.length > 0 ? normalizedSources : DEFAULT_LEAD_SOURCES;
 
+    closeSideNav();
     setLoading(true);
     try {
       const { data, err } = await searchLeads({
@@ -48,6 +49,9 @@ export const useAppHeader = () => {
       }
 
       setData(data.nearby_properties);
+      console.log(`Leads:`);
+      console.log(data.nearby_properties);
+      console.log(``);
     } finally {
       setLoading(false);
     }

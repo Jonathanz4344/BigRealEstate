@@ -42,12 +42,12 @@ export const ContactFolder = ({
         {lead && (
           <div className="w-full flex flex-col items-center pr-[30px] pt-[30px]">
             <p className="w-full text-center text-xl font-bold">
-              Contact: {lead.agent}
+              Contact: {lead.contact.firstName} {lead.contact.lastName}
             </p>
             <div className="w-full flex grow-1 items-center justify-center">
               <div className="w-full flex flex-col space-y-[15px]">
-                <LeadTitleValue title="Email:" value={lead.contact} />
-                <LeadTitleValue title="Phone #:" value={"5853239877"} />
+                <LeadTitleValue title="Email:" value={lead.contact.email} />
+                <LeadTitleValue title="Phone #:" value={lead.contact.phone} />
                 <LeadTitleValue title="Contacted by:">
                   <div className="flex flex-row justify-between w-full pt-[5px] px-[15px]">
                     <ContactMethod text="Email" icon={Icons.Mail} />
