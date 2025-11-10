@@ -3,12 +3,30 @@ import {
   IconButtonVariant,
   Icons,
   LeadListSection,
+  Loader,
   Map,
 } from "../../components";
 import { useLeadSearchPage } from "../../hooks";
-import { SideNavControlVariant } from "../../stores";
+import { SideNavControlVariant, useSearchQueryStore } from "../../stores";
 import clsx from "clsx";
 import { CampaignCard } from "./components";
+import { COLORS } from "../../config";
+import type { DemoData } from "../../interfaces";
+
+const SOURCE_COLOR_MAP: Record<string, string> = {
+  rapidapi: "#60A5FA", // blue
+  google_places: "#34D399", // emerald
+  gpt: "#F472B6", // pink
+  db: "#FBBF24", // amber
+  mock: "#A8A29E", // cool gray
+};
+
+const getSourceColor = (lead: DemoData): string => {
+  if (lead.source && SOURCE_COLOR_MAP[lead.source]) {
+    return SOURCE_COLOR_MAP[lead.source];
+  }
+  return COLORS.white;
+};
 
 export const LeadSearchPage = () => {
   const {
@@ -26,6 +44,7 @@ export const LeadSearchPage = () => {
     onLeadButton,
     onStart,
   } = useLeadSearchPage();
+  const loading = useSearchQueryStore((state) => state.loading);
 
   return (
     <div className="flex flex-1 items-center">
@@ -64,9 +83,16 @@ export const LeadSearchPage = () => {
                 },
                 iconName: Icons.UserPin,
                 active: i === activeLead,
+                color: getSourceColor(lead),
+                activeColor: COLORS.accent,
                 onClick: () => setActiveLead(i),
               }))}
             />
+            {loading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                <Loader />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -75,7 +101,8 @@ export const LeadSearchPage = () => {
         animated
         animationTrigger={showLeads}
         leads={leadData}
-        title={`${leadData.length} results`}
+        title={loading ? "Loading leads..." : `${leadData.length} results`}
+        loading={loading}
         getLeadProps={(lead, i) => ({
           active: i === activeLead,
           button: {

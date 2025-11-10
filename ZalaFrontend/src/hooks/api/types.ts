@@ -7,7 +7,7 @@ export type APIResponse<T> = {
 
 export type SearchLeadsProps = {
   query: string;
-  source: DemoDataSource;
+  sources: DemoDataSource[];
 };
 
 export type CreateContactProps = Omit<AContact, "contact_id">;

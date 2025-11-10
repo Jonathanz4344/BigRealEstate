@@ -1,24 +1,51 @@
-import { useState } from "react";
-import { useSideNavControlStore, useSearchFilterStore } from "../../../stores";
+import { useEffect, useState } from "react";
+import type { DemoDataSource } from "../../../interfaces";
+import {
+  DEFAULT_LEAD_SOURCES,
+  useSideNavControlStore,
+  useSearchFilterStore,
+} from "../../../stores";
 
 export const useSearchLeadFilterSidenav = () => {
   const closeSideNav = useSideNavControlStore((state) => state.close);
   const {
-    source: globalSource,
-    setSource: setGlobalSource,
+    sources: globalSources,
+    setSources: setGlobalSources,
     sortBy: globalSortBy,
     setSortBy: setGlobalSortBy,
   } = useSearchFilterStore();
-  // const [source, setSource] = useState<DemoDataSource>(globalSource);
+
+  const [selectedSources, setSelectedSources] =
+    useState<DemoDataSource[]>(globalSources);
   const [sortBy, setSortBy] = useState(globalSortBy);
-  const applyControls = () => (
-    // setGlobalSource(source),
-    setGlobalSortBy(sortBy), closeSideNav()
-  );
+
+  useEffect(() => {
+    setSelectedSources(globalSources);
+  }, [globalSources]);
+
+  useEffect(() => {
+    setSortBy(globalSortBy);
+  }, [globalSortBy]);
+
+  const toggleSource = (value: DemoDataSource) => {
+    setSelectedSources((prev) => {
+      if (prev.includes(value)) return prev.filter((item) => item !== value);
+      return [...prev, value];
+    });
+  };
+
+  const applyControls = () => {
+    const sanitizedSources =
+      selectedSources.length > 0 ? selectedSources : DEFAULT_LEAD_SOURCES;
+    setGlobalSources(sanitizedSources);
+    setGlobalSortBy(sortBy);
+    closeSideNav();
+  };
+
   return {
     closeSideNav,
-    globalSource,
-    setGlobalSource,
+    selectedSources,
+    toggleSource,
     sortBy,
     setSortBy,
     applyControls,

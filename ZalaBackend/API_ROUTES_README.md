@@ -166,14 +166,18 @@ Allowed file MIME types: `text/csv`, `application/vnd.ms-excel`, and `.xlsx`. Th
 
 ---
 
-## Location Filtering (`/api/search-location…`)
+## Lead Search (`/api/searchLeads`)
 
 | Method | Path | Purpose | Body Fields | Response |
 | --- | --- | --- | --- | --- |
-| POST | `/api/search-location/` | External geocode + mock properties | JSON per `LocationFilter` (any of: `zip`, `city`, `state`, `latitude`, `longitude`, `location_text`, `source`) | Normalized location + mock property list (within 50 miles) |
-| POST | `/api/search-location/db` | Geocode, then search DB leads near location | Same as above; if lat/long omitted, server geocodes | Normalized location + `nearby_leads` (serialized lead data + distance) |
+| POST | `/api/searchLeads` | Fan-out search across one or more data sources | `location_text` (string) plus `sources` (array containing any of `"db"`, `"rapidapi"`, `"google_places"`, `"gpt"`) | Per-source `results` (each with `leads` and optional metadata) and per-source `errors` when a provider fails |
 
-`LocationFilter.source` defaults to `"gpt"` but you can pass `"rapidapi"` or `"google places"` for tracing.
+Notes:
+- When a single source is requested, the matching entry in `results` mirrors the legacy payloads (for example, `rapidapi`/`google_places`/`gpt`/`db` return `leads` with `distance_miles`).
+- If geocoding fails or a provider rejects the request, the reason is listed under `errors[source]`.
+- `location_text` can be a zip code or free-form description; the backend geocodes and extracts any dynamic filters automatically.
+- Leads returned from external sources include a temporary positive `lead_id` so frontends can key list items consistently; IDs increment across sources within the same response.
+- External provider quotas: RapidAPI requests reset monthly with a cap of 95 calls, and Brave search requests (used by the GPT integration) are limited to 1,950 calls per month.
 
 ---
 

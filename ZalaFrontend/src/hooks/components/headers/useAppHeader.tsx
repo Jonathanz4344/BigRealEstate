@@ -1,5 +1,6 @@
 import type { DemoDataSource } from "../../../interfaces";
 import {
+  DEFAULT_LEAD_SOURCES,
   useSideNavControlStore,
   useSearchQueryStore,
   useSearchFilterStore,
@@ -10,8 +11,8 @@ import { useAppNavigation } from "../../utils";
 export const useAppHeader = () => {
   const { location, toLeadSearchPage } = useAppNavigation();
   const openSideNav = useSideNavControlStore((state) => state.open);
-  const { query, setData, setQuery } = useSearchQueryStore();
-  const { source } = useSearchFilterStore();
+  const { query, setData, setQuery, setLoading } = useSearchQueryStore();
+  const { sources } = useSearchFilterStore();
 
   const { searchLeads } = useApi();
 
@@ -20,19 +21,36 @@ export const useAppHeader = () => {
 
     if (location.pathname != "/") toLeadSearchPage();
 
-    await onSearchCore(query, source);
+    await onSearchCore(query, sources);
   };
 
-  const onSearchCore = async (q: string, s: DemoDataSource) => {
-    const { data, err } = await searchLeads({ query: q, source: s });
+  const onSearchCore = async (
+    q: string,
+    selectedSources: DemoDataSource | DemoDataSource[]
+  ) => {
+    const normalizedSources = Array.isArray(selectedSources)
+      ? selectedSources
+      : [selectedSources];
+    const activeSources =
+      normalizedSources.length > 0 ? normalizedSources : DEFAULT_LEAD_SOURCES;
 
-    if (err || !data) {
-      console.log("API Error:");
-      console.log(err);
-      return; // TODO: Add error message
+    setLoading(true);
+    try {
+      const { data, err } = await searchLeads({
+        query: q,
+        sources: activeSources,
+      });
+
+      if (err || !data) {
+        console.log("API Error:");
+        console.log(err);
+        return; // TODO: Add error message
+      }
+
+      setData(data.nearby_properties);
+    } finally {
+      setLoading(false);
     }
-
-    setData(data.nearby_properties);
   };
 
   return {

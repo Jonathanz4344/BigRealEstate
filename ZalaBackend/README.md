@@ -16,8 +16,6 @@ Backend service for the **Zala** project, built with [FastAPI](https://fastapi.t
 ```text
 ZalaBackend/
 ├── app/
-│   ├── data/
-│   │   └── mock_properties.json           # Mock property inventory used by search endpoints
 │   ├── db/
 │   │   ├── crud/                          # CRUD helpers (addresses, leads, campaigns, etc.)
 │   │   ├── schema.sql                     # Core PostgreSQL schema
@@ -105,7 +103,7 @@ Creating a virtual environment ensures dependencies are isolated to this project
 3. Install dependencies:
 
    ```
-   pip install -r requirements.txt
+   py -m pip install -r requirements.txt
    ```
 
 4. Run the application:
@@ -227,6 +225,7 @@ Each service requires a developer account to generate and manage API credentials
 1. Visit [RapidAPI](https://rapidapi.com) and log in or create an account.
 2. Navigate to the **"My Apps"** section from your dashboard.
 3. Select an existing application or create a new one.
+   Need to subscribe https://rapidapi.com/ntd119/api/zillow-com4/playground/apiendpoint_85a30d86-7f81-4503-b49e-0c6ffe1f5f97
 4. Copy your personal API key.
 5. Add it to your `.env` file as:
 
@@ -276,6 +275,30 @@ SQL_DBNAME=zala
 
 ---
 
+## Fixing Database Structure
+
+Go to Pgadmin and right click your database ex. zala and go to query tool.
+Run the following commands to delete db:
+
+(**MAKE SURE NAMING OF UNAME AND DBNAME MATCHES YOUR CONFIG**)
+-- 1. Drop everything in the schema (irreversible)
+DROP SCHEMA IF EXISTS public CASCADE;
+
+-- 2. Recreate the schema owned by your app role
+CREATE SCHEMA public AUTHORIZATION postgresadmin;
+
+-- 3. Ensure the role keeps access
+GRANT ALL ON SCHEMA public TO postgresadmin;
+
+-- 4. Make sure new sessions see the schema automatically
+ALTER ROLE postgresadmin IN DATABASE zala SET search_path TO public;
+ALTER DATABASE zala SET search_path TO public;
+
+-- 5. Apply the setting for the current session
+SET search_path TO public;
+
+Rerun initalize_db.py to create tables
+
 ## Testing
 
 1. Ensure the server is running:
@@ -304,3 +327,21 @@ SQL_DBNAME=zala
 - Use dedicated link/unlink endpoints for entity relationships instead of embedding IDs in create requests.
 - Keep `API_ROUTES_README.md` updated with endpoint changes for frontend synchronization.
 - Restart your FastAPI server after modifying `.env`.
+Google Places
+1. Create or select a project at https://console.cloud.google.com/.
+2. Enable the **Geocoding API** (and any other required services).
+3. Generate an API key under **APIs & Services → Credentials**.
+4. Add the key to `.env` as `GOOGLE_API_KEY=...`.
+
+OpenAI
+1. Create an API key for OpenAI at https://platform.openai.com/api-keys
+2. Add funds to your OpenAI account at https://platform.openai.com/settings/organization/billing/overview
+3. Add the API key to `.env` as `OPENAI_API_KEY=...`.
+
+Brave
+1. Create a Brave account at https://brave.com/search/api/
+2. Subscribe to the Free AI plan at https://api-dashboard.search.brave.com/app/subscriptions/subscribe?tab=ai
+3. Create an API key at https://api-dashboard.search.brave.com/app/keys
+4. Add the API key to `.env` as `BRAVE_API_KEY=...`.
+
+Restart the server after updating `.env` so changes take effect.
