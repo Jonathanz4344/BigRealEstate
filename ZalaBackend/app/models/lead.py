@@ -46,3 +46,5 @@ class Lead(Base):
 
     campaigns: Mapped[List["CampaignLead"]] = relationship(
         "CampaignLead", back_populates="lead", cascade="all, delete-orphan")
+
+    board_steps: Mapped[List["BoardStep"]] = relationship(secondary=board_step_leads, back_populates="board_steps")

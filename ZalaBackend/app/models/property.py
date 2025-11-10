@@ -28,4 +28,5 @@ class Property(Base):
     units: Mapped[List["Unit"]] = relationship("Unit", back_populates="property", cascade="all, delete-orphan")
     lead: Mapped["Lead"] = relationship("Lead", back_populates="properties", uselist=False)
     address: Mapped["Address"] = relationship("Address", back_populates="property", uselist=False)
+    board_steps: Mapped[List["BoardStep"]] = relationship(secondary=board_step_leads, back_populates="board_steps")
 
