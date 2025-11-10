@@ -4,8 +4,41 @@ import { useApi } from "../../api";
 import { stringify } from "../../../utils";
 import { AUserToIUser, type IUser } from "../../../interfaces";
 
-type GoogleCredentialResponse = {
-  credential: string;
+declare global {
+  interface Window {
+    google?: {
+      accounts?: {
+        oauth2?: {
+          initCodeClient: (config: GoogleCodeClientConfig) => GoogleCodeClient;
+        };
+      };
+    };
+  }
+}
+
+type GoogleCodeClient = {
+  requestCode: () => void;
+};
+
+type GoogleCodeClientConfig = {
+  client_id: string;
+  scope: string;
+  ux_mode?: "popup" | "redirect";
+  redirect_uri: string;
+  prompt?: string;
+  access_type?: "online" | "offline";
+  callback: (response: GoogleCodeResponse) => void;
+  error_callback?: (error: GoogleCodeError) => void;
+};
+
+type GoogleCodeResponse = {
+  code?: string;
+  scope?: string;
+};
+
+type GoogleCodeError = {
+  type: string;
+  message?: string;
 };
 
 const GOOGLE_SCRIPT_ID = "google-identity-services";
@@ -21,20 +54,22 @@ type UseGoogleAuthButtonProps = {
 };
 
 export const useGoogleAuthButton = ({ callback }: UseGoogleAuthButtonProps) => {
-  const buttonContainerRef = useRef<HTMLDivElement | null>(null);
-
+  const codeClientRef = useRef<GoogleCodeClient | null>(null);
   const [scriptReady, setScriptReady] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [clientReady, setClientReady] = useState(false);
 
   const clientId = CONFIG.keys.google.oauth;
+  const redirectUri = CONFIG.keys.google.redirectUri;
+  const scopes = CONFIG.keys.google.scopes;
+
   const { loginGoogle } = useApi();
 
   useEffect(() => {
     let cancelled = false;
 
     const handleLoad = () => {
-      if (!cancelled) {
-        setScriptReady(true);
-      }
+      if (!cancelled) setScriptReady(true);
     };
 
     const handleError = () => {
@@ -47,7 +82,7 @@ export const useGoogleAuthButton = ({ callback }: UseGoogleAuthButtonProps) => {
     };
 
     const attachScript = () => {
-      if (window.google?.accounts?.id) {
+      if (window.google?.accounts?.oauth2) {
         handleLoad();
         return;
       }
@@ -74,70 +109,100 @@ export const useGoogleAuthButton = ({ callback }: UseGoogleAuthButtonProps) => {
 
     attachScript();
 
-    const interval = window.setInterval(() => {
-      if (window.google?.accounts?.id) {
-        window.clearInterval(interval);
-        handleLoad();
-      }
-    }, 300);
-
     return () => {
       cancelled = true;
-      window.clearInterval(interval);
       const existing = document.getElementById(GOOGLE_SCRIPT_ID);
       if (existing) {
         existing.removeEventListener("load", handleLoad);
         existing.removeEventListener("error", handleError);
       }
     };
-  }, []);
+  }, [callback]);
+
+  const submitCode = useCallback(
+    async (code: string, scope?: string) => {
+      callback({ loading: true });
+      setLoading(true);
+
+      const userRes = await loginGoogle({ code, scope });
+
+      setLoading(false);
+      if (userRes.err || !userRes.data) {
+        console.log(`Internal Error - Login Google: ${stringify(userRes)}`);
+        callback({
+          error: "Unable to complete Google login. Please try again.",
+          loading: false,
+        });
+        return;
+      }
+
+      const user = AUserToIUser(userRes.data);
+      callback({ loading: false, user });
+    },
+    [callback, loginGoogle]
+  );
 
   useEffect(() => {
-    if (!scriptReady || !clientId || !window.google?.accounts?.id) {
-      return;
-    }
+    setClientReady(false);
+    if (!scriptReady || !clientId || !window.google?.accounts?.oauth2) return;
 
-    window.google.accounts.id.initialize({
+    codeClientRef.current = window.google.accounts.oauth2.initCodeClient({
       client_id: clientId,
-      callback: (res: GoogleCredentialResponse) =>
-        res?.credential
-          ? submitToken(res.credential)
-          : callback({
-              error: "Google returned an empty credential. Try again.",
-              loading: false,
-            }),
+      scope: scopes,
+      redirect_uri: redirectUri,
+      ux_mode: "popup",
+      prompt: "consent",
+      access_type: "offline",
+      callback: (response: GoogleCodeResponse) => {
+        if (!response.code) {
+          callback({
+            error: "Google did not return an authorization code.",
+            loading: false,
+          });
+          return;
+        }
+        submitCode(response.code, response.scope);
+      },
+      error_callback: (error: GoogleCodeError) => {
+        setLoading(false);
+        callback({
+          error: error.message ?? "Google authorization was cancelled.",
+          loading: false,
+        });
+      },
     });
+    setClientReady(true);
+  }, [
+    clientId,
+    redirectUri,
+    scopes,
+    scriptReady,
+    callback,
+    submitCode,
+  ]);
 
-    if (buttonContainerRef.current) {
-      buttonContainerRef.current.innerHTML = "";
-      window.google.accounts.id.renderButton(buttonContainerRef.current, {
-        theme: "outline",
-        size: "large",
-        width: "100%",
-      });
-      window.google.accounts.id.prompt();
-    }
-  }, [clientId, scriptReady]);
+  useEffect(() => {
+    return () => {
+      setClientReady(false);
+    };
+  }, [scriptReady]);
 
-  const submitToken = useCallback(async (token: string) => {
-    callback({ loading: true });
-
-    const userRes = await loginGoogle({ token });
-
-    if (userRes.err || !userRes.data) {
-      console.log(`Internal Error - Login Google: ${stringify(userRes)}`);
-      console.log(``);
+  const requestCode = useCallback(() => {
+    if (!codeClientRef.current) {
       callback({
-        // error: "Internal error - please try again later",
+        error: "Google client is not ready yet. Please wait a moment.",
         loading: false,
       });
       return;
     }
+    codeClientRef.current.requestCode();
+  }, [callback]);
 
-    const user = AUserToIUser(userRes.data);
+  const disabled = !clientReady || loading;
 
-    callback({ loading: false, user });
-  }, []);
-
-  return buttonContainerRef;
+  return {
+    disabled,
+    loading,
+    onClick: requestCode,
+  };
 };

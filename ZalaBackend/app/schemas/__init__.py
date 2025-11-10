@@ -20,6 +20,7 @@ from .campaign_email import (
     CampaignEmailPublic,
     ContactMethod,
 )
+from .gmail import GmailSendRequest, GmailSendResponse
 from .campaign_lead import (
     CampaignLeadBase,
     CampaignLeadCreate,

@@ -13,6 +13,8 @@ export const useAppNavigation = () => {
 
   const toSignupPage = () => navigate("/signup");
 
+  const toEmailTestPage = () => navigate("/email-test");
+
   return {
     location,
     navigate,
@@ -21,5 +23,6 @@ export const useAppNavigation = () => {
     toCampaignPage,
     toLoginPage,
     toSignupPage,
+    toEmailTestPage,
   };
 };

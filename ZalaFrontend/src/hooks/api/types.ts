@@ -30,5 +30,14 @@ export type LoginAPIProps = {
 };
 
 export type LoginGoogleProps = {
-  token: string;
+  code: string;
+  scope?: string;
+};
+
+export type SendTestEmailProps = {
+  userId: number;
+  to: string;
+  subject: string;
+  html: string;
+  fromName?: string;
 };

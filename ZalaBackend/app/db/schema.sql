@@ -63,6 +63,15 @@ CREATE TABLE user_authentication (
     provider_email  TEXT
 );
 
+CREATE TABLE user_google_credentials (
+    user_id                     INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    access_token_encrypted      TEXT,
+    refresh_token_encrypted     TEXT,
+    token_expiry                TIMESTAMPTZ,
+    scope                       TEXT,
+    updated_at                  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TYPE user_role AS ENUM ('user', 'admin', 'moderator');
 
 CREATE TABLE properties (

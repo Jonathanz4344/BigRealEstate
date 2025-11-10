@@ -21,9 +21,19 @@ This document summarizes the REST endpoints exposed by the FastAPI service so th
 | Method | Path | Purpose | Body Fields | Response |
 | --- | --- | --- | --- | --- |
 | POST | `/api/login/` | Authenticate a user | `username` *(string, required)*, `password` *(string, required)* | `UserPublic` (user details if credentials match) |
-| POST | `/api/login/google` | Authenticate via Google | `id_token` *(string, required)* | `UserPublic` (populated from Google profile or linked user) |
+| POST | `/api/login/google` | Authenticate via Google OAuth | `code` *(string, preferred)* plus optional `scope`; falls back to `id_token` *(string)* for legacy clients | `UserPublic` (populated from Google profile or linked user, includes `gmail_connected` flag) |
 
 401 is returned when credentials are invalid.
+
+---
+
+## Google Mail (`/api/google-mail`)
+
+| Method | Path | Purpose | Body Fields | Response |
+| --- | --- | --- | --- | --- |
+| POST | `/api/google-mail/send` | Send a Gmail message using the authenticated user's Google account | `user_id` *(int, required)*, `to` *(email, required)*, `subject` *(string, required)*, `html` *(string, required)*, `from_name` *(string, optional)* | `{ "id": "<gmail_message_id>", "thread_id": "<gmail_thread_id>" }` |
+
+Returns 400 if the user has not completed Google OAuth with Gmail scopes.
 
 ---
 

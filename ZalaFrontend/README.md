@@ -39,11 +39,13 @@ VITE_GOOGLE_MAPS_KEY=<your_google_maps_api_key>
 
 # ─── Google OAuth 2.0 Authentication ────────────
 VITE_GOOGLE_CLIENT_ID=<your_google_oauth_client_id>
+VITE_GOOGLE_REDIRECT_URI=postmessage
+VITE_GOOGLE_SCOPES="openid email profile https://www.googleapis.com/auth/gmail.send"
 ```
 
 > **Note:**
 >
-> - Instructions for obtaining `VITE_GOOGLE_CLIENT_ID` and `VITE_GOOGLE_MAPS_KEY` can be found in the **Zala API README** under their respective environment variable setup sections.
+> - Instructions for obtaining `VITE_GOOGLE_CLIENT_ID`, `VITE_GOOGLE_REDIRECT_URI`, `VITE_GOOGLE_SCOPES`, and `VITE_GOOGLE_MAPS_KEY` can be found in the **Zala API README** under their respective environment variable setup sections.
 > - Ensure that `VITE_API_URL` points to your locally running or deployed Zala API instance.
 
 ---
@@ -145,3 +147,5 @@ For inquiries, visit [colintondreau.com](https://colintondreau.com) or contact [
 
 This project is licensed under the **MIT License**.
 See the `LICENSE` file for more details.
+
+

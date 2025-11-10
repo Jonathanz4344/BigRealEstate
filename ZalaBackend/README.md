@@ -156,6 +156,8 @@ GOOGLE_API_KEY=<your_google_maps_api_key>
 # ─── Google OAuth 2.0 Authentication ────────────────────
 GOOGLE_CLIENT_ID=<your_google_oauth_client_id>
 GOOGLE_CLIENT_SECRET=<your_google_oauth_client_secret>
+GOOGLE_REDIRECT_URI=postmessage
+GOOGLE_TOKEN_ENCRYPTION_KEY=<your_fernet_key_for_token_storage>
 
 # ─── Lead Generation API Keys ────────────────────
 
@@ -165,6 +167,8 @@ BRAVE_API_KEY=<your_brave_api_key>
 
 # ─── Frontend OAuth Integration (for React/Vite) ────────
 VITE_GOOGLE_CLIENT_ID=<same_as_GOOGLE_CLIENT_ID_or_OAuth_client_id>
+VITE_GOOGLE_REDIRECT_URI=postmessage
+VITE_GOOGLE_SCOPES="openid email profile https://www.googleapis.com/auth/gmail.send"
 ```
 
 ### How to Get These Values
@@ -214,6 +218,21 @@ VITE_GOOGLE_CLIENT_ID=<same_as_GOOGLE_CLIENT_ID_or_OAuth_client_id>
    ```
    VITE_GOOGLE_CLIENT_ID=<your_client_id>
    ```
+
+7. Use the Google Identity Services `postmessage` redirect for the popup/PKCE flow:
+
+   ```
+   GOOGLE_REDIRECT_URI=postmessage
+   VITE_GOOGLE_REDIRECT_URI=postmessage
+   ```
+
+8. Request the Gmail send scope so users can authorize email sending:
+
+   ```
+   VITE_GOOGLE_SCOPES="openid email profile https://www.googleapis.com/auth/gmail.send"
+   ```
+
+9. Generate a Fernet key and set `GOOGLE_TOKEN_ENCRYPTION_KEY` (see the **Gmail send flow** section) so refresh tokens are stored encrypted.
 
 #### 🧠 Lead Generation API Keys (RapidAPI, OpenAI, Brave Search)
 
@@ -345,3 +364,33 @@ Brave
 4. Add the API key to `.env` as `BRAVE_API_KEY=...`.
 
 Restart the server after updating `.env` so changes take effect.
+
+## Gmail send flow
+
+The Gmail integration now requires full OAuth consent with the `https://www.googleapis.com/auth/gmail.send` scope. Make sure the Google client configured in `.env` is the same one your frontend uses.
+
+1. Generate an encryption key and set `GOOGLE_TOKEN_ENCRYPTION_KEY` in `.env`:
+
+   ```bash
+   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+   ```
+
+   This key is used to encrypt Google access and refresh tokens at rest.
+
+2. Update your OAuth consent screen to include Gmail scopes and allow the `postmessage` redirect URI.
+
+3. Sign in via Google from the login/signup pages. The server exchanges the authorization code, stores encrypted refresh tokens, and the returned `UserPublic` now exposes a `gmail_connected` flag so the UI can reflect status.
+
+4. Open `/email-test` in the frontend to send a sample email. The page calls `POST /api/google-mail/send`, which relays the message through Gmail with the stored credentials.
+
+If Gmail stops working for a user, have them re-run Google sign-in so a new refresh token is issued.
+
+> **Note:** The Gmail API must be enabled for the same Google Cloud project that owns your OAuth client. Visit https://console.cloud.google.com/apis/api/gmail.googleapis.com/overview?project=<your_project_id> and click **Enable** (or re-enable) before testing email sends, otherwise Google will return `SERVICE_DISABLED / accessNotConfigured`.
+
+### Adding Google test users (required while the app is in Testing mode)
+
+1. Visit the OAuth consent screen in Google Cloud Console: https://console.cloud.google.com/apis/credentials/consent
+2. Switch to the **Audience** tab.
+3. In the **Test users** panel, click **Add users**, enter each Gmail address that should be able to sign in/send email, then save. You can remove testers from the same panel when access is no longer needed.
+
+

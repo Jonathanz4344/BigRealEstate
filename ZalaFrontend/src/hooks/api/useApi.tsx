@@ -11,6 +11,7 @@ import type {
   LoginAPIProps,
   LoginGoogleProps,
   SearchLeadsProps,
+  SendTestEmailProps,
 } from "./types";
 import { useFetch } from "./useFetch";
 import { DEFAULT_LEAD_SOURCES } from "../../stores";
@@ -170,8 +171,25 @@ export const useApi = () => {
     return await get<AUser>(`/api/users/${userId}`);
   };
 
-  const loginGoogle = async ({ token }: LoginGoogleProps) => {
-    return await post<AUser>(`/api/login/google`, { id_token: token });
+  const loginGoogle = async ({ code, scope }: LoginGoogleProps) => {
+    return await post<AUser>(`/api/login/google`, { code, scope });
+  };
+
+  const sendTestEmail = async ({
+    userId,
+    to,
+    subject,
+    html,
+    fromName,
+  }: SendTestEmailProps) => {
+    type GmailResponse = { id: string; thread_id?: string };
+    return await post<GmailResponse>(`/api/google-mail/send`, {
+      user_id: userId,
+      to,
+      subject,
+      html,
+      from_name: fromName,
+    });
   };
 
   return {
@@ -182,5 +200,6 @@ export const useApi = () => {
     loginAPI,
     getUser,
     loginGoogle,
+    sendTestEmail,
   };
 };

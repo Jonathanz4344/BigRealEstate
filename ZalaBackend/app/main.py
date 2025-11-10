@@ -19,6 +19,7 @@ from app.routes import (
     campaigns,
     campaign_leads,
     campaign_emails,
+    google_mail,
 )
 
 app = FastAPI()
@@ -41,18 +42,20 @@ app.include_router(users.public_router, prefix="/api") # signup
 app.include_router(auth.router, prefix="/api") # Login with google signin
 app.include_router(location_filter.router, prefix="/api", include_in_schema=True) # search leads
 app.include_router(campaign_emails.send_router, prefix="/api", include_in_schema=True) # Send Campaign Email
-app.include_router(campaign_emails.router, prefix="/api", include_in_schema=True)
-app.include_router(campaign_leads.router, prefix="/api", include_in_schema=True)
+app.include_router(google_mail.router, prefix="/api", include_in_schema=True)
 
-app.include_router(campaigns.router, prefix="/api", include_in_schema=True)
+app.include_router(campaign_emails.router, prefix="/api", include_in_schema=False)
+app.include_router(campaign_leads.router, prefix="/api", include_in_schema=False)
+
+app.include_router(campaigns.router, prefix="/api", include_in_schema=False)
 app.include_router(addresses.router, prefix="/api", include_in_schema=False)
 app.include_router(properties.router, prefix="/api", include_in_schema=False)
 app.include_router(units.router, prefix="/api", include_in_schema=False)
 app.include_router(leads.router, prefix="/api", include_in_schema=False)
 
 
-app.include_router(users.router, prefix="/api", include_in_schema=False)
-app.include_router(contacts.router, prefix="/api", include_in_schema=False) 
+app.include_router(users.router, prefix="/api", include_in_schema=True)
+app.include_router(contacts.router, prefix="/api", include_in_schema=True) 
 
 app.include_router(csv_intake.router, prefix="/api", include_in_schema=False)
 
