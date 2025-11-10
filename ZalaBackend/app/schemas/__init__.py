@@ -15,6 +15,7 @@ from .campaign import CampaignBase, CampaignCreate, CampaignUpdate, CampaignPubl
 from .campaign_email import (
     CampaignEmailBase,
     CampaignEmailCreate,
+    CampaignEmailSendRequest,
     CampaignEmailUpdate,
     CampaignEmailPublic,
     ContactMethod,

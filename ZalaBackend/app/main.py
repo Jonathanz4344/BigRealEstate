@@ -19,6 +19,7 @@ from app.routes import (
     campaigns,
     campaign_leads,
     campaign_emails,
+    send_campaign_email,
 )
 
 app = FastAPI()
@@ -42,10 +43,9 @@ def read_root():
 app.include_router(users.public_router, prefix="/api") # signup
 app.include_router(auth.router, prefix="/api") # Login with google signin
 app.include_router(location_filter.router, prefix="/api", include_in_schema=True) # search leads
-
-
-app.include_router(campaign_leads.router, prefix="/api", include_in_schema=True)
+app.include_router(send_campaign_email.router, prefix="/api", include_in_schema=True) # Send Campaign Email
 app.include_router(campaign_emails.router, prefix="/api", include_in_schema=True)
+app.include_router(campaign_leads.router, prefix="/api", include_in_schema=True)
 
 app.include_router(campaigns.router, prefix="/api", include_in_schema=True)
 app.include_router(addresses.router, prefix="/api", include_in_schema=True)

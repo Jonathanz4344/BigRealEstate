@@ -181,6 +181,19 @@ Notes:
 
 ---
 
+## Send Campaign Email (`/api/campaign-emails/send`)
+
+| Method | Path | Purpose | Body Fields | Response |
+| --- | --- | --- | --- | --- |
+| POST | `/api/campaign-emails/send` | Send one email template to multiple leads already linked to the campaign | `campaign_id` (int), `lead_id` (array of lead IDs), `message_subject` (string), `message_body` (string) | Hydrated `CampaignPublic` object for the campaign after the messages are queued |
+
+Notes:
+- `lead_id` must include at least one ID, and every ID must already be linked to the specified campaign via `/api/campaign-leads`.
+- The endpoint records one `CampaignEmail` per lead and flips the `email_contacted` flag for each matching campaign-lead link.
+- Useful for bulk drip sends where the UI already has a campaign selection and filtered lead list.
+
+---
+
 ### Usage Tips for Frontend Developers
 
 - Always hit the `/api` prefixed route (e.g., `/api/leads`), even when an endpoint is described relative to a resource group.
