@@ -646,7 +646,6 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
     else:
         unique_sources.insert(0, DataSource.db)
 
-    results: Dict[str, object] = {}
     errors: Dict[str, str] = {}
     external_persistence: Dict[str, Dict[str, int]] = {}
 
@@ -669,7 +668,6 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
     aggregated_leads: List[Dict[str, object]] = []
     try:
         db_result = _perform_db_search(request, db)
-        results[DataSource.db.value] = db_result
         aggregated_leads = db_result.get("leads", [])
     except LocationResolutionError as exc:
         errors[DataSource.db.value] = exc.message
@@ -677,8 +675,6 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
         errors[DataSource.db.value] = f"Unexpected error: {exc}"
 
     response: Dict[str, object] = {
-        "requested_sources": [src.value for src in unique_sources],
-        "results": results,
         "aggregated_leads": aggregated_leads,
     }
     if external_persistence:

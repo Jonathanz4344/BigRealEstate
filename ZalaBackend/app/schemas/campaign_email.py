@@ -14,6 +14,12 @@ class ContactMethod(str, Enum):
     EMAIL = "email"
 
 
+class CampaignEmailStatus(str, Enum):
+    DRAFT = "draft"
+    SENT = "sent"
+    FAILED = "failed"
+
+
 class CampaignEmailBase(BaseModel):
     """
     Shared fields for CampaignEmail schema variants.
@@ -23,13 +29,19 @@ class CampaignEmailBase(BaseModel):
     lead_id: Optional[int] = None
     message_subject: str
     message_body: str
+    from_name: Optional[str] = None
 
 
 class CampaignEmailCreate(CampaignEmailBase):
     """
     Schema for creating a campaign message.
     """
-    pass
+
+    to_email: Optional[str] = None
+    gmail_message_id: Optional[str] = None
+    gmail_thread_id: Optional[str] = None
+    send_status: CampaignEmailStatus = CampaignEmailStatus.DRAFT
+    error_detail: Optional[str] = None
 
 
 class CampaignEmailSendRequest(BaseModel):
@@ -41,6 +53,7 @@ class CampaignEmailSendRequest(BaseModel):
     lead_id: List[int] = Field(..., min_length=1, description="Array of lead IDs to receive the campaign email.")
     message_subject: str
     message_body: str
+    from_name: Optional[str] = Field(default=None, max_length=128)
 
 
 class CampaignEmailUpdate(BaseModel):
@@ -52,6 +65,12 @@ class CampaignEmailUpdate(BaseModel):
     # contact_method: Optional[ContactMethod] = None
     message_subject: Optional[str] = None
     message_body: Optional[str] = None
+    from_name: Optional[str] = None
+    to_email: Optional[str] = None
+    gmail_message_id: Optional[str] = None
+    gmail_thread_id: Optional[str] = None
+    send_status: Optional[CampaignEmailStatus] = None
+    error_detail: Optional[str] = None
 
 
 class CampaignEmailPublic(CampaignEmailBase):
@@ -61,8 +80,26 @@ class CampaignEmailPublic(CampaignEmailBase):
 
     message_id: int
     timestamp: datetime
+    to_email: Optional[str] = None
+    gmail_message_id: Optional[str] = None
+    gmail_thread_id: Optional[str] = None
+    send_status: CampaignEmailStatus = CampaignEmailStatus.DRAFT
+    error_detail: Optional[str] = None
     campaign: Optional[CampaignPublic] = None
     lead: Optional[LeadPublic] = None
 
     class Config:
         from_attributes = True
+
+
+class CampaignEmailSendResult(BaseModel):
+    lead_id: int
+    to_email: Optional[str] = None
+    status: CampaignEmailStatus
+    error_detail: Optional[str] = None
+    message_id: Optional[int] = None
+
+
+class CampaignEmailSendResponse(BaseModel):
+    campaign: CampaignPublic
+    results: List[CampaignEmailSendResult]
