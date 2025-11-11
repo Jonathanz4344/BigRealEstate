@@ -1,13 +1,17 @@
 from typing import Dict, List, Optional, Tuple
 
 import re
+from decimal import Decimal, InvalidOperation
 from math import atan2, cos, radians, sin, sqrt
 
 from fastapi import APIRouter, Depends
+from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.db.session import get_db
 from app.models.address import Address
+from app.models.contact import Contact
 from app.models.lead import Lead
 from app.models.property import Property
 from app.schemas.location import DataSource, LeadSearchRequest, LocationFilter
@@ -258,8 +262,240 @@ def _prepare_external_filter(
     return filter, dynamic_filter
 
 
+def _normalize_str(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    normalized = value.strip().lower()
+    return normalized or None
+
+
+def _normalize_phone(value: Optional[str]) -> Optional[str]:
+    if not value:
+        return None
+    digits = re.sub(r"\D", "", value)
+    return digits or None
+
+
+def _decimal_or_none(value) -> Optional[Decimal]:
+    if value is None:
+        return None
+    try:
+        return Decimal(str(value))
+    except (InvalidOperation, ValueError, TypeError):
+        return None
+
+
+def _as_address_dict(value) -> Optional[Dict[str, object]]:
+    if isinstance(value, dict):
+        return dict(value)
+    if isinstance(value, str) and value.strip():
+        text = value.strip()
+        return {
+            "street_1": text,
+            "street_2": None,
+            "city": text,
+            "state": "",
+            "zipcode": "",
+            "lat": None,
+            "long": None,
+        }
+    return None
+
+
+def _extract_contact_dict(payload: Dict[str, object]) -> Optional[Dict[str, object]]:
+    contact_value = payload.get("contact")
+    if isinstance(contact_value, dict):
+        return dict(contact_value)
+    return None
+
+
+def _find_existing_lead(db: Session, candidate: Dict[str, object]) -> Optional[Lead]:
+    contact_data = _extract_contact_dict(candidate)
+    if contact_data:
+        email_norm = _normalize_str(contact_data.get("email"))
+        if email_norm:
+            existing = (
+                db.query(Lead)
+                .join(Contact, Lead.contact_id == Contact.contact_id)
+                .filter(func.lower(Contact.email) == email_norm)
+                .first()
+            )
+            if existing:
+                return existing
+
+        phone_digits = _normalize_phone(contact_data.get("phone"))
+        if phone_digits:
+            existing = (
+                db.query(Lead)
+                .join(Contact, Lead.contact_id == Contact.contact_id)
+                .filter(
+                    func.regexp_replace(Contact.phone, r"\D", "", "g") == phone_digits
+                )
+                .first()
+            )
+            if existing:
+                return existing
+
+    business_norm = _normalize_str(candidate.get("business"))
+    address_data = _as_address_dict(candidate.get("address"))
+    if business_norm and address_data:
+        city_norm = _normalize_str(address_data.get("city"))
+        state_norm = _normalize_str(address_data.get("state"))
+        street_norm = _normalize_str(address_data.get("street_1"))
+
+        query = (
+            db.query(Lead)
+            .outerjoin(Address, Lead.address_id == Address.address_id)
+            .filter(func.lower(Lead.business) == business_norm)
+        )
+        if street_norm:
+            query = query.filter(func.lower(Address.street_1) == street_norm)
+        if city_norm:
+            query = query.filter(func.lower(Address.city) == city_norm)
+        if state_norm:
+            query = query.filter(func.lower(Address.state) == state_norm)
+
+        existing = query.first()
+        if existing:
+            return existing
+
+    return None
+
+
+def _create_contact_from_payload(
+    db: Session, payload: Dict[str, object]
+) -> Optional[Contact]:
+    contact_data = _extract_contact_dict(payload)
+    if not contact_data:
+        return None
+
+    meaningful = any(
+        contact_data.get(field)
+        for field in ("first_name", "last_name", "email", "phone")
+    )
+    if not meaningful:
+        return None
+
+    email_norm = _normalize_str(contact_data.get("email"))
+    phone_digits = _normalize_phone(contact_data.get("phone"))
+
+    existing_contact = None
+    if email_norm:
+        existing_contact = (
+            db.query(Contact).filter(func.lower(Contact.email) == email_norm).first()
+        )
+    if not existing_contact and phone_digits:
+        existing_contact = (
+            db.query(Contact)
+            .filter(func.regexp_replace(Contact.phone, r"\D", "", "g") == phone_digits)
+            .first()
+        )
+    if existing_contact:
+        return existing_contact
+
+    first_name = (
+        contact_data.get("first_name")
+        or contact_data.get("last_name")
+        or payload.get("business")
+        or "Unknown"
+    )
+    contact = Contact(
+        first_name=first_name,
+        last_name=contact_data.get("last_name"),
+        email=contact_data.get("email"),
+        phone=contact_data.get("phone"),
+    )
+    db.add(contact)
+    db.flush()
+    return contact
+
+
+def _create_address_from_payload(
+    db: Session, payload: Dict[str, object]
+) -> Optional[Address]:
+    address_data = _as_address_dict(payload.get("address"))
+    if not address_data:
+        return None
+
+    street_1 = (
+        address_data.get("street_1")
+        or address_data.get("city")
+        or payload.get("business")
+        or "Unknown"
+    )
+    city = address_data.get("city") or street_1 or "Unknown"
+    state = address_data.get("state") or "NA"
+    zipcode = address_data.get("zipcode") or "00000"
+
+    address = Address(
+        street_1=street_1,
+        street_2=address_data.get("street_2"),
+        city=city,
+        state=state,
+        zipcode=zipcode,
+        lat=_decimal_or_none(address_data.get("lat")),
+        long=_decimal_or_none(address_data.get("long")),
+    )
+    db.add(address)
+    db.flush()
+    return address
+
+
+def _create_lead_from_payload(
+    db: Session, payload: Dict[str, object]
+) -> Optional[Lead]:
+    try:
+        contact = _create_contact_from_payload(db, payload)
+        address = _create_address_from_payload(db, payload)
+        db_lead = Lead(
+            person_type=payload.get("person_type"),
+            business=payload.get("business"),
+            website=payload.get("website"),
+            license_num=payload.get("license_num"),
+            notes=payload.get("notes"),
+            contact_id=contact.contact_id if contact else None,
+            address_id=address.address_id if address else None,
+        )
+        db.add(db_lead)
+        db.commit()
+        db.refresh(db_lead)
+        return db_lead
+    except IntegrityError:
+        db.rollback()
+        return None
+    except Exception:
+        db.rollback()
+        raise
+
+
+def _persist_external_leads(
+    db: Session, leads: List[Dict[str, object]]
+) -> Dict[str, int]:
+    inserted = 0
+    duplicates = 0
+    failed = 0
+
+    for lead in leads or []:
+        candidate = lead if isinstance(lead, dict) else _model_to_dict(lead)
+        if _find_existing_lead(db, candidate):
+            duplicates += 1
+            continue
+        created = _create_lead_from_payload(db, candidate)
+        if created:
+            inserted += 1
+        else:
+            failed += 1
+
+    return {
+        "inserted": inserted,
+        "duplicates": duplicates,
+        "failed": failed,
+    }
+
+
 def _perform_db_search(filter: LocationFilter, db: Session) -> Dict[str, object]:
-    lat, lon, _, _ = _resolve_location(filter, DataSource.db.value)
+    lat, lon, normalized_location, _ = _resolve_location(filter, DataSource.db.value)
+    radius_miles = 50.0
 
     leads = (
         db.query(Lead)
@@ -295,11 +531,13 @@ def _perform_db_search(filter: LocationFilter, db: Session) -> Dict[str, object]
             continue
 
         best_distance = min(candidate_distances)
-        if best_distance <= 50:
+        if best_distance <= radius_miles:
             nearby_leads.append(_serialize_lead(lead, round(best_distance, 2)))
 
     return {
         "leads": nearby_leads,
+        "normalized_location": normalized_location,
+        "radius_miles": radius_miles,
     }
 
 
@@ -311,7 +549,9 @@ def _perform_external_search(
     gpt_max_searches = 10
 
     filter_for_location, dynamic_filter = _prepare_external_filter(filter)
-    lat, lon, _, location_query = _resolve_location(filter_for_location, source.value)
+    lat, lon, normalized_location, location_query = _resolve_location(
+        filter_for_location, source.value
+    )
 
     try:
         if source == DataSource.gpt:
@@ -447,6 +687,8 @@ def _perform_external_search(
 
     response: Dict[str, object] = {
         "leads": trimmed_leads,
+        "normalized_location": normalized_location,
+        "radius_miles": radius_miles,
     }
     if dynamic_filter:
         response["dynamic_filter"] = dynamic_filter
@@ -455,14 +697,6 @@ def _perform_external_search(
 
 @router.post("/searchLeads", summary="Search Lead Combined", tags=["Search Lead"])
 def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
-    def assign_temp_ids(leads: List[Dict[str, object]], counter: int) -> int:
-        for lead in leads or []:
-            current_id = lead.get("lead_id")
-            if not isinstance(current_id, int) or current_id <= 0:
-                lead["lead_id"] = counter
-                counter += 1
-        return counter
-
     unique_sources: List[DataSource] = []
     for src in request.sources or []:
         if src not in unique_sources:
@@ -471,30 +705,29 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
     if not unique_sources:
         unique_sources = [DataSource.google_places]
 
-    results: Dict[str, object] = {}
-    errors: Dict[str, str] = {}
-    temp_id_counter = 1
+    if DataSource.db in unique_sources:
+        unique_sources = [DataSource.db] + [
+            src for src in unique_sources if src != DataSource.db
+        ]
+    else:
+        unique_sources.insert(0, DataSource.db)
 
-    for source in unique_sources:
+    errors: Dict[str, str] = {}
+    external_persistence: Dict[str, Dict[str, int]] = {}
+
+    external_sources = [src for src in unique_sources if src != DataSource.db]
+    for source in external_sources:
         try:
-            if source == DataSource.db:
-                db_result = _perform_db_search(request, db)
-                results[source.value] = db_result
-                temp_id_counter = assign_temp_ids(
-                    db_result.get("leads", []), temp_id_counter
-                )
-            elif source in {
+            if source not in {
                 DataSource.gpt,
                 DataSource.rapidapi,
                 DataSource.google_places,
             }:
-                ext_result = _perform_external_search(request, source)
-                results[source.value] = ext_result
-                temp_id_counter = assign_temp_ids(
-                    ext_result.get("leads", []), temp_id_counter
-                )
-            else:
                 errors[source.value] = "Unsupported source requested."
+                continue
+            ext_result = _perform_external_search(request, source)
+            persistence = _persist_external_leads(db, ext_result.get("leads", []))
+            external_persistence[source.value] = persistence
         except LocationResolutionError as exc:
             errors[source.value] = exc.message
         except ExternalProviderError as exc:
@@ -502,9 +735,20 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
         except Exception as exc:
             errors[source.value] = f"Unexpected error: {exc}"
 
+    aggregated_leads: List[Dict[str, object]] = []
+    try:
+        db_result = _perform_db_search(request, db)
+        aggregated_leads = db_result.get("leads", [])
+    except LocationResolutionError as exc:
+        errors[DataSource.db.value] = exc.message
+    except Exception as exc:
+        errors[DataSource.db.value] = f"Unexpected error: {exc}"
+
     response: Dict[str, object] = {
-        "results": results,
+        "aggregated_leads": aggregated_leads,
     }
+    if external_persistence:
+        response["external_persistence"] = external_persistence
 
     if errors:
         response["errors"] = errors
