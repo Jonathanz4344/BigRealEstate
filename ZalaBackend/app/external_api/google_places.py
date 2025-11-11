@@ -1,4 +1,6 @@
 import requests, sys, re, pprint, time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict, List, Optional
 from . import GOOGLE_API_KEY
 from .to_leads import gplaces_to_leads
 
@@ -97,22 +99,49 @@ def search_agents(place_text_or_zip: str, radius_m=10000, max_results: int = 50)
         # The nextPageToken can take a moment to become valid.
         time.sleep(2)
 
-    results = []
-    for p in collected_places[:max_results]:
-        base = {
-            "id": p["id"],
-            "name": p["displayName"]["text"],
-            "address": p.get("formattedAddress"),
-            "lat": p.get("location", {}).get("latitude"),
-            "lng": p.get("location", {}).get("longitude"),
+    def _build_base(place: Dict[str, object]) -> Dict[str, object]:
+        return {
+            "id": place.get("id"),
+            "name": place.get("displayName", {}).get("text"),
+            "address": place.get("formattedAddress"),
+            "lat": place.get("location", {}).get("latitude"),
+            "lng": place.get("location", {}).get("longitude"),
         }
-        # Try to enrich with contact info; fail soft if not available
+
+    def _enrich_with_contact(place: Dict[str, object]) -> Dict[str, object]:
+        base = _build_base(place)
+        place_id = base.get("id")
+        if not place_id:
+            base.update({"phone": None, "website": None, "maps_url": None})
+            return base
         try:
-            base.update(get_place_contact(p["id"]))
+            base.update(get_place_contact(place_id))
         except Exception:
             base.update({"phone": None, "website": None, "maps_url": None})
-        results.append(base)
-    return gplaces_to_leads(results)
+        return base
+
+    selected_places: List[Dict[str, object]] = collected_places[:max_results]
+    if not selected_places:
+        return []
+
+    if len(selected_places) == 1:
+        enriched = [_enrich_with_contact(selected_places[0])]
+    else:
+        max_workers = min(8, len(selected_places))
+        enriched: List[Optional[Dict[str, object]]] = [None] * len(selected_places)
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_map = {
+                executor.submit(_enrich_with_contact, place): idx
+                for idx, place in enumerate(selected_places)
+            }
+            for future in as_completed(future_map):
+                idx = future_map[future]
+                enriched[idx] = future.result()
+
+        enriched = [item for item in enriched if item is not None]
+
+    return gplaces_to_leads(enriched)
 
 if __name__ == "__main__":
     query = sys.argv[1] if len(sys.argv) > 1 else "Houston, TX"
