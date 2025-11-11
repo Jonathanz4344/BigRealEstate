@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, List, Optional, Tuple
 
 import re
@@ -9,7 +10,7 @@ from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from app.db.session import get_db
+from app.db.session import SessionLocal, get_db
 from app.models.address import Address
 from app.models.contact import Contact
 from app.models.lead import Lead
@@ -20,6 +21,13 @@ from app.external_api import google_places, openai_api, rapidapi
 
 
 router = APIRouter()
+
+
+_ALLOWED_EXTERNAL_SOURCES = {
+    DataSource.gpt,
+    DataSource.rapidapi,
+    DataSource.google_places,
+}
 
 
 class LocationResolutionError(RuntimeError):
@@ -459,6 +467,23 @@ def _persist_external_leads(db: Session, leads: List[Dict[str, object]]) -> Dict
     }
 
 
+def _search_and_persist_external_source(
+    request: LeadSearchRequest, source: DataSource
+) -> Dict[str, int]:
+    """
+    Fetch leads from an external provider and persist them using an isolated DB session.
+    """
+    ext_result = _perform_external_search(request, source)
+    session = SessionLocal()
+    try:
+        return _persist_external_leads(session, ext_result.get("leads", []))
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+
 def _perform_db_search(filter: LocationFilter, db: Session) -> Dict[str, object]:
     lat, lon, normalized_location, _ = _resolve_location(filter, DataSource.db.value)
     radius_miles = 50.0
@@ -650,20 +675,31 @@ def search_leads(request: LeadSearchRequest, db: Session = Depends(get_db)):
     external_persistence: Dict[str, Dict[str, int]] = {}
 
     external_sources = [src for src in unique_sources if src != DataSource.db]
+    valid_external_sources: List[DataSource] = []
     for source in external_sources:
-        try:
-            if source not in {DataSource.gpt, DataSource.rapidapi, DataSource.google_places}:
-                errors[source.value] = "Unsupported source requested."
-                continue
-            ext_result = _perform_external_search(request, source)
-            persistence = _persist_external_leads(db, ext_result.get("leads", []))
-            external_persistence[source.value] = persistence
-        except LocationResolutionError as exc:
-            errors[source.value] = exc.message
-        except ExternalProviderError as exc:
-            errors[source.value] = f"External provider request failed: {exc.message}"
-        except Exception as exc:
-            errors[source.value] = f"Unexpected error: {exc}"
+        if source not in _ALLOWED_EXTERNAL_SOURCES:
+            errors[source.value] = "Unsupported source requested."
+            continue
+        valid_external_sources.append(source)
+
+    if valid_external_sources:
+        max_workers = max(1, min(len(valid_external_sources), len(_ALLOWED_EXTERNAL_SOURCES)))
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            future_map = {
+                executor.submit(_search_and_persist_external_source, request, source): source
+                for source in valid_external_sources
+            }
+            for future in as_completed(future_map):
+                source = future_map[future]
+                try:
+                    persistence = future.result()
+                    external_persistence[source.value] = persistence
+                except LocationResolutionError as exc:
+                    errors[source.value] = exc.message
+                except ExternalProviderError as exc:
+                    errors[source.value] = f"External provider request failed: {exc.message}"
+                except Exception as exc:
+                    errors[source.value] = f"Unexpected error: {exc}"
 
     aggregated_leads: List[Dict[str, object]] = []
     try:
