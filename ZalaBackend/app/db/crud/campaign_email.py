@@ -60,21 +60,11 @@ def get_campaign_emails_for_campaign(
         campaign_id: int,
         skip: int = 0,
         limit: int = 100,
-        # contact_methods: Optional[List[schemas.ContactMethod]] = None,
 ) -> List[CampaignEmail]:
     """
     Fetch messages for a given campaign.
     """
     query = _base_query(db).filter(CampaignEmail.campaign_id == campaign_id)
-
-    # if contact_methods:
-    #     contact_method_values = [
-    #         contact_method.value
-    #         if hasattr(contact_method, "value")
-    #         else contact_method
-    #         for contact_method in contact_methods
-    #     ]
-    #     query = query.filter(CampaignEmail.contact_method.in_(contact_method_values))
 
     return query.offset(skip).limit(limit).all()
 

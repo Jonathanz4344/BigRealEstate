@@ -112,7 +112,6 @@ def create_lead(lead_in: schemas.LeadCreate, db: Session = Depends(get_db)):
 @router.get("/", tags=["Leads"],summary="Get All Leads", response_model=List[schemas.LeadPublic])
 def list_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     leads = lead_crud.get_leads(db, skip=skip, limit=limit)
-    # return [_serialize_lead(lead) for lead in leads]
     return leads
 
 
@@ -121,7 +120,6 @@ def read_lead(lead_id: int, db: Session = Depends(get_db)):
     lead = lead_crud.get_lead_by_id(db, lead_id=lead_id)
     if not lead:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
-    # return _serialize_lead(lead)
     return lead
 
 @router.put("/{lead_id}",tags=["Leads"], response_model=schemas.LeadPublic)

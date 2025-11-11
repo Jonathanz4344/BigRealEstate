@@ -97,7 +97,3 @@ def search_agents(city: str, max_results: int = 50):
 if __name__ == "__main__":
     response = search_agents("Houston, TX")
     pprint.pprint(response)
-
-    # with open("agents_log.txt", "a", encoding="utf-8") as f:
-    #     f.write("\n--- new run ---\n")
-    #     f.write(json.dumps(response.json()["data"]["results"]["professionals"], indent=2, ensure_ascii=False))

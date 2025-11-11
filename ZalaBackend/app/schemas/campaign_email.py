@@ -62,7 +62,6 @@ class CampaignEmailUpdate(BaseModel):
     """
 
     lead_id: Optional[int] = None
-    # contact_method: Optional[ContactMethod] = None
     message_subject: Optional[str] = None
     message_body: Optional[str] = None
     from_name: Optional[str] = None
