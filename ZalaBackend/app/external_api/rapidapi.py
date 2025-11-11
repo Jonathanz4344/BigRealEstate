@@ -1,6 +1,7 @@
 import json
 import pprint
 from typing import Any, Dict, List, Set
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 
@@ -49,41 +50,72 @@ def search_agents(city: str, max_results: int = 50):
     max_results = max(1, max_results)
     aggregated: List[Dict[str, Any]] = []
     seen_keys: Set[str] = set()
-    page = 1
     max_pages = max(1, min(10, (max_results + 9) // 10))
     page_size = min(50, max_results)
 
-    while len(aggregated) < max_results and page <= max_pages:
-        professionals = _fetch_agents_page(city, page, page_size if page == 1 else 0)
-        if not professionals:
-            if page == 1:
-                raise RuntimeError("RapidAPI response did not include any professionals.")
-            break
+    def _lead_key(prof: Dict[str, Any]) -> str:
+        key_candidate = (
+            prof.get("encodedZuid")
+            or prof.get("id")
+            or prof.get("profileLink")
+            or prof.get("fullName")
+            or prof.get("businessName")
+        )
+        return str(key_candidate) if key_candidate is not None else json.dumps(prof, sort_keys=True)
 
-        added_this_page = 0
+    def _ingest(professionals: List[Dict[str, Any]]) -> int:
+        added = 0
         for prof in professionals:
-            key_candidate = (
-                prof.get("encodedZuid")
-                or prof.get("id")
-                or prof.get("profileLink")
-                or prof.get("fullName")
-                or prof.get("businessName")
-            )
-            key_str = str(key_candidate) if key_candidate is not None else json.dumps(prof, sort_keys=True)
+            key_str = _lead_key(prof)
             if key_str in seen_keys:
                 continue
             seen_keys.add(key_str)
             aggregated.append(prof)
-            added_this_page += 1
+            added += 1
             if len(aggregated) >= max_results:
                 break
+        return added
 
-        if len(aggregated) >= max_results:
-            break
-        if added_this_page == 0:
-            break
+    first_page = _fetch_agents_page(city, 1, page_size)
+    if not first_page:
+        raise RuntimeError("RapidAPI response did not include any professionals.")
+    _ingest(first_page)
 
-        page += 1
+    if len(aggregated) < max_results and max_pages > 1:
+        max_workers = min(3, max_pages - 1)
+        next_page = 2
+        no_more_results = False
+        in_flight: Dict[Any, int] = {}
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            def _schedule():
+                nonlocal next_page
+                while (
+                    len(in_flight) < max_workers
+                    and next_page <= max_pages
+                    and not no_more_results
+                    and len(aggregated) < max_results
+                ):
+                    future = executor.submit(_fetch_agents_page, city, next_page, 0)
+                    in_flight[future] = next_page
+                    next_page += 1
+
+            _schedule()
+
+            while in_flight and len(aggregated) < max_results and not no_more_results:
+                future = next(as_completed(list(in_flight.keys())))
+                page_number = in_flight.pop(future)
+                professionals = future.result()
+                if not professionals:
+                    no_more_results = True
+                    break
+
+                added = _ingest(professionals)
+                if added == 0:
+                    no_more_results = True
+                    break
+
+                _schedule()
 
     truncated = aggregated[:max_results]
     if not truncated:
