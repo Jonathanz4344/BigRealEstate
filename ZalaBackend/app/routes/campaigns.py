@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import schemas
 from app.db.crud import campaign as campaign_crud
+from app.db.crud import campaign_lead as campaign_lead_crud
 from app.db.session import get_db
 
 
@@ -59,3 +60,5 @@ def delete_campaign(campaign_id: int, db: Session = Depends(get_db)):
     if not campaign_crud.delete_campaign(db, campaign_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
     return None
+
+
