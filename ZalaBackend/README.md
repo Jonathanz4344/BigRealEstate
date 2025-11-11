@@ -346,6 +346,16 @@ Rerun initalize_db.py to create tables
 - Use dedicated link/unlink endpoints for entity relationships instead of embedding IDs in create requests.
 - Keep `API_ROUTES_README.md` updated with endpoint changes for frontend synchronization.
 - Restart your FastAPI server after modifying `.env`.
+
+### Search-lead pipeline & API usage
+
+- `/api/searchLeads` always executes the **DB search first**, then fans out to the enabled external sources.
+- Google Places & RapidAPI now skip re-geocoding when latitude/longitude already come back from the provider. Only results that lack coordinates are geocoded, and those calls run through a thread pool to keep the map provider from being hammered sequentially.
+- Database filtering now uses a bounding box query to fetch just the nearby leads/properties before running the precise Haversine calculation in Python. That keeps the DB workload tiny even as the table grows.
+- GPT + Brave fetches are dispatched as a FastAPI background task. The API response returns immediately with `external_persistence["gpt"] = {"status": "queued"}` while the background job calls the LLM, normalizes the leads, and writes them to the DB. Those leads show up on the next request that includes the `db` source—no separate polling needed.
+- `external_persistence` now contains either `{inserted, duplicates, failed}` for blocking sources or `{status: "queued"}` if a background job is still running. This gives the frontend a single place to show async progress.
+- Because more work happens in parallel, provider quotas are consumed faster. Keep `app/external_api/api_usage.json` (and the vendor dashboards) updated so you know when to throttle tests.
+
 Google Places
 1. Create or select a project at https://console.cloud.google.com/.
 2. Enable the **Geocoding API** (and any other required services).
