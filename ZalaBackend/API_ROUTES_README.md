@@ -180,13 +180,13 @@ Allowed file MIME types: `text/csv`, `application/vnd.ms-excel`, and `.xlsx`. Th
 
 | Method | Path | Purpose | Body Fields | Response |
 | --- | --- | --- | --- | --- |
-| POST | `/api/searchLeads` | Fan-out search across one or more data sources | `location_text` (string) plus `sources` (array containing any of `"db"`, `"rapidapi"`, `"google_places"`, `"gpt"`) | Per-source `results` (each with `leads` and optional metadata) and per-source `errors` when a provider fails |
+| POST | `/api/searchLeads` | Fetch nearby leads (DB first, external providers auto-triggered) | JSON: `location_text` (string) | `aggregated_leads` (from DB after any inline refresh), optional `external_persistence` statuses, and `errors` keyed by provider |
 
 Notes:
-- When a single source is requested, the matching entry in `results` mirrors the legacy payloads (for example, `rapidapi`/`google_places`/`gpt`/`db` return `leads` with `distance_miles`).
+- Google Places & RapidAPI execute inline only when the DB cache is empty for the requested area; otherwise they enqueue background refresh jobs. GPT always runs as a background job. Check `external_persistence` for `{inserted, duplicates, failed}` counts or `{status: "queued"}`.
 - If geocoding fails or a provider rejects the request, the reason is listed under `errors[source]`.
 - `location_text` can be a zip code or free-form description; the backend geocodes and extracts any dynamic filters automatically.
-- Leads returned from external sources include a temporary positive `lead_id` so frontends can key list items consistently; IDs increment across sources within the same response.
+- `aggregated_leads` always contains persisted DB leads (with real `lead_id` values). When inline fetches run, the backend saves results first and then re-queries the DB so IDs remain stable.
 - External provider quotas: RapidAPI requests reset monthly with a cap of 95 calls, and Brave search requests (used by the GPT integration) are limited to 1,950 calls per month.
 
 ---

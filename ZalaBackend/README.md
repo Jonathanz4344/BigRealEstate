@@ -349,7 +349,8 @@ Rerun initalize_db.py to create tables
 
 ### Search-lead pipeline & API usage
 
-- `/api/searchLeads` always executes the **DB search first**, then fans out to the enabled external sources.
+- `/api/searchLeads` always executes the **DB search first**. If that query already has nearby data, the endpoint returns immediately and refreshes each configured external source in the background. If the DB has *no* matches for the requested location, Google Places and RapidAPI run inline, persist their results, and the DB search is repeated so the user still gets fresh leads before the response is returned.
+- Clients no longer pass a `sources` array. The backend automatically schedules Google Places, RapidAPI, and GPT (with DB caching as the authoritative surface) and decides which ones should block vs. run in the background based on whether the DB already has nearby leads.
 - Google Places & RapidAPI now skip re-geocoding when latitude/longitude already come back from the provider. Only results that lack coordinates are geocoded, and those calls run through a thread pool to keep the map provider from being hammered sequentially.
 - Database filtering now uses a bounding box query to fetch just the nearby leads/properties before running the precise Haversine calculation in Python. That keeps the DB workload tiny even as the table grows.
 - GPT + Brave fetches are dispatched as a FastAPI background task. The API response returns immediately with `external_persistence["gpt"] = {"status": "queued"}` while the background job calls the LLM, normalizes the leads, and writes them to the DB. Those leads show up on the next request that includes the `db` source—no separate polling needed.

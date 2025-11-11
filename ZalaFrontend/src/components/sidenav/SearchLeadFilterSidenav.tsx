@@ -1,20 +1,10 @@
-import type { DemoDataSource } from "../../interfaces";
 import { Button, IconButton, IconButtonVariant } from "../buttons";
-import { Icon, Icons } from "../icons";
+import { Icons } from "../icons";
 import { Select } from "../inputs";
 import { useSearchLeadFilterSidenav } from "../../hooks";
-import { COLORS } from "../../config";
-
-const SOURCE_OPTIONS: { value: DemoDataSource; text: string }[] = [
-  { value: "rapidapi", text: "RapidAPI (Zillow)" },
-  { value: "google_places", text: "Google Places" },
-  { value: "gpt", text: "OpenAI" },
-];
 
 export const SearchLeadFilterSidenav = () => {
   const {
-    selectedSources,
-    toggleSource,
     sortBy,
     setSortBy,
     closeSideNav,
@@ -36,39 +26,6 @@ export const SearchLeadFilterSidenav = () => {
             shadow={false}
           />
           <p className="opacity-0 text-xl font-bold">Lead Controls</p>
-        </div>
-        <div className="flex flex-col space-y-2">
-          <p className="text-sm font-semibold text-neutral-600 uppercase tracking-wide">
-            Lead sources
-          </p>
-          <div className="flex flex-col space-y-2">
-            {SOURCE_OPTIONS.map(({ value, text }) => {
-              const isSelected = selectedSources.includes(value);
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => toggleSource(value)}
-                  className={`flex w-full items-center space-x-3 rounded-lg border px-3 py-2 text-left transition-colors ${
-                    isSelected
-                      ? "border-transparent shadow-sm"
-                      : "border-neutral-200 hover:border-neutral-400"
-                  }`}
-                  style={isSelected ? { backgroundColor: COLORS.primary } : undefined}
-                >
-                  <Icon
-                    name={
-                      isSelected ? Icons.CheckboxChecked : Icons.CheckboxOutline
-                    }
-                    color={isSelected ? COLORS.accent : COLORS.secondary50}
-                  />
-                  <span className="text-sm font-medium text-neutral-800">
-                    {text}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
         </div>
         <Select
           label="Sort by"

@@ -29,6 +29,12 @@ _ALLOWED_EXTERNAL_SOURCES = {
     DataSource.google_places,
 }
 
+_DEFAULT_EXTERNAL_SOURCES: List[DataSource] = [
+    DataSource.google_places,
+    DataSource.rapidapi,
+    DataSource.gpt,
+]
+
 
 class LocationResolutionError(RuntimeError):
     """Raised when input data is insufficient to resolve a usable location."""
@@ -758,23 +764,25 @@ def search_leads(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
-    unique_sources: List[DataSource] = []
-    for src in request.sources or []:
-        if src not in unique_sources:
-            unique_sources.append(src)
-
-    if not unique_sources:
-        unique_sources = [DataSource.google_places]
-
-    if DataSource.db in unique_sources:
-        unique_sources = [DataSource.db] + [src for src in unique_sources if src != DataSource.db]
-    else:
-        unique_sources.insert(0, DataSource.db)
-
     errors: Dict[str, str] = {}
     external_persistence: Dict[str, Dict[str, object]] = {}
 
-    external_sources = [src for src in unique_sources if src != DataSource.db]
+    aggregated_leads: List[Dict[str, object]] = []
+    try:
+        db_result = _perform_db_search(request, db)
+        aggregated_leads = db_result.get("leads", [])
+    except LocationResolutionError as exc:
+        errors[DataSource.db.value] = exc.message
+    except Exception as exc:
+        errors[DataSource.db.value] = f"Unexpected error: {exc}"
+
+    db_has_results = bool(aggregated_leads)
+
+    external_sources = [
+        src
+        for src in _DEFAULT_EXTERNAL_SOURCES
+        if src in _ALLOWED_EXTERNAL_SOURCES
+    ]
     blocking_sources: List[DataSource] = []
     background_sources: List[DataSource] = []
     for source in external_sources:
@@ -782,6 +790,9 @@ def search_leads(
             errors[source.value] = "Unsupported source requested."
             continue
         if source == DataSource.gpt:
+            background_sources.append(source)
+            continue
+        if db_has_results:
             background_sources.append(source)
         else:
             blocking_sources.append(source)
@@ -805,19 +816,18 @@ def search_leads(
                 except Exception as exc:
                     errors[source.value] = f"Unexpected error: {exc}"
 
+        try:
+            db_result = _perform_db_search(request, db)
+            aggregated_leads = db_result.get("leads", [])
+        except LocationResolutionError as exc:
+            errors[DataSource.db.value] = exc.message
+        except Exception as exc:
+            errors[DataSource.db.value] = f"Unexpected error: {exc}"
+
     if background_sources:
         for source in background_sources:
             background_tasks.add_task(_background_source_search, request, source)
             external_persistence[source.value] = {"status": "queued"}
-
-    aggregated_leads: List[Dict[str, object]] = []
-    try:
-        db_result = _perform_db_search(request, db)
-        aggregated_leads = db_result.get("leads", [])
-    except LocationResolutionError as exc:
-        errors[DataSource.db.value] = exc.message
-    except Exception as exc:
-        errors[DataSource.db.value] = f"Unexpected error: {exc}"
 
     response: Dict[str, object] = {
         "aggregated_leads": aggregated_leads,

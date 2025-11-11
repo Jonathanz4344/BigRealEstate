@@ -1,9 +1,4 @@
-import type {
-  AContact,
-  AUser,
-  DemoData,
-  DemoLocationResult,
-} from "../../interfaces";
+import type { AContact, AUser, DemoData } from "../../interfaces";
 import type {
   CreateContactProps,
   CreateUserProps,
@@ -20,7 +15,6 @@ import type {
   ListCampaignsParams,
 } from "./types";
 import { useFetch } from "./useFetch";
-import { DEFAULT_LEAD_SOURCES } from "../../stores";
 import type {
   ACampaignEmail,
   ACampaignEmailSendResponse,
@@ -34,20 +28,15 @@ export const useApi = () => {
   // };
   const { post, get, put, del } = useFetch();
 
-  const searchLeads = async ({ query, sources }: SearchLeadsProps) => {
-    type CombinedSearchResponse = {
-      requested_sources: string[];
-      results: Record<string, any>;
+  const searchLeads = async ({ query }: SearchLeadsProps) => {
+    type SearchLeadsResponse = {
       aggregated_leads?: any[];
+      external_persistence?: Record<string, unknown>;
       errors?: Record<string, string>;
     };
 
-    const requestedSources =
-      sources.length > 0 ? sources : [...DEFAULT_LEAD_SOURCES];
-
-    const response = await post<CombinedSearchResponse>(`/api/searchLeads`, {
+    const response = await post<SearchLeadsResponse>(`/api/searchLeads`, {
       location_text: query,
-      sources: requestedSources,
     });
 
     if (response.err || !response.data) {
@@ -56,13 +45,6 @@ export const useApi = () => {
         err: response.err ?? "No data returned",
       };
     }
-
-    const availableSources = requestedSources.filter(
-      (source) => response.data.results?.[source]
-    );
-    const primarySource = availableSources[0] ?? requestedSources[0];
-    const primaryResult =
-      (primarySource && response.data.results?.[primarySource]) ?? {};
 
     const normalizeLead = (lead: any): DemoData => {
       const contact = lead?.contact ?? {};
@@ -108,10 +90,7 @@ export const useApi = () => {
         longitude,
         distance_miles:
           typeof lead?.distance_miles === "number" ? lead.distance_miles : 0,
-        source:
-          typeof lead?.source === "string"
-            ? (lead.source as DemoData["source"])
-            : primarySource,
+        source: typeof lead?.source === "string" ? lead.source : "db",
       };
     };
 
@@ -119,41 +98,13 @@ export const useApi = () => {
       ? response.data.aggregated_leads.map(normalizeLead)
       : [];
 
-    let nearby_properties: DemoData[] = [];
-    if (aggregatedLeads.length > 0) {
-      nearby_properties = aggregatedLeads;
-    } else if (Array.isArray(primaryResult?.nearby_properties)) {
-      nearby_properties = primaryResult.nearby_properties as DemoData[];
-    } else if (Array.isArray(primaryResult?.leads)) {
-      nearby_properties = primaryResult.leads.map(normalizeLead);
-    }
-
-    const findNormalizedLocation = (): DemoLocationResult | null => {
-      for (const source of availableSources) {
-        const candidate = response.data.results?.[source]?.normalized_location;
-        if (candidate) return candidate as DemoLocationResult;
-      }
-      const fallback = Object.values(response.data.results ?? {}).find(
-        (item) => item?.normalized_location
-      ) as { normalized_location?: DemoLocationResult } | undefined;
-      if (fallback?.normalized_location) return fallback.normalized_location;
-      return null;
-    };
-
-    const normalized_location: DemoLocationResult =
-      findNormalizedLocation() ?? {
-        latitude: 0,
-        longitude: 0,
-        city: "",
-        state: "",
-        zip: "",
-        source: primarySource ?? "google_places",
-      };
+    const nearby_properties = aggregatedLeads;
 
     return {
       data: {
-        normalized_location,
         nearby_properties,
+        external_persistence: response.data.external_persistence ?? {},
+        errors: response.data.errors ?? {},
       },
       err: null,
     };

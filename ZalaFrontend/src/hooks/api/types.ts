@@ -1,4 +1,4 @@
-import type { AContact, DemoDataSource } from "../../interfaces";
+import type { AContact } from "../../interfaces";
 
 export type APIResponse<T> = {
   data: T | null;
@@ -7,7 +7,6 @@ export type APIResponse<T> = {
 
 export type SearchLeadsProps = {
   query: string;
-  sources: DemoDataSource[];
 };
 
 export type CreateContactProps = Omit<AContact, "contact_id">;
