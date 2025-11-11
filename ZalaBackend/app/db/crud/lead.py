@@ -29,8 +29,8 @@ def get_lead_by_id(db: Session, lead_id: int) -> Optional[Lead]:
     )
 
 
-def get_leads(db: Session, skip: int = 0, limit: int = 100) -> List[Lead]:
-    return (
+def get_leads(db: Session, skip: int = 0, limit: int = 100, lead_ids: Optional[List[int]] = None) -> List[Lead]:
+    query = (
         db.query(Lead)
         .options(
             selectinload(Lead.properties).joinedload(Property.address),
@@ -41,10 +41,10 @@ def get_leads(db: Session, skip: int = 0, limit: int = 100) -> List[Lead]:
             joinedload(Lead.address),
             selectinload(Lead.campaigns).joinedload(CampaignLead.campaign)
         )
-        .offset(skip)
-        .limit(limit)
-        .all()
     )
+    if lead_ids:
+        query = query.filter(Lead.lead_id.in_(lead_ids))
+    return query.offset(skip).limit(limit).all()
 
 
 def create_lead(db: Session, lead_in: schemas.LeadCreate) -> Lead:
