@@ -39,6 +39,7 @@ def init_db():
     from ..models import (
         user,
         board,
+        board_step,
         property,
         contact,
         lead,

@@ -30,7 +30,6 @@ class BoardStepUpdate(BaseModel):
 
     board_column: Optional[int] = None
     step_name: Optional[str] = None
-    user_id: Optional[int] = None
     lead_ids: Optional[List[int]] = None
     property_ids: Optional[List[int]] = None
 

@@ -16,6 +16,7 @@ from app.routes import (
     units,
     leads,
     board,
+    board_step,
     auth,
     campaigns,
     campaign_leads,
