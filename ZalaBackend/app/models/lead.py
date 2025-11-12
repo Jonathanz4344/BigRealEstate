@@ -4,6 +4,7 @@ from sqlalchemy import Column, ForeignKey, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..db.session import Base
+from .board_step import board_step_leads
 
 
 # campaign_leads = Table(
@@ -46,3 +47,9 @@ class Lead(Base):
 
     campaigns: Mapped[List["CampaignLead"]] = relationship(
         "CampaignLead", back_populates="lead", cascade="all, delete-orphan")
+
+    board_steps: Mapped[List["BoardStep"]] = relationship(
+        "BoardStep",
+        secondary=board_step_leads,
+        back_populates="leads",
+    )

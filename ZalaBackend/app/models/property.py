@@ -4,6 +4,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from .user import user_properties
+from .board_step import board_step_properties
 from ..db.session import Base
 
 
@@ -28,4 +29,8 @@ class Property(Base):
     units: Mapped[List["Unit"]] = relationship("Unit", back_populates="property", cascade="all, delete-orphan")
     lead: Mapped["Lead"] = relationship("Lead", back_populates="properties", uselist=False)
     address: Mapped["Address"] = relationship("Address", back_populates="property", uselist=False)
-
+    board_steps: Mapped[List["BoardStep"]] = relationship(
+        "BoardStep",
+        secondary=board_step_properties,
+        back_populates="properties",
+    )

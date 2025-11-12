@@ -8,6 +8,8 @@ from .user_authentication import UserAuthentication
 from .user import User
 from .property import Property
 from .unit import Unit
+from .board import Board
+from .board_step import BoardStep
 from .campaign import Campaign
 from .campaign_email import CampaignEmail
 from .lead import Lead

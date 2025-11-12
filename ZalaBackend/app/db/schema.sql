@@ -1,7 +1,11 @@
 -- drop types
 DROP TYPE IF EXISTS user_role;
 -- drop tables
+DROP TABLE IF EXISTS board_step_properties;
+DROP TABLE IF EXISTS board_step_leads;
 DROP TABLE IF EXISTS lead_properties;
+DROP TABLE IF EXISTS board_steps;
+DROP TABLE IF EXISTS boards;
 DROP TABLE IF EXISTS user_properties;
 DROP TABLE IF EXISTS user_authentication;
 DROP TABLE IF EXISTS units;
@@ -43,6 +47,19 @@ CREATE TABLE users (
     updated_at      TIMESTAMPTZ
 );
 
+CREATE TABLE boards (
+    board_id        SERIAL PRIMARY KEY,
+    board_name      TEXT NOT NULL,
+    user_id         INTEGER REFERENCES users(user_id) ON DELETE SET NULL
+);
+
+CREATE TABLE board_steps (
+    board_step_id   SERIAL PRIMARY KEY,
+    board_id        INTEGER NOT NULL REFERENCES boards(board_id) ON DELETE CASCADE,
+    board_column    INTEGER NOT NULL,
+    step_name       TEXT
+);
+
 CREATE TABLE leads (
     lead_id         SERIAL PRIMARY KEY,
     created_by      INTEGER REFERENCES users(user_id) ON DELETE SET NULL,
@@ -63,6 +80,12 @@ CREATE TABLE user_authentication (
     provider_email  TEXT
 );
 
+CREATE TABLE board_step_leads (
+    board_step_id   INTEGER REFERENCES board_steps(board_step_id) ON DELETE CASCADE,
+    lead_id         INTEGER REFERENCES leads(lead_id) ON DELETE CASCADE,
+    PRIMARY KEY (board_step_id, lead_id)
+);
+
 CREATE TYPE user_role AS ENUM ('user', 'admin', 'moderator');
 
 CREATE TABLE properties (
@@ -72,6 +95,12 @@ CREATE TABLE properties (
     mls_number      TEXT UNIQUE,
     lead_id         INTEGER REFERENCES leads(lead_id),
     notes           TEXT
+);
+
+CREATE TABLE board_step_properties (
+    board_step_id   INTEGER REFERENCES board_steps(board_step_id) ON DELETE CASCADE,
+    property_id     INTEGER REFERENCES properties(property_id) ON DELETE CASCADE,
+    PRIMARY KEY (board_step_id, property_id)
 );
 
 CREATE TABLE units (

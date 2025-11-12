@@ -15,6 +15,8 @@ from app.routes import (
     users,
     units,
     leads,
+    board,
+    board_step,
     auth,
     campaigns,
     campaign_leads,
@@ -43,8 +45,10 @@ app.include_router(location_filter.router, prefix="/api", include_in_schema=True
 app.include_router(campaign_emails.send_router, prefix="/api", include_in_schema=True) # Send Campaign Email
 app.include_router(campaign_emails.router, prefix="/api", include_in_schema=True)
 app.include_router(campaign_leads.router, prefix="/api", include_in_schema=True)
+app.include_router(board.router, prefix="/api", include_in_schema=True)
+app.include_router(board_step.router, prefix="/api", include_in_schema=True)
 
-app.include_router(campaigns.router, prefix="/api", include_in_schema=True)
+app.include_router(campaigns.router, prefix="/api", include_in_schema=False)
 app.include_router(addresses.router, prefix="/api", include_in_schema=False)
 app.include_router(properties.router, prefix="/api", include_in_schema=False)
 app.include_router(units.router, prefix="/api", include_in_schema=False)
