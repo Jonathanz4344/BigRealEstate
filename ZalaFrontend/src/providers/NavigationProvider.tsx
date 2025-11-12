@@ -5,6 +5,8 @@ import {
   LeadSearchPage,
   CampaignPage,
   NotFoundPage,
+  TestEmailPage,
+  CampaignEmailDemoPage,
 } from "../pages";
 import { RootLayout } from "../layouts";
 import { useAuthStore } from "../stores";
@@ -31,6 +33,11 @@ export const NavigationProvider = () => {
 
           <Route index path="/" element={<LeadSearchPage />} />
           <Route path="/campaign/:campaignId" element={<CampaignPage />} />
+          <Route path="/email-test" element={<TestEmailPage />} />
+          <Route
+            path="/campaign-email-demo"
+            element={<CampaignEmailDemoPage />}
+          />
           <Route path="404" element={<NotFoundPage />} />
           <Route path="*" element={<NavTo404 />} />
         </Route>

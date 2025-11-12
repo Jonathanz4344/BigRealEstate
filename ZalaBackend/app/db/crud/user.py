@@ -23,7 +23,12 @@ def get_user_by_id(db: Session, user_id: int):
     Get a single user by their ID
     SELECT * FROM users WHERE user_id = {user_id}
     """
-    return db.query(User).options(joinedload(User.contact), joinedload(User.properties)).filter(
+    return db.query(User).options(
+        joinedload(User.contact),
+        joinedload(User.properties),
+        joinedload(User.google_credentials),
+        joinedload(User.authentication),
+    ).filter(
         User.user_id == user_id).first()
 
 
@@ -32,7 +37,18 @@ def get_user_by_email(db: Session, email: str):
     Get a single user by their email address
     SELECT * FROM users JOIN contacts WHERE contact.email = {email}
     """
-    return db.query(User).join(Contact).filter(Contact.email == email).first()
+    return (
+        db.query(User)
+        .join(Contact)
+        .options(
+            joinedload(User.contact),
+            joinedload(User.properties),
+            joinedload(User.google_credentials),
+            joinedload(User.authentication),
+        )
+        .filter(Contact.email == email)
+        .first()
+    )
 
 
 def get_user_by_username(db: Session, username: str):
@@ -40,7 +56,17 @@ def get_user_by_username(db: Session, username: str):
     Get a single user by their username
     SELECT * FROM users WHERE username = {username}
     """
-    return db.query(User).filter(User.username == username).first()
+    return (
+        db.query(User)
+        .options(
+            joinedload(User.contact),
+            joinedload(User.properties),
+            joinedload(User.google_credentials),
+            joinedload(User.authentication),
+        )
+        .filter(User.username == username)
+        .first()
+    )
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
@@ -48,7 +74,17 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     Get a list of users with limits
     SELECT * FROM users OFFSET {skip} LIMIT {limit};
     """
-    return db.query(User).options(joinedload(User.contact)).offset(skip).limit(limit).all()
+    return (
+        db.query(User)
+        .options(
+            joinedload(User.contact),
+            joinedload(User.google_credentials),
+            joinedload(User.authentication),
+        )
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def get_users_by_ids(db: Session, user_ids: Sequence[int]) -> List[User]:
@@ -60,7 +96,12 @@ def get_users_by_ids(db: Session, user_ids: Sequence[int]) -> List[User]:
 
     users = (
         db.query(User)
-        .options(joinedload(User.contact), joinedload(User.properties))
+        .options(
+            joinedload(User.contact),
+            joinedload(User.properties),
+            joinedload(User.google_credentials),
+            joinedload(User.authentication),
+        )
         .filter(User.user_id.in_(user_ids))
         .all()
     )
@@ -79,7 +120,12 @@ def get_user_by_provider(db: Session, provider: str, provider_subject: str) -> O
     return (
         db.query(User)
         .join(UserAuthentication, UserAuthentication.user_id == User.user_id)
-        .options(joinedload(User.contact), joinedload(User.properties))
+        .options(
+            joinedload(User.contact),
+            joinedload(User.properties),
+            joinedload(User.google_credentials),
+            joinedload(User.authentication),
+        )
         .filter(
             UserAuthentication.auth_provider == provider,
             UserAuthentication.provider_subject == provider_subject,

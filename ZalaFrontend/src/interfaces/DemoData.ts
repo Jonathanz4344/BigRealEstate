@@ -1,12 +1,3 @@
-export type DemoLocationResult = {
-  latitude: number;
-  longitude: number;
-  city: string;
-  state: string;
-  zip: string;
-  source: string;
-};
-
 export type DemoData = {
   address: string;
   agent: string;
@@ -17,9 +8,8 @@ export type DemoData = {
   latitude: number;
   longitude: number;
   distance_miles: number;
+  source?: string;
 };
-
-export type DemoDataSource = "gpt" | "rapidapi" | "google_places" | "db" | "mock";
 
 export const DEMO_DATA: DemoData[] = [
   {

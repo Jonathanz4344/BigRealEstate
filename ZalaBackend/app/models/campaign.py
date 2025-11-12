@@ -17,11 +17,6 @@ class Campaign(Base):
     user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.user_id"), nullable=True)
 
     user: Mapped[Optional["User"]] = relationship("User", back_populates="campaigns")
-    # leads: Mapped[List["Lead"]] = relationship(
-    #     "Lead",
-    #     secondary=campaign_leads,
-    #     back_populates="campaigns",
-    # )
     campaign_emails: Mapped[List["CampaignEmails"]] = relationship(
         "CampaignEmail", back_populates="campaign", cascade="all, delete-orphan"
     )

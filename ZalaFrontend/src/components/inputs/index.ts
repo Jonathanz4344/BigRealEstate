@@ -1,3 +1,4 @@
 export * from "./TextInput";
 export * from "./Select";
+export * from "./RichTextEditor";
 export * from "./CheckboxInput";

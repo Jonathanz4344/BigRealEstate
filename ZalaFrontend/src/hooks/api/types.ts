@@ -7,7 +7,6 @@ export type APIResponse<T> = {
 
 export type SearchLeadsProps = {
   query: string;
-  sources: DemoDataSource[];
 };
 
 export type SearchLeadsResponse = {
@@ -37,7 +36,56 @@ export type LoginAPIProps = {
 };
 
 export type LoginGoogleProps = {
-  token: string;
+  code: string;
+  scope?: string;
+  targetUserId?: number;
+};
+
+export type SendTestEmailProps = {
+  userId: number;
+  to: string;
+  subject: string;
+  html: string;
+  fromName?: string;
+};
+
+export type CreateCampaignEmailDraftProps = {
+  campaignId: number;
+  subject: string;
+  body: string;
+  leadId?: number;
+  fromName?: string;
+};
+
+export type SendCampaignEmailProps = {
+  campaignId: number;
+  leadIds: number[];
+  subject: string;
+  body: string;
+  fromName?: string;
+};
+
+export type CampaignEmailQueryParams = {
+  campaignId?: number;
+  skip?: number;
+  limit?: number;
+};
+
+export type UpdateCampaignEmailDraftProps = {
+  messageId: number;
+  subject?: string;
+  body?: string;
+  fromName?: string;
+  leadId?: number | null;
+};
+
+export type DeleteCampaignEmailDraftProps = {
+  messageId: number;
+};
+
+export type ListCampaignsParams = {
+  skip?: number;
+  limit?: number;
 };
 
 export type CreateCampaignProps = {

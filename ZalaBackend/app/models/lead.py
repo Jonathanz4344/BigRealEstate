@@ -6,14 +6,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from ..db.session import Base
 
 
-# campaign_leads = Table(
-#     "campaign_leads",
-#     Base.metadata,
-#     Column("campaign_id", ForeignKey("campaigns.campaign_id"), primary_key=True),
-#     Column("lead_id", ForeignKey("leads.lead_id"), primary_key=True),
-# )
-
-
 class Lead(Base):
     """
     SQLAlchemy model for Lead (leads)
@@ -38,11 +30,7 @@ class Lead(Base):
     campaign_emails: Mapped[List["CampaignEmail"]] = relationship(
         "CampaignEmail", back_populates="lead", cascade="all, delete-orphan"
     )
-    # campaigns: Mapped[List["Campaign"]] = relationship(
-    #     "Campaign",
-    #     secondary=campaign_leads,
-    #     back_populates="leads",
-    # )
+
 
     campaigns: Mapped[List["CampaignLead"]] = relationship(
         "CampaignLead", back_populates="lead", cascade="all, delete-orphan")

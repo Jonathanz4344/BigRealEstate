@@ -1,5 +1,9 @@
-import { Button } from "../buttons";
-import { useLogout } from "../../hooks";
+import { Button, GoogleAuthButton } from "../buttons";
+import {
+  useAppNavigation,
+  useGoogleAuthButtonCallback,
+  useLogout,
+} from "../../hooks";
 import { useAuthStore, useSideNavControlStore } from "../../stores";
 import Avatar from "@mui/material/Avatar";
 import { COLORS } from "../../config";
@@ -8,7 +12,16 @@ export const UserSidenav = () => {
   const user = useAuthStore((state) => state.user);
   const closeSideNav = useSideNavControlStore((state) => state.close);
   const logout = useLogout();
+  const { toEmailTestPage } = useAppNavigation();
+  const googleConnectCallback = useGoogleAuthButtonCallback({
+    onMsg: () => "Google account connected!",
+  });
+
   const onLogout = () => (closeSideNav(), logout());
+  const onOpenTestPage = () => {
+    closeSideNav();
+    toEmailTestPage();
+  };
 
   const avatarSize = 150;
   return (
@@ -36,6 +49,29 @@ export const UserSidenav = () => {
                 {user.contact?.firstName} {user.contact?.lastName}
               </p>
             </div>
+          </div>
+
+          <div className="w-full space-y-2 rounded-lg border border-secondary-25 p-4 text-secondary">
+            <p className="text-base font-semibold">Gmail Status</p>
+            <p
+              className="font-medium"
+              style={{
+                color: user.gmailConnected
+                  ? "var(--color-accent)"
+                  : "var(--color-error)",
+              }}
+            >
+              {user.gmailConnected ? "Connected" : "Not connected"}
+            </p>
+            {user.gmailConnected ? (
+              <Button text="Open Gmail Test" onClick={onOpenTestPage} />
+            ) : (
+              <GoogleAuthButton
+                callback={googleConnectCallback}
+                text="Connect Google"
+                getExtraPayload={() => ({ targetUserId: user.userId })}
+              />
+            )}
           </div>
         </div>
         <div className="p-[30px]">

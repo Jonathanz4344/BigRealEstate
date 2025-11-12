@@ -7,10 +7,12 @@ import {
   type ALead,
   type AUser,
   type IAddress,
+  type ACampaignEmail,
+  type ACampaignEmailSendResponse,
+  type ACampaignSummary,
 } from "../../interfaces";
 import type {
   APIResponse,
-  CreateCampaignProps,
   CreateContactProps,
   CreateLeadProps,
   CreateUserProps,
@@ -18,12 +20,18 @@ import type {
   LoginAPIProps,
   LoginGoogleProps,
   SearchLeadsProps,
-  SearchLeadsResponse,
+  SendTestEmailProps,
+  CreateCampaignEmailDraftProps,
+  SendCampaignEmailProps as SendCampaignEmailPayload,
+  CampaignEmailQueryParams,
+  UpdateCampaignEmailDraftProps,
+  DeleteCampaignEmailDraftProps,
+  ListCampaignsParams,
+  CreateCampaignProps,
   UpdateCampaignLeadProps,
   UpdateLeadProps,
 } from "./types";
 import { useFetch } from "./useFetch";
-import { DEFAULT_LEAD_SOURCES } from "../../stores";
 import { Normalizer } from "../../utils";
 import { useState } from "react";
 import { useApiResponseError } from "../utils";
@@ -35,7 +43,7 @@ export const useApi = () => {
   // };
 
   const apiResponseError = useApiResponseError();
-  const { post, get, put } = useFetch();
+  const { post, get, put, del } = useFetch();
   const [signal, setSignalState] = useState<AbortSignal>(
     new AbortController().signal
   );
@@ -319,12 +327,19 @@ export const useApi = () => {
     return await get<ALead>(`/api/leads/${leadId}`, getSignal("getLead"));
   };
 
-  const loginGoogle = async ({ token }: LoginGoogleProps) => {
-    return await post<AUser>(
-      `/api/login/google`,
-      { id_token: token },
-      { isFormData: false, signal: getSignal("loginGoogle") }
-    );
+  const loginGoogle = async ({
+    code,
+    scope,
+    targetUserId,
+  }: LoginGoogleProps) => {
+    const payload: Record<string, unknown> = { code, scope };
+    if (typeof targetUserId === "number") {
+      payload.target_user_id = targetUserId;
+    }
+    return await post<AUser>(`/api/login/google`, payload, {
+      isFormData: false,
+      signal: getSignal("loginGoogle"),
+    });
   };
 
   const loginAPI = async (body: LoginAPIProps) => {
@@ -334,15 +349,17 @@ export const useApi = () => {
     });
   };
 
-  const searchLeads = async ({ query, sources }: SearchLeadsProps) => {
-    const requestedSources =
-      sources.length > 0 ? sources : [...DEFAULT_LEAD_SOURCES];
+  const searchLeads = async ({ query }: SearchLeadsProps) => {
+    type SearchLeadsResponse = {
+      aggregated_leads?: any[];
+      external_persistence?: Record<string, unknown>;
+      errors?: Record<string, string>;
+    };
 
     const response = await post<SearchLeadsResponse>(
       `/api/searchLeads`,
       {
         location_text: query,
-        sources: requestedSources,
       },
       { isFormData: false, signal: getSignal("searchLeads") }
     );
@@ -354,16 +371,123 @@ export const useApi = () => {
       };
     }
 
+    const nearby_properties = Array.isArray(response.data.aggregated_leads)
+      ? response.data.aggregated_leads.map(Normalizer.APINormalizer.sourceLead)
+      : [];
+
     return {
       data: {
-        nearby_properties: response.data.aggregated_leads.map(
-          Normalizer.APINormalizer.sourceLead
-        ),
+        nearby_properties,
+        external_persistence: response.data.external_persistence ?? {},
+        errors: response.data.errors ?? {},
       },
       err: null,
     };
   };
 
+  const sendTestEmail = async ({
+    userId,
+    to,
+    subject,
+    html,
+    fromName,
+  }: SendTestEmailProps) => {
+    type GmailResponse = { id: string; thread_id?: string };
+    return await post<GmailResponse>(`/api/google-mail/send`, {
+      user_id: userId,
+      to,
+      subject,
+      html,
+      from_name: fromName,
+    });
+  };
+
+  const listCampaignEmails = async ({
+    campaignId,
+    skip,
+    limit,
+  }: CampaignEmailQueryParams = {}) => {
+    const params = new URLSearchParams();
+    if (typeof campaignId === "number") {
+      params.append("campaign_id", String(campaignId));
+    }
+    if (typeof skip === "number") {
+      params.append("skip", String(skip));
+    }
+    if (typeof limit === "number") {
+      params.append("limit", String(limit));
+    }
+    const query = params.toString();
+    const path = "/api/campaign-emails" + (query.length > 0 ? `?${query}` : "");
+    return await get<ACampaignEmail[]>(path);
+  };
+
+  const createCampaignEmailDraft = async ({
+    campaignId,
+    leadId,
+    subject,
+    body,
+    fromName,
+  }: CreateCampaignEmailDraftProps) => {
+    return await post<ACampaignEmail>(`/api/campaign-emails/`, {
+      campaign_id: campaignId,
+      lead_id: leadId,
+      message_subject: subject,
+      message_body: body,
+      from_name: fromName,
+    });
+  };
+
+  const sendCampaignEmail = async ({
+    campaignId,
+    leadIds,
+    subject,
+    body,
+    fromName,
+  }: SendCampaignEmailPayload) => {
+    return await post<ACampaignEmailSendResponse>(`/api/campaign-emails/send`, {
+      campaign_id: campaignId,
+      lead_id: leadIds,
+      message_subject: subject,
+      message_body: body,
+      from_name: fromName,
+    });
+  };
+
+  const updateCampaignEmailDraft = async ({
+    messageId,
+    subject,
+    body,
+    fromName,
+    leadId,
+  }: UpdateCampaignEmailDraftProps) => {
+    const payload: Record<string, unknown> = {};
+    if (typeof subject === "string") payload.message_subject = subject;
+    if (typeof body === "string") payload.message_body = body;
+    if (typeof fromName === "string") payload.from_name = fromName;
+    if (typeof leadId === "number") payload.lead_id = leadId;
+    else if (leadId === null) payload.lead_id = null;
+    return await put<ACampaignEmail>(
+      `/api/campaign-emails/${messageId}`,
+      payload
+    );
+  };
+
+  const deleteCampaignEmailDraft = async ({
+    messageId,
+  }: DeleteCampaignEmailDraftProps) => {
+    return await del<void>(`/api/campaign-emails/${messageId}`);
+  };
+
+  const listCampaigns = async ({ skip, limit }: ListCampaignsParams = {}) => {
+    const params = new URLSearchParams();
+    if (typeof skip === "number") params.append("skip", String(skip));
+    if (typeof limit === "number") params.append("limit", String(limit));
+    const query = params.toString();
+    return await get<ACampaignSummary[]>(
+      `/api/campaigns${query ? `?${query}` : ""}`
+    );
+  };
   return {
     apiResponseError,
     searchLeads,
@@ -375,6 +499,13 @@ export const useApi = () => {
     getCampaign,
     getLeads,
     loginGoogle,
+    sendTestEmail,
+    listCampaignEmails,
+    createCampaignEmailDraft,
+    sendCampaignEmail,
+    updateCampaignEmailDraft,
+    deleteCampaignEmailDraft,
+    listCampaigns,
     createCampaign,
     createLead,
     updateCampaign,

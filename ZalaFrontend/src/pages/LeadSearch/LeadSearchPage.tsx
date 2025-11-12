@@ -11,22 +11,6 @@ import { SideNavControlVariant, useSearchQueryStore } from "../../stores";
 import clsx from "clsx";
 import { CampaignCard } from "./components";
 import { COLORS } from "../../config";
-import type { ILead, ISourceResult } from "../../interfaces";
-
-const SOURCE_COLOR_MAP: Record<string, string> = {
-  rapidapi: "#60A5FA", // blue
-  google_places: "#34D399", // emerald
-  gpt: "#F472B6", // pink
-  db: "#FBBF24", // amber
-  mock: "#A8A29E", // cool gray
-};
-
-const getSourceColor = (_lead: ISourceResult<ILead>): string => {
-  // if (lead.source && SOURCE_COLOR_MAP[lead.source]) {
-  //   return SOURCE_COLOR_MAP[lead.source];
-  // }
-  return COLORS.white;
-};
 
 export const LeadSearchPage = () => {
   const {
@@ -83,7 +67,7 @@ export const LeadSearchPage = () => {
                 },
                 iconName: Icons.UserPin,
                 active: lead.leadId === activeLead,
-                color: getSourceColor(lead),
+                color: COLORS.white,
                 activeColor: COLORS.accent,
                 onClick: () => setActiveLead(lead.leadId),
               }))}

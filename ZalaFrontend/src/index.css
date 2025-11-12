@@ -69,3 +69,8 @@ body {
   font-family: "Ubuntu Mono", monospace;
   font-style: normal;
 }
+
+[contenteditable][data-placeholder]:empty:before {
+  content: attr(data-placeholder);
+  color: var(--color-secondary-50);
+}

@@ -22,18 +22,10 @@ class LeadCreate(LeadBase):
     """
     Schema for Create a Lead.
     """
-    # contact: ContactBase
-    # address: Optional[AddressBase] = None
-    # Linking a user to a lead should be done via the link endpoint
-    # POST /leads/{lead_id}/users/{user_id} and not via the create body.
-
-
 class LeadUpdate(BaseModel):
     """
     Schema for Updating a Lead
     """
-    # contact: Optional[ContactBase] = None
-    # address: Optional[AddressUpdate] = None
     person_type: Optional[str] = None
     business: Optional[str] = None
     website: Optional[str] = None

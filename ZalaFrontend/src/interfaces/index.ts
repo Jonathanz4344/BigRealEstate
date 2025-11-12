@@ -6,3 +6,4 @@ export * from "./Lead";
 export * from "./contact";
 export * from "./Address";
 export * from "./SourceResult";
+export * from "./campaignEmail";

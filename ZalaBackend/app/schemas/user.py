@@ -64,6 +64,7 @@ class UserPublic(UserBase):
     xp: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+    gmail_connected: bool = False
 
     class Config:
         from_attributes = True

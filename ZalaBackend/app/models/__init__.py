@@ -6,6 +6,7 @@ from .address import Address
 from .contact import Contact
 from .user_authentication import UserAuthentication
 from .user import User
+from .user_google_credentials import UserGoogleCredential
 from .property import Property
 from .unit import Unit
 from .campaign import Campaign

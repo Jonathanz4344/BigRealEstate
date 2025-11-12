@@ -16,10 +16,14 @@ from .campaign_email import (
     CampaignEmailBase,
     CampaignEmailCreate,
     CampaignEmailSendRequest,
+    CampaignEmailSendResponse,
+    CampaignEmailSendResult,
     CampaignEmailUpdate,
     CampaignEmailPublic,
+    CampaignEmailStatus,
     ContactMethod,
 )
+from .gmail import GmailSendRequest, GmailSendResponse
 from .campaign_lead import (
     CampaignLeadBase,
     CampaignLeadCreate,
