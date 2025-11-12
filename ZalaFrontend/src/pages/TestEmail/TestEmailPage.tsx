@@ -5,10 +5,11 @@ import {
   IconButtonVariant,
   Icons,
   RichTextEditor,
+  GoogleAuthButton,
 } from "../../components";
 import { useApi } from "../../hooks";
 import { useAuthStore } from "../../stores";
-import { useSnack } from "../../hooks/utils";
+import { useGoogleAuthButtonCallback, useSnack } from "../../hooks/utils";
 
 export const TestEmailPage = () => {
   const user = useAuthStore((state) => state.user);
@@ -16,6 +17,9 @@ export const TestEmailPage = () => {
 
   const { sendTestEmail } = useApi();
   const [successMsg, errorMsg] = useSnack();
+  const googleConnectCallback = useGoogleAuthButtonCallback({
+    onMsg: () => "Google account connected. You can send test emails now.",
+  });
 
   const [to, setTo] = useState("");
   const [subject, setSubject] = useState("Welcome to Zala!");
@@ -70,19 +74,52 @@ export const TestEmailPage = () => {
         </div>
 
         <div
-          className="rounded-md border p-4"
-          style={{
-            borderColor: gmailConnected
-              ? "var(--color-accent)"
-              : "var(--color-error)",
-            color: gmailConnected
-              ? "var(--color-accent)"
-              : "var(--color-error)",
-          }}
+          className={`space-y-3 rounded-2xl border p-5 ${
+            gmailConnected
+              ? "border-[#d2e3fc] bg-[#f8fafd]"
+              : "border-[#fad2cf] bg-[#fef7f5]"
+          }`}
         >
-          {gmailConnected
-            ? "Google account is connected. You can send test messages."
-            : "Google account is not connected. Sign in with Google from the login/signup page to enable Gmail sending."}
+          {gmailConnected ? (
+            <>
+              <p className="text-sm font-semibold uppercase text-[#1a73e8]">
+                Gmail connected
+              </p>
+              <p className="text-lg font-semibold text-secondary">
+                You can send test messages.
+              </p>
+              <p className="text-sm text-secondary-50">
+                Use the form below to deliver a real Gmail message through your
+                connected Google Workspace account.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-semibold uppercase text-[#d93025]">
+                Google account required
+              </p>
+              <p className="text-lg font-semibold text-secondary">
+                Connect Google to enable Gmail sending.
+              </p>
+              <p className="text-sm text-secondary-50">
+                Sign in with your Google account so Zala can securely send email
+                on your behalf via Gmail.
+              </p>
+              <div className="max-w-xs">
+                <GoogleAuthButton
+                  callback={googleConnectCallback}
+                  className="w-full"
+                  getExtraPayload={
+                    user
+                      ? () => ({
+                          targetUserId: user.userId,
+                        })
+                      : undefined
+                  }
+                />
+              </div>
+            </>
+          )}
         </div>
 
         <div className="space-y-4">

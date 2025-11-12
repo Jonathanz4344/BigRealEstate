@@ -51,24 +51,32 @@ export const UserSidenav = () => {
             </div>
           </div>
 
-          <div className="w-full space-y-2 rounded-lg border border-secondary-25 p-4 text-secondary">
-            <p className="text-base font-semibold">Gmail Status</p>
-            <p
-              className="font-medium"
-              style={{
-                color: user.gmailConnected
-                  ? "var(--color-accent)"
-                  : "var(--color-error)",
-              }}
-            >
-              {user.gmailConnected ? "Connected" : "Not connected"}
+          <div
+            className={`w-full space-y-3 rounded-2xl border p-5 ${
+              user.gmailConnected
+                ? "border-[#d2e3fc] bg-[#f8fafd]"
+                : "border-[#fad2cf] bg-[#fef7f5]"
+            }`}
+          >
+            <p className="text-sm font-semibold uppercase tracking-wide text-secondary-50">
+              Google Workspace
+            </p>
+            <p className="text-xl font-semibold text-secondary">
+              {user.gmailConnected
+                ? "Gmail account connected"
+                : "Connect your Google account"}
+            </p>
+            <p className="text-sm text-secondary-50">
+              {user.gmailConnected
+                ? "You're ready to send Gmail campaigns from Zala."
+                : "Sign in with Google to enable Gmail sending from campaigns and test emails."}
             </p>
             {user.gmailConnected ? (
               <Button text="Open Gmail Test" onClick={onOpenTestPage} />
             ) : (
               <GoogleAuthButton
                 callback={googleConnectCallback}
-                text="Connect Google"
+                className="w-full"
                 getExtraPayload={() => ({ targetUserId: user.userId })}
               />
             )}
