@@ -5,16 +5,34 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app import schemas
 from app.models.board import Board
+from app.models.board_step import BoardStep
+from app.models.lead import Lead
+from app.models.property import Property
 from app.models.user import User
+from app.models import CampaignLead
 
 
 def _with_relationships(query):
     """
     Apply the eager-loading strategy we want for board responses.
     """
+    step_loader = selectinload(Board.board_steps)
+    lead_loader = step_loader.selectinload(BoardStep.leads)
+    property_loader = step_loader.selectinload(BoardStep.properties)
+
     return query.options(
         joinedload(Board.user),
-        selectinload(Board.board_steps),
+        step_loader,
+        lead_loader.selectinload(Lead.properties).joinedload(Property.address),
+        lead_loader.selectinload(Lead.properties).selectinload(Property.units),
+        lead_loader.selectinload(Lead.properties).joinedload(Property.users),
+        lead_loader.joinedload(Lead.created_by_user),
+        lead_loader.joinedload(Lead.contact),
+        lead_loader.joinedload(Lead.address),
+        lead_loader.selectinload(Lead.campaigns).joinedload(CampaignLead.campaign),
+        property_loader.joinedload(Property.address),
+        property_loader.selectinload(Property.units),
+        property_loader.joinedload(Property.users),
     )
 
 

@@ -41,7 +41,7 @@ def list_board_steps(
         if not steps:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Board steps not found for provided ids")
 
-        found_ids = {step.step_id for step in steps}
+        found_ids = {step.board_step_id for step in steps}
         missing_ids = [step_id for step_id in unique_ids if step_id not in found_ids]
         if missing_ids:
             raise HTTPException(

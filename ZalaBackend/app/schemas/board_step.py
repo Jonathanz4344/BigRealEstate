@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from app.schemas.summaries import BoardSummary
 from app.schemas.lead import LeadPublic
@@ -11,16 +11,25 @@ class BoardStepBase(BaseModel):
     """
     Shared fields for BoardStep schema variants.
     """
+
     board_id: int
     board_column: int
     step_name: str
+
 
 class BoardStepCreate(BoardStepBase):
     """
     Schema for creating a board_step.
     """
-    lead_ids: Optional[List[int]] = Field(default_factory=list)
-    property_ids: Optional[List[int]] = Field(default_factory=list)
+
+    lead_ids: List[int] = Field(default_factory=list)
+    property_ids: List[int] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def ensure_single_target(cls, values: "BoardStepCreate") -> "BoardStepCreate":
+        if values.lead_ids and values.property_ids:
+            raise ValueError("Board step can target leads or properties, but not both.")
+        return values
 
 
 class BoardStepUpdate(BaseModel):
@@ -32,6 +41,12 @@ class BoardStepUpdate(BaseModel):
     step_name: Optional[str] = None
     lead_ids: Optional[List[int]] = None
     property_ids: Optional[List[int]] = None
+
+    @model_validator(mode="after")
+    def ensure_single_target(cls, values: "BoardStepUpdate") -> "BoardStepUpdate":
+        if values.lead_ids and values.property_ids:
+            raise ValueError("Board step can target leads or properties, but not both.")
+        return values
 
 
 class BoardStepPublic(BoardStepBase):

@@ -22,4 +22,5 @@ class Board(Base):
         back_populates="board",
         cascade="all, delete-orphan",
         passive_deletes=True,
+        order_by="BoardStep.board_column",
     )
