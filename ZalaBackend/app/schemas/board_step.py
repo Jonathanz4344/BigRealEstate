@@ -42,8 +42,8 @@ class BoardStepPublic(BoardStepBase):
 
     board_step_id: int
     board: BoardSummary
-    leads: List[LeadPublic] = []
-    properties: List[PropertyPublic] = []
+    leads: List[LeadPublic] = Field(default_factory=list)
+    properties: List[PropertyPublic] = Field(default_factory=list)
 
     class Config:
         from_attributes = True

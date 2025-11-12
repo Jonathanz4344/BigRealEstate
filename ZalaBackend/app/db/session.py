@@ -38,6 +38,7 @@ def init_db():
     # Import all your models so Base knows about them
     from ..models import (
         user,
+        board,
         property,
         contact,
         lead,

@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 
 from app.schemas.user import UserPublic
+from app.schemas.board_step import BoardStepPublic
 
 
 class BoardBase(BaseModel):
@@ -36,7 +37,7 @@ class BoardPublic(BoardBase):
 
     board_id: int
     user: Optional[UserPublic] = None
-    board_steps: List[BoardStepPublic] = []
+    board_steps: List[BoardStepPublic] = Field(default_factory=list)
 
     class Config:
         from_attributes = True

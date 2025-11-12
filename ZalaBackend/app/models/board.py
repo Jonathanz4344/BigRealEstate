@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -17,4 +17,9 @@ class Board(Base):
     user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.user_id"), nullable=True)
 
     user: Mapped[Optional["User"]] = relationship("User", back_populates="boards")
-    board_steps: Mapped[Optional["BoardStep"]] = relationship("BoardStep", back_populates="board")
+    board_steps: Mapped[List["BoardStep"]] = relationship(
+        "BoardStep",
+        back_populates="board",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
