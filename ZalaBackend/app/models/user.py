@@ -41,5 +41,6 @@ class User(Base):
 
     @property
     def gmail_connected(self) -> bool:
-        creds = self.__dict__.get("google_credentials")
+        # Use getattr so SQLAlchemy lazily loads credentials when needed.
+        creds = getattr(self, "google_credentials", None)
         return bool(creds and creds.refresh_token_encrypted)
