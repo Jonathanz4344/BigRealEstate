@@ -1,4 +1,4 @@
-import type { AContact, DemoDataSource, ILead } from "../../interfaces";
+import type { AContact, ILead } from "../../interfaces";
 
 export type APIResponse<T> = {
   data: T | null;
@@ -10,9 +10,8 @@ export type SearchLeadsProps = {
 };
 
 export type SearchLeadsResponse = {
-  requested_sources: string[];
-  results: Record<string, never>;
   aggregated_leads: never[];
+  external_persistence?: Record<string, unknown>;
   errors?: Record<string, string>;
 };
 

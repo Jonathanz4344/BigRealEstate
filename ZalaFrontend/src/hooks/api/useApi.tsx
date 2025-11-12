@@ -30,6 +30,7 @@ import type {
   CreateCampaignProps,
   UpdateCampaignLeadProps,
   UpdateLeadProps,
+  SearchLeadsResponse,
 } from "./types";
 import { useFetch } from "./useFetch";
 import { Normalizer } from "../../utils";
@@ -350,12 +351,6 @@ export const useApi = () => {
   };
 
   const searchLeads = async ({ query }: SearchLeadsProps) => {
-    type SearchLeadsResponse = {
-      aggregated_leads?: any[];
-      external_persistence?: Record<string, unknown>;
-      errors?: Record<string, string>;
-    };
-
     const response = await post<SearchLeadsResponse>(
       `/api/searchLeads`,
       {
@@ -393,13 +388,17 @@ export const useApi = () => {
     fromName,
   }: SendTestEmailProps) => {
     type GmailResponse = { id: string; thread_id?: string };
-    return await post<GmailResponse>(`/api/google-mail/send`, {
-      user_id: userId,
-      to,
-      subject,
-      html,
-      from_name: fromName,
-    });
+    return await post<GmailResponse>(
+      `/api/google-mail/send`,
+      {
+        user_id: userId,
+        to,
+        subject,
+        html,
+        from_name: fromName,
+      },
+      { isFormData: false, signal: getSignal("sendTestEmail") }
+    );
   };
 
   const listCampaignEmails = async ({
@@ -419,7 +418,7 @@ export const useApi = () => {
     }
     const query = params.toString();
     const path = "/api/campaign-emails" + (query.length > 0 ? `?${query}` : "");
-    return await get<ACampaignEmail[]>(path);
+    return await get<ACampaignEmail[]>(path, getSignal("listCampaignEmails"));
   };
 
   const createCampaignEmailDraft = async ({
