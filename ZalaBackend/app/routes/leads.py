@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -110,8 +110,13 @@ def create_lead(lead_in: schemas.LeadCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", tags=["Leads"],summary="Get All Leads", response_model=List[schemas.LeadPublic])
-def list_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    leads = lead_crud.get_leads(db, skip=skip, limit=limit)
+def list_leads(
+    skip: int = 0,
+    limit: int = 100,
+    lead_ids: Optional[List[int]] = Query(None, description="Optional list of lead ids to filter by"),
+    db: Session = Depends(get_db),
+):
+    leads = lead_crud.get_leads(db, skip=skip, limit=limit, lead_ids=lead_ids)
     # return [_serialize_lead(lead) for lead in leads]
     return leads
 
