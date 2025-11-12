@@ -50,7 +50,8 @@ export const useLeadSearchPage = () => {
   const onAllLeadsButton = () => {
     const newCampaignLeads = [];
     if (!campaignHasAllLeads)
-      for (let i = 0; i < leadData.length; i++) newCampaignLeads.push(i);
+      for (let i = 0; i < leadData.length; i++)
+        newCampaignLeads.push(leadData[i].leadId);
     setCampaignLeads(newCampaignLeads);
   };
 
@@ -88,27 +89,27 @@ export const useLeadSearchPage = () => {
       campaignTitle.length > 0
         ? campaignTitle
         : `${new Date().toDateString()} Campaign`;
-    const leadsToAddToCampaign = leadData.filter((_lead, i) =>
-      campaignLeads.includes(i)
+    const leadsToAddToCampaign = leadData.filter((lead) =>
+      campaignLeads.includes(lead.leadId)
     );
 
     setLoading(true);
-    const apiLeads: ILead[] = (
-      await Promise.all(
-        leadsToAddToCampaign.map(async (lead) => {
-          console.log(`Creating ${lead.leadId}`);
-          return (await createLead({ lead, createdById: user!.userId })).data
-            ?.lead;
-        })
-      )
-    )
-      .map((apiLead) => apiLead && Normalizer.APINormalizer.lead(apiLead))
-      .filter((apiLead) => apiLead) as ILead[];
-    const leadIds = apiLeads.map((lead) => lead.leadId);
+    // const apiLeads: ILead[] = (
+    //   await Promise.all(
+    //     leadsToAddToCampaign.map(async (lead) => {
+    //       console.log(`Creating ${lead.leadId}`);
+    //       return (await createLead({ lead, createdById: user!.userId })).data
+    //         ?.lead;
+    //     })
+    //   )
+    // )
+    //   .map((apiLead) => apiLead && Normalizer.APINormalizer.lead(apiLead))
+    //   .filter((apiLead) => apiLead) as ILead[];
+    // const leadIds = apiLeads.map((lead) => lead.leadId);
 
     const res = await createCampaign({
       title,
-      leads: leadIds,
+      leads: campaignLeads,
       userId: user!.userId,
     });
 

@@ -1,36 +1,34 @@
-import { useCampaignFolderStore } from "../../../../stores";
 import { CampaignTab, type ILead } from "../../../../interfaces";
 import { ContactFolder } from "./ContactFolder";
 import { NotesFolder } from "./NotesFolder";
 import { InfoFolder } from "./InfoFolder";
 import { MultiFolder } from "./MultiFolder";
 import type { CampaignFolderChildPropsState } from "./types";
+import { useCampaignPageStore } from "../../../../stores";
 
 type CampaignFoldersProps = {
   allLeads: ILead[];
-  currentLeadIndex: number;
-  selectedLeadIndexs: number[];
   onPrimary?: () => void;
-  setViewing: (i: number) => void;
   unselectAll: () => void;
+  onContactMethod: (toggleMethod: string) => void;
 };
 
 export const CampaignFolders = ({
   allLeads,
-  currentLeadIndex,
-  selectedLeadIndexs,
   onPrimary = () => {},
-  setViewing,
   unselectAll,
+  onContactMethod,
 }: CampaignFoldersProps) => {
-  const { tab } = useCampaignFolderStore();
-  const showBackBtn = selectedLeadIndexs.length > 1;
-  const viewing = currentLeadIndex;
+  const { tab, selectedLeads, viewingLead, setViewingLead } =
+    useCampaignPageStore();
+  const showBackBtn = selectedLeads.length > 1;
+  const viewing = viewingLead;
   const totalLeads = allLeads.length;
-  const lead = allLeads.at(viewing);
+  const leadIndex = allLeads.findIndex((lead) => lead.leadId === viewing);
+  const lead = allLeads[leadIndex];
 
   const campaignFolderChildProps: CampaignFolderChildPropsState = {
-    title: `Lead #${viewing + 1} of ${totalLeads}`,
+    title: `Lead #${leadIndex + 1} of ${totalLeads}`,
     viewing,
     lead,
     showBackBtn,
@@ -40,16 +38,21 @@ export const CampaignFolders = ({
   const singleActions = {
     onPrimary: onPrimary,
     onSecondary: () => {
-      if (viewing < allLeads.length - 1) setViewing(currentLeadIndex + 1);
+      if (leadIndex < allLeads.length - 1)
+        setViewingLead(allLeads[leadIndex + 1].leadId);
     },
   };
   const multiActions = {
-    onPrimary: () => {},
+    onPrimary: onPrimary,
     onSecondary: () => unselectAll(),
   };
 
   return tab === CampaignTab.Connect ? (
-    <ContactFolder {...campaignFolderChildProps} {...singleActions} />
+    <ContactFolder
+      {...campaignFolderChildProps}
+      {...singleActions}
+      onContactMethod={onContactMethod}
+    />
   ) : tab === CampaignTab.Notes ? (
     <NotesFolder {...campaignFolderChildProps} {...singleActions} />
   ) : tab === CampaignTab.Profile ? (
@@ -59,10 +62,9 @@ export const CampaignFolders = ({
       {...campaignFolderChildProps}
       {...multiActions}
       disableSecondary={undefined}
-      title={`${selectedLeadIndexs.length} Selected Leads`}
+      title={`${selectedLeads.length} Selected Leads`}
       allLeads={allLeads}
-      leads={allLeads.filter((_, i) => selectedLeadIndexs.includes(i))}
-      setViewing={setViewing}
+      leads={allLeads.filter((lead) => selectedLeads.includes(lead.leadId))}
     />
   ) : null;
 };

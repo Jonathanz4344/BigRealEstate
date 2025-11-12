@@ -20,12 +20,15 @@ export const Modal = ({
         >
           <div className="full relative">
             <div
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
+              onClick={onClose}
               className="absolute-fill z-[12] pointer-events-auto flex items-center justify-center"
             >
-              <div className="h-full min-w-[50vw] card-base box-shadow p-5">
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                className="h-full min-w-[50vw] card-base box-shadow p-5"
+              >
                 {children}
               </div>
             </div>

@@ -1,16 +1,17 @@
-import type {
-  AContact,
-  ALead,
-  IContact,
-  ILead,
-  ISourceResult,
-  IAddress,
-  AAddress,
-  ASourceResult,
-  ACampaign,
-  ICampaign,
-  ACampaignLead,
-  ICampaignLead,
+import {
+  type AContact,
+  type ALead,
+  type IContact,
+  type ILead,
+  type ISourceResult,
+  type IAddress,
+  type AAddress,
+  type ASourceResult,
+  type ACampaign,
+  type ICampaign,
+  type ACampaignLead,
+  type ICampaignLead,
+  CampaignContactMethod,
 } from "../../interfaces";
 
 const contact = (data: AContact): IContact => {
@@ -59,7 +60,7 @@ const sourceResult = <T, B>(
   return {
     ...result,
     distanceMiles: data["distance_miles"],
-    source: data["source"],
+    // source: data["source"],
   };
 };
 
@@ -68,9 +69,9 @@ const sourceLead = (d: ASourceResult<ALead>): ISourceResult<ILead> =>
 
 const campaignLead = (data: ACampaignLead): ICampaignLead => {
   const contactMethods = [];
-  if (data["email_contacted"]) contactMethods.push("email");
-  if (data["sms_contacted"]) contactMethods.push("sms");
-  if (data["phone_contacted"]) contactMethods.push("phone");
+  if (data["email_contacted"]) contactMethods.push(CampaignContactMethod.Email);
+  if (data["sms_contacted"]) contactMethods.push(CampaignContactMethod.SMS);
+  if (data["phone_contacted"]) contactMethods.push(CampaignContactMethod.Phone);
   return {
     campaignId: data["campaign"]["campaign_id"],
     contactMethods: contactMethods,

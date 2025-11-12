@@ -21,10 +21,10 @@ const SOURCE_COLOR_MAP: Record<string, string> = {
   mock: "#A8A29E", // cool gray
 };
 
-const getSourceColor = (lead: ISourceResult<ILead>): string => {
-  if (lead.source && SOURCE_COLOR_MAP[lead.source]) {
-    return SOURCE_COLOR_MAP[lead.source];
-  }
+const getSourceColor = (_lead: ISourceResult<ILead>): string => {
+  // if (lead.source && SOURCE_COLOR_MAP[lead.source]) {
+  //   return SOURCE_COLOR_MAP[lead.source];
+  // }
   return COLORS.white;
 };
 
@@ -76,16 +76,16 @@ export const LeadSearchPage = () => {
             )}
             <Map
               ref={mapRef}
-              pins={leadData.map((lead, i) => ({
+              pins={leadData.map((lead) => ({
                 center: {
                   lat: lead.address.lat,
                   lng: lead.address.long,
                 },
                 iconName: Icons.UserPin,
-                active: i === activeLead,
+                active: lead.leadId === activeLead,
                 color: getSourceColor(lead),
                 activeColor: COLORS.accent,
-                onClick: () => setActiveLead(i),
+                onClick: () => setActiveLead(lead.leadId),
               }))}
             />
             {loading && (
@@ -103,19 +103,23 @@ export const LeadSearchPage = () => {
         leads={leadData}
         title={loading ? "Loading leads..." : `${leadData.length} results`}
         loading={loading}
-        getLeadProps={(lead, i) => ({
-          active: i === activeLead,
+        getLeadProps={(lead) => ({
+          active: lead.leadId === activeLead,
           button: {
-            text: campaignLeads.includes(i) ? "Remove Lead" : "Add Lead",
-            icon: campaignLeads.includes(i) ? Icons.Minus : Icons.Flag,
-            onClick: () => onLeadButton(i),
+            text: campaignLeads.includes(lead.leadId)
+              ? "Remove Lead"
+              : "Add Lead",
+            icon: campaignLeads.includes(lead.leadId)
+              ? Icons.Minus
+              : Icons.Flag,
+            onClick: () => onLeadButton(lead.leadId),
           },
           onTitleClick: () => (
             mapRef.current?.centerMap({
               lat: lead.address.lat,
               lng: lead.address.long,
             }),
-            setActiveLead(i)
+            setActiveLead(lead.leadId)
           ),
         })}
         footerBtn={{

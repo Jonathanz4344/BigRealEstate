@@ -55,14 +55,14 @@ export const LeadListSection = ({
                 const props = getLeadProps(lead, i);
                 return (
                   <LeadCard
-                    key={lead.leadId + i}
+                    key={lead.leadId}
                     i={i}
                     lead={lead}
-                    sourceResult={
-                      (lead as ISourceResult<ILead>).source
-                        ? (lead as ISourceResult<ILead>)
-                        : undefined
-                    }
+                    // sourceResult={
+                    //   (lead as ISourceResult<ILead>).source
+                    //     ? (lead as ISourceResult<ILead>)
+                    //     : undefined
+                    // }
                     active={props.active}
                     onTitleClick={props.onTitleClick}
                     button={props.button}

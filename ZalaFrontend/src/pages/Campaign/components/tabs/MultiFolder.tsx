@@ -3,12 +3,11 @@ import { CampaignTab, type ILead } from "../../../../interfaces";
 import { useFolderIcons } from "../../hooks";
 import { Folder, LeadButtons } from "../layout";
 import { ArrowLeadCard, Icons } from "../../../../components";
-import { useCampaignFolderStore } from "../../../../stores";
+import { useCampaignPageStore } from "../../../../stores";
 
 type MultiFolderProps = Omit<CampaignFolderChildProps, "lead"> & {
   allLeads: ILead[];
   leads: ILead[];
-  setViewing: (i: number) => void;
 };
 
 export const MultiFolder = ({
@@ -17,11 +16,10 @@ export const MultiFolder = ({
   allLeads,
   leads,
   disableSecondary,
-  setViewing,
   onPrimary,
   onSecondary,
 }: MultiFolderProps) => {
-  const setTab = useCampaignFolderStore((state) => state.setTab);
+  const { setTab, setViewingLead } = useCampaignPageStore();
   const icons = useFolderIcons({ active: CampaignTab.Multi, showBackBtn });
   return (
     <Folder
@@ -52,8 +50,7 @@ export const MultiFolder = ({
                 lead={lead}
                 i={allLeads.indexOf(lead)}
                 onClick={() => (
-                  setViewing(allLeads.indexOf(lead)),
-                  setTab(CampaignTab.Connect)
+                  setViewingLead(lead.leadId), setTab(CampaignTab.Connect)
                 )}
               />
             ))}

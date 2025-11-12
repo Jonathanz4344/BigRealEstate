@@ -50,3 +50,19 @@ export type CreateLeadProps = {
   lead: ILead;
   createdById: number;
 };
+
+export type UpdateLeadProps = {
+  leadId: number;
+  userId: number;
+  buisness: string;
+  website: string;
+  licenseNumber: string;
+  notes: string;
+};
+
+export type UpdateCampaignLeadProps = {
+  campaignId: number;
+  leadId: number;
+  userId: number;
+  contactMethods: string[];
+};

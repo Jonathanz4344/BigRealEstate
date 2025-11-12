@@ -1,9 +1,9 @@
 export type ASourceResult<T> = {
-  source: string;
+  // source: string;
   distance_miles: number;
 } & T;
 
 export type ISourceResult<T> = {
-  source: string;
+  // source: string;
   distanceMiles: number;
 } & T;

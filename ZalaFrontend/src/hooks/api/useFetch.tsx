@@ -3,6 +3,11 @@ import type { APIResponse } from "./types";
 
 const OK_STATUS_CODES = [200, 201];
 
+type RequestOptions = {
+  isFormData: boolean;
+  signal: AbortSignal;
+};
+
 export const useFetch = () => {
   const jsonHeader = {
     "Content-Type": "application/json",
@@ -33,8 +38,10 @@ export const useFetch = () => {
     apiEndpoint: string,
     method: "POST" | "GET" | "PUT" | "DELETE",
     body: unknown,
-    isFormData: boolean = false,
-    abortController = new AbortController()
+    { signal, isFormData }: RequestOptions = {
+      signal: new AbortController().signal,
+      isFormData: false,
+    }
   ): Promise<APIResponse<T>> => {
     const header = isFormData ? formDataHeader : jsonHeader;
     const url = CONFIG.api + apiEndpoint;
@@ -47,7 +54,7 @@ export const useFetch = () => {
             ? JSON.stringify(body)
             : null,
         headers: header,
-        signal: abortController.signal,
+        signal,
       });
       const json = await response.json();
 
@@ -64,58 +71,44 @@ export const useFetch = () => {
 
   const get = async <T,>(
     apiEndpoint: string,
-    abortController = new AbortController()
+    signal: AbortSignal = new AbortController().signal
   ): Promise<APIResponse<T>> => {
-    return await fetchWithParams(
-      apiEndpoint,
-      "GET",
-      null,
-      false,
-      abortController
-    );
+    return await fetchWithParams(apiEndpoint, "GET", null, {
+      isFormData: false,
+      signal,
+    });
   };
 
   const post = async <T,>(
     apiEndpoint: string,
     body: unknown,
-    isFormData: boolean = false,
-    abortController = new AbortController()
+    options: RequestOptions = {
+      signal: new AbortController().signal,
+      isFormData: false,
+    }
   ): Promise<APIResponse<T>> => {
-    return await fetchWithParams(
-      apiEndpoint,
-      "POST",
-      body,
-      isFormData,
-      abortController
-    );
+    return await fetchWithParams(apiEndpoint, "POST", body, options);
   };
 
   const put = async <T,>(
     apiEndpoint: string,
     body: unknown,
-    isFormData: boolean = false,
-    abortController = new AbortController()
+    options: RequestOptions = {
+      signal: new AbortController().signal,
+      isFormData: false,
+    }
   ): Promise<APIResponse<T>> => {
-    return await fetchWithParams(
-      apiEndpoint,
-      "PUT",
-      body,
-      isFormData,
-      abortController
-    );
+    return await fetchWithParams(apiEndpoint, "PUT", body, options);
   };
 
   const del = async <T,>(
     apiEndpoint: string,
-    abortController = new AbortController()
+    signal: AbortSignal = new AbortController().signal
   ): Promise<APIResponse<T>> => {
-    return await fetchWithParams(
-      apiEndpoint,
-      "DELETE",
-      null,
-      false,
-      abortController
-    );
+    return await fetchWithParams(apiEndpoint, "DELETE", null, {
+      isFormData: false,
+      signal,
+    });
   };
 
   return { get, post, put, del };

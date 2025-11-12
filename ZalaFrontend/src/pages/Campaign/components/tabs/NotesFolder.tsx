@@ -3,6 +3,7 @@ import { CampaignTab } from "../../../../interfaces";
 import { Icons } from "../../../../components";
 import { Folder, LeadButtons, LeadFolder } from "../layout";
 import type { CampaignFolderChildProps } from "./types";
+import { useCampaignPageStore } from "../../../../stores";
 
 type NotesFolderProps = CampaignFolderChildProps;
 
@@ -15,6 +16,7 @@ export const NotesFolder = ({
   onPrimary,
   onSecondary,
 }: NotesFolderProps) => {
+  const { notes, setNotes } = useCampaignPageStore();
   const icons = useFolderIcons({ active: CampaignTab.Notes, showBackBtn });
 
   return (
@@ -46,6 +48,8 @@ export const NotesFolder = ({
                     <textarea
                       className="text-area-style w-full max-h-full overflow-scroll pt-[15px]"
                       placeholder={`Notes on ${lead.contact.firstName} ${lead.contact.lastName}`}
+                      value={notes}
+                      onChange={({ target: { value } }) => setNotes(value)}
                     />
                   </div>
                 </div>

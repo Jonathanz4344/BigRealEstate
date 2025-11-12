@@ -14,6 +14,8 @@ export const useAppNavigation = () => {
 
   const toSignupPage = () => navigate("/signup");
 
+  const toNotFound = () => navigate("/404");
+
   return {
     location,
     navigate,
@@ -22,5 +24,6 @@ export const useAppNavigation = () => {
     toCampaignPage,
     toLoginPage,
     toSignupPage,
+    toNotFound,
   };
 };

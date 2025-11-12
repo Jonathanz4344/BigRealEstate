@@ -1,5 +1,11 @@
 import type { AUser, IUser } from "./User";
 
+export enum CampaignContactMethod {
+  Phone = "phone",
+  SMS = "sms",
+  Email = "email",
+}
+
 export type ACampaignLead = {
   phone_contacted: boolean;
   sms_contacted: boolean;

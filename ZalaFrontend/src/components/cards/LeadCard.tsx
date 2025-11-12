@@ -62,11 +62,11 @@ export const LeadCard = ({
           <span className="overflow-ellipsis line-clamp-2 text-sm  text-secondary-50">
             {lead.notes}
           </span>
-          {sourceResult && (
+          {/* {sourceResult && (
             <span className="overflow-ellipsis line-clamp-1 text-sm  text-secondary-50">
               Sourced from: {sourceResult.source}
             </span>
-          )}
+          )} */}
         </div>
 
         {button && (
