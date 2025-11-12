@@ -3,6 +3,7 @@ import {
   type UseGoogleAuthButtonCallbackProps,
 } from "../../hooks";
 import type { LoginGoogleProps } from "../../hooks";
+import { Loader2 } from "lucide-react";
 
 export type GoogleAuthButtonCallback = (
   v: UseGoogleAuthButtonCallbackProps
@@ -27,12 +28,46 @@ export const GoogleAuthButton = ({
   });
   return (
     <button
-      className={`w-full flex flex-row items-center justify-center space-x-2 rounded-md border border-secondary-25 py-2 px-3 text-secondary hover:bg-secondary hover:text-white transition disabled:opacity-60 disabled:cursor-not-allowed ${className}`}
+      className={`relative w-full flex items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white py-2.5 px-4 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
       disabled={disabled}
       onClick={onClick}
       type="button"
     >
-      <span>{loading ? "Connecting..." : text}</span>
+      <span className="absolute left-4 flex h-5 w-5 items-center justify-center">
+        {loading ? (
+          <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+        ) : (
+          <GoogleGlyph className="h-5 w-5" />
+        )}
+      </span>
+      <span className="text-base">{loading ? "Connecting..." : text}</span>
     </button>
   );
 };
+
+const GoogleGlyph = ({ className = "" }: { className?: string }) => (
+  <svg
+    aria-hidden="true"
+    className={className}
+    viewBox="0 0 24 24"
+    role="img"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill="#4285F4"
+      d="M23.49 12.27c0-.86-.07-1.49-.22-2.14H12v4.07h6.51c-.13 1.07-.84 2.68-2.4 3.77v3.12h3.87c2.27-2.09 3.51-5.18 3.51-8.82Z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 24c3.24 0 5.96-1.08 7.95-2.92l-3.87-3.12c-1.04.73-2.44 1.24-4.08 1.24-3.14 0-5.8-2.11-6.75-4.99H1.26v3.14C3.24 21.33 7.27 24 12 24Z"
+    />
+    <path
+      fill="#FABB05"
+      d="M5.25 14.21c-.24-.73-.38-1.51-.38-2.32s.14-1.59.38-2.32V6.43H1.26A11.96 11.96 0 0 0 0 11.89c0 1.93.46 3.75 1.26 5.46l3.99-3.14Z"
+    />
+    <path
+      fill="#E94235"
+      d="M12 4.74c1.76 0 3.32.6 4.56 1.79l3.42-3.42C17.96 1.18 15.24 0 12 0 7.27 0 3.24 2.67 1.26 6.43l3.99 3.14C6.2 6.85 8.86 4.74 12 4.74Z"
+    />
+  </svg>
+);
