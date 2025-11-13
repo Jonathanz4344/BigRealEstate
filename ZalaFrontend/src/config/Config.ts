@@ -16,7 +16,10 @@ export const CONFIG: IConfig = {
   env: import.meta.env.VITE_ENV,
   keys: {
     google: {
-      maps: import.meta.env.VITE_GOOGLE_MAPS_KEY || "",
+      maps:
+        import.meta.env.VITE_GOOGLE_MAPS_KEY ||
+        import.meta.env.GOOGLE_API_KEY ||
+        "",
       oauth: import.meta.env.VITE_GOOGLE_CLIENT_ID,
       redirectUri: import.meta.env.VITE_GOOGLE_REDIRECT_URI || "postmessage",
       scopes:
