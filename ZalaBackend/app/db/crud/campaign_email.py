@@ -36,30 +36,23 @@ def get_campaign_email(db: Session, message_id: int) -> Optional[CampaignEmail]:
     """
     Fetch a single campaign message.
     """
-    return (
-        _base_query(db)
-        .filter(CampaignEmail.message_id == message_id)
-        .first()
-    )
+    return _base_query(db).filter(CampaignEmail.message_id == message_id).first()
 
 
-def get_campaign_emails(db: Session, skip: int = 0, limit: int = 100) -> List[CampaignEmail]:
+def get_campaign_emails(
+    db: Session, skip: int = 0, limit: int = 100
+) -> List[CampaignEmail]:
     """
     Fetch multiple campaign messages.
     """
-    return (
-        _base_query(db)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+    return _base_query(db).offset(skip).limit(limit).all()
 
 
 def get_campaign_emails_for_campaign(
-        db: Session,
-        campaign_id: int,
-        skip: int = 0,
-        limit: int = 100,
+    db: Session,
+    campaign_id: int,
+    skip: int = 0,
+    limit: int = 100,
 ) -> List[CampaignEmail]:
     """
     Fetch messages for a given campaign.
@@ -70,21 +63,25 @@ def get_campaign_emails_for_campaign(
 
 
 def get_campaign_emails_by_lead(
-        db: Session,
-        campaign_id: int,
-        lead_id: int,
-        skip: int = 0,
-        limit: int = 100,
+    db: Session,
+    campaign_id: int,
+    lead_id: int,
+    skip: int = 0,
+    limit: int = 100,
 ) -> List[CampaignEmail]:
     """
     Fetch emails for a given campaign and lead.
     """
-    query = _base_query(db).filter(CampaignEmail.campaign_id == campaign_id, CampaignEmail.lead_id == lead_id)
+    query = _base_query(db).filter(
+        CampaignEmail.campaign_id == campaign_id, CampaignEmail.lead_id == lead_id
+    )
 
     return query.offset(skip).limit(limit).all()
 
 
-def create_campaign_email(db: Session, message_in: schemas.CampaignEmailCreate) -> CampaignEmail:
+def create_campaign_email(
+    db: Session, message_in: schemas.CampaignEmailCreate
+) -> CampaignEmail:
     """
     Create and persist a campaign message.
     """
@@ -96,7 +93,9 @@ def create_campaign_email(db: Session, message_in: schemas.CampaignEmailCreate) 
     return db_message
 
 
-def send_campaign_email(db: Session, message_in: schemas.CampaignEmailSendRequest) -> schemas.CampaignEmailSendResponse:
+def send_campaign_email(
+    db: Session, message_in: schemas.CampaignEmailSendRequest
+) -> schemas.CampaignEmailSendResponse:
     """
     Send a campaign email to multiple leads via Gmail and return per-lead results with the hydrated campaign.
     """
@@ -109,7 +108,9 @@ def send_campaign_email(db: Session, message_in: schemas.CampaignEmailSendReques
 
     campaign = campaign_crud.get_campaign(db, message_in.campaign_id)
     if not campaign:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found"
+        )
 
     if not campaign.user:
         raise HTTPException(
@@ -135,6 +136,7 @@ def send_campaign_email(db: Session, message_in: schemas.CampaignEmailSendReques
         )
 
     results: List[schemas.CampaignEmailSendResult] = []
+    emailed: List[str] = []
 
     for link in campaign_leads:
         lead = link.lead
@@ -145,26 +147,33 @@ def send_campaign_email(db: Session, message_in: schemas.CampaignEmailSendReques
         gmail_thread_id = None
         error_detail = None
 
-        if not to_email:
-            error_detail = "Lead is missing a contact email."
-        else:
-            gmail_request = schemas.GmailSendRequest(
-                user_id=campaign.user.user_id,
-                to=to_email,
-                subject=message_in.message_subject,
-                html=message_in.message_body,
-                from_name=message_in.from_name,
-            )
+        gmail_request = schemas.GmailSendRequest(
+            user_id=campaign.user.user_id,
+            # to=to_email,
+            to="colin.d.m.tondreau@gmail.com",
+            subject=message_in.message_subject,
+            html=message_in.message_body,
+            from_name=message_in.from_name,
+        )
+
+        # if not to_email:
+        #     error_detail = "Lead is missing a contact email."
+        if gmail_request.to not in emailed:
             try:
                 gmail_response = send_gmail_message(db, campaign.user, gmail_request)
                 status_value = schemas.CampaignEmailStatus.SENT
                 gmail_message_id = gmail_response.id
                 gmail_thread_id = gmail_response.thread_id
                 link.email_contacted = True
+                emailed.append(gmail_request.to)
             except HTTPException as exc:
                 error_detail = _normalize_error_detail(exc.detail)
             except Exception as exc:  # pragma: no cover - defensive
                 error_detail = str(exc)
+
+        if gmail_request.to in emailed:
+            status_value = schemas.CampaignEmailStatus.SENT
+        to_email = gmail_request.to
 
         db_message = CampaignEmail(
             campaign_id=message_in.campaign_id,
@@ -198,12 +207,14 @@ def send_campaign_email(db: Session, message_in: schemas.CampaignEmailSendReques
 
 
 def update_campaign_email(
-        db: Session, message_id: int, message_in: schemas.CampaignEmailUpdate
+    db: Session, message_id: int, message_in: schemas.CampaignEmailUpdate
 ) -> Optional[CampaignEmail]:
     """
     Update a campaign message.
     """
-    db_message = db.query(CampaignEmail).filter(CampaignEmail.message_id == message_id).first()
+    db_message = (
+        db.query(CampaignEmail).filter(CampaignEmail.message_id == message_id).first()
+    )
     if not db_message:
         return None
 
@@ -219,7 +230,9 @@ def delete_campaign_email(db: Session, message_id: int) -> bool:
     """
     Delete a campaign message.
     """
-    db_message = db.query(CampaignEmail).filter(CampaignEmail.message_id == message_id).first()
+    db_message = (
+        db.query(CampaignEmail).filter(CampaignEmail.message_id == message_id).first()
+    )
     if not db_message:
         return False
 

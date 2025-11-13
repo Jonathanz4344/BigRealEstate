@@ -1,6 +1,10 @@
 import { produce } from "immer";
 import React, { useRef, useState } from "react";
-import type { ACampaign, ILead } from "../../interfaces";
+import {
+  CampaignContactMethod,
+  type ACampaign,
+  type ILead,
+} from "../../interfaces";
 import { Normalizer } from "../../utils";
 import { useAppNavigation, useTimeoutEffect } from "../utils";
 import { useApi } from "./useApi";
@@ -82,7 +86,9 @@ export const useCampaignPageAPI = ({
 
     if (res.err || !res.data)
       return (
-        apiResponseError("getting campaign", res.err, { showSnack: false }),
+        apiResponseError("getting campaign", res.err, {
+          showSnack: false,
+        }),
         toNotFound()
       );
 
@@ -116,12 +122,13 @@ export const useCampaignPageAPI = ({
     apiCampaignResponse(res.data);
   };
 
-  const updateLeadContactMethod = async (method: string) => {
+  const updateLeadContactMethod = async (
+    method: CampaignContactMethod,
+    leadId: number
+  ) => {
     if (!viewingLead || campaign.campaignId === -1) return;
 
-    const campaignLead = campaign.leads.find(
-      (lead) => lead.leadId === viewingLead.leadId
-    )!;
+    const campaignLead = campaign.leads.find((lead) => lead.leadId === leadId)!;
     let contactMethods = campaignLead.contactMethods;
 
     if (contactMethods.includes(method))
@@ -185,6 +192,7 @@ export const useCampaignPageAPI = ({
     title,
     setTitle,
 
+    getCampaign,
     updateTitle,
     updateLeadContactMethod,
     updateLeadNotes,

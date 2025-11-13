@@ -107,7 +107,9 @@ def _resolve_access_token(db: Session, credentials) -> str:
     return new_access
 
 
-def send_gmail_message(db: Session, user: User, request: GmailSendRequest) -> GmailSendResponse:
+def send_gmail_message(
+    db: Session, user: User, request: GmailSendRequest
+) -> GmailSendResponse:
     credentials = google_credentials_crud.get_credentials(db, user.user_id)
     if not credentials:
         raise HTTPException(
@@ -117,7 +119,9 @@ def send_gmail_message(db: Session, user: User, request: GmailSendRequest) -> Gm
 
     access_token = _resolve_access_token(db, credentials)
     _, from_header = _build_from_header(user, request.from_name)
-    raw_message = _encode_message(from_header, request.to, request.subject, request.html)
+    raw_message = _encode_message(
+        from_header, request.to, request.subject, request.html
+    )
 
     payload = {"raw": raw_message}
     headers = {
@@ -126,7 +130,9 @@ def send_gmail_message(db: Session, user: User, request: GmailSendRequest) -> Gm
     }
 
     try:
-        response = requests.post(_GMAIL_SEND_URL, headers=headers, json=payload, timeout=10)
+        response = requests.post(
+            _GMAIL_SEND_URL, headers=headers, json=payload, timeout=10
+        )
         response.raise_for_status()
     except requests.HTTPError as exc:
         body = response.text if response is not None else "<no response body>"

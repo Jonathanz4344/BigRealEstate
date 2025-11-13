@@ -4,3 +4,4 @@ export * from "./SearchFilterStore";
 export * from "./CampaignStore";
 export * from "./AuthStore";
 export * from "./CampaignPageStore";
+export * from "./GoogleRequiredStore";

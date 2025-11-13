@@ -58,11 +58,6 @@ export const LeadListSection = ({
                     key={lead.leadId}
                     i={i}
                     lead={lead}
-                    // sourceResult={
-                    //   (lead as ISourceResult<ILead>).source
-                    //     ? (lead as ISourceResult<ILead>)
-                    //     : undefined
-                    // }
                     active={props.active}
                     onTitleClick={props.onTitleClick}
                     button={props.button}

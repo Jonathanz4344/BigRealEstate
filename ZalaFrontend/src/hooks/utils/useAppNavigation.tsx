@@ -7,8 +7,8 @@ export const useAppNavigation = () => {
 
   const toLeadSearchPage = () => navigate("/");
 
-  const toCampaignPage = (campaignId: number, leads: ILead[]) =>
-    navigate("/campaign/" + campaignId, { state: { leads } });
+  const toCampaignPage = (campaignId: number, leads: ILead[] = []) =>
+    navigate("/campaigns/" + campaignId, { state: { leads } });
 
   const toLoginPage = () => navigate("/login");
 
@@ -16,7 +16,11 @@ export const useAppNavigation = () => {
 
   const toNotFound = () => navigate("/404");
 
-  const toEmailTestPage = () => navigate("/email-test");
+  const toEmailTestPage = () => navigate("/demos/email");
+
+  const toCampaignEmailTestPage = () => navigate("/demos/campaign");
+
+  const toPastCampaigns = () => navigate("/campaigns");
 
   return {
     location,
@@ -28,5 +32,7 @@ export const useAppNavigation = () => {
     toSignupPage,
     toNotFound,
     toEmailTestPage,
+    toPastCampaigns,
+    toCampaignEmailTestPage,
   };
 };

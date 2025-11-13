@@ -5,7 +5,13 @@ import {
   getIconButtonColor,
   IconButtonVariant,
 } from "./IconButtonVariant";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
+import Badge from "@mui/material/Badge";
+import {
+  ButtonVariant,
+  getButtonBgColorHex,
+  getButtonTextColorHex,
+} from "./ButtonVariant";
 
 type IconButtonProps = {
   name: Icons;
@@ -16,6 +22,10 @@ type IconButtonProps = {
   shadow?: boolean;
   borderRadius?: number;
   disableOpacity?: boolean;
+  badge?: {
+    content: React.ReactNode;
+    color?: ButtonVariant;
+  };
 
   onClick?: () => void;
 };
@@ -28,6 +38,7 @@ export const IconButton = ({
   shadow = true,
   disableOpacity = false,
   borderRadius = 15,
+  badge,
   onClick,
 }: IconButtonProps) => {
   const variant = propVariant ?? IconButtonVariant.Secondary;
@@ -35,26 +46,41 @@ export const IconButton = ({
   const getBgColor = useCallback(getIconButtonBgColor, []);
   const getColor = useCallback(getIconButtonColor, []);
 
+  const getBadgeBgColor = useCallback(getButtonBgColorHex, []);
+  const getBadgeTextColor = useCallback(getButtonTextColorHex, []);
+
   return (
-    <div
-      style={{ borderRadius, scale }}
-      className={clsx(
-        "p-2.5 relative overflow-hidden transition-[scale] duration-75 active:scale-[.9]",
-        onClick ? "cursor-pointer" : "",
-        shadow ? "box-shadow-sm" : "",
-        getBgColor(variant)
-      )}
+    <Badge
+      badgeContent={badge?.content}
+      sx={{
+        "& .MuiBadge-badge": {
+          backgroundColor: getBadgeBgColor(
+            badge?.color ?? ButtonVariant.Primary
+          ),
+          color: getBadgeTextColor(badge?.color ?? ButtonVariant.Primary),
+        },
+      }}
     >
-      <Icon name={name} color={getColor(variant)} size={size} />
       <div
-        onClick={onClick}
+        style={{ borderRadius, scale }}
         className={clsx(
-          "absolute z-1 top-0 left-0 bottom-0 right-0",
-          onClick && !disableOpacity
-            ? "bg-[var(--color-secondary)] opacity-0 hover:opacity-25"
-            : ""
+          "p-2.5 relative overflow-hidden transition-[scale] duration-75 active:scale-[.9]",
+          onClick ? "cursor-pointer" : "",
+          shadow ? "box-shadow-sm" : "",
+          getBgColor(variant)
         )}
-      ></div>
-    </div>
+      >
+        <Icon name={name} color={getColor(variant)} size={size} />
+        <div
+          onClick={onClick}
+          className={clsx(
+            "absolute z-1 top-0 left-0 bottom-0 right-0",
+            onClick && !disableOpacity
+              ? "bg-[var(--color-secondary)] opacity-0 hover:opacity-25"
+              : ""
+          )}
+        ></div>
+      </div>
+    </Badge>
   );
 };

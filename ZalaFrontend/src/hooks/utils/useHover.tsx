@@ -2,29 +2,34 @@ import React from "react";
 import { useBoolean } from "./useBoolean";
 
 type UseHoverProps = {
-  onMouseEnter?: (e: React.MouseEvent) => void;
-  onMouseLeave?: (e: React.MouseEvent) => void;
-  onBlur?: (e: React.FocusEvent) => void;
+  onMouseOver: (e: React.MouseEvent) => void;
+  onMouseOut: (e: React.MouseEvent) => void;
+  onBlur: (e: React.FocusEvent) => void;
+  onClick: () => void;
 };
 
-export const useHover = (props?: UseHoverProps): [boolean, UseHoverProps] => {
+export const useHover = (
+  props?: Partial<UseHoverProps>
+): [boolean, UseHoverProps] => {
   const [isHovered, _onHover, _onHoverDone] = useBoolean();
-  const onMouseEnter = (e: React.MouseEvent) => {
+  const onMouseOver = (e: React.MouseEvent) => {
     _onHover();
-    if (props?.onMouseEnter) props.onMouseEnter(e);
+    if (props?.onMouseOver) props.onMouseOver(e);
   };
-  const onMouseLeave = (e: React.MouseEvent) => {
+  const onMouseOut = (e: React.MouseEvent) => {
     _onHoverDone();
-    if (props?.onMouseLeave) props.onMouseLeave(e);
+    if (props?.onMouseOut) props.onMouseOut(e);
   };
+
   const onBlur = (e: React.FocusEvent) => {
     _onHoverDone();
     if (props?.onBlur) props.onBlur(e);
   };
   const hoverProps = {
-    onMouseEnter,
-    onMouseLeave,
+    onMouseOver,
+    onMouseOut,
     onBlur,
+    onClick: () => (_onHoverDone(), props?.onClick && props.onClick()),
   };
   return [isHovered, hoverProps];
 };

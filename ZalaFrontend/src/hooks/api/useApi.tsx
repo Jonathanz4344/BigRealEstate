@@ -328,6 +328,16 @@ export const useApi = () => {
     return await get<ALead>(`/api/leads/${leadId}`, getSignal("getLead"));
   };
 
+  const getCampaigns = async (campaignIds: number[] = []) => {
+    return await get<ACampaign[]>(
+      `/api/campaigns${
+        campaignIds.length > 0
+          ? `?${idsToQueryString(campaignIds, "campaign_id")}`
+          : ""
+      }`
+    );
+  };
+
   const loginGoogle = async ({
     code,
     scope,
@@ -497,6 +507,7 @@ export const useApi = () => {
     getUser,
     getCampaign,
     getLeads,
+    getCampaigns,
     loginGoogle,
     sendTestEmail,
     listCampaignEmails,

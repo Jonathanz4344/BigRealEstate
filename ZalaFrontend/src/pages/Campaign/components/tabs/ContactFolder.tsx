@@ -12,7 +12,7 @@ import type { CampaignFolderChildProps } from "./types";
 import { useCampaignStore } from "../../../../stores";
 
 type ContactFolderProps = CampaignFolderChildProps & {
-  onContactMethod: (method: string) => void;
+  onContactMethod: (method: CampaignContactMethod) => void;
 };
 
 export const ContactFolder = ({

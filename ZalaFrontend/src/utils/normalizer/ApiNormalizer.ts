@@ -12,6 +12,16 @@ import {
   type ACampaignLead,
   type ICampaignLead,
   CampaignContactMethod,
+  type ACampaignEmailSendResult,
+  type ICampaignEmailSendResult,
+  type ACampaignEmail,
+  type ICampaignEmail,
+  type ACampaignEmailCampaign,
+  type ICampaignEmailCampaign,
+  type ACampaignEmailLead,
+  type ICampaignEmailLead,
+  type ACampaignEmailContact,
+  type ICampaignEmailContact,
 } from "../../interfaces";
 
 const contact = (data: AContact): IContact => {
@@ -88,8 +98,56 @@ const campaign = (data: ACampaign): ICampaign => {
   };
 };
 
+const campaignEmailSendResult = (
+  data: ACampaignEmailSendResult
+): ICampaignEmailSendResult => ({
+  leadId: data["lead_id"],
+  messageId: data["message_id"] ?? -1,
+  status: data["status"],
+  toEmail: data["to_email"] ?? "",
+  errorDetail: data["error_detail"] ?? null,
+});
+
+const campaignEmail = (data: ACampaignEmail): ICampaignEmail => ({
+  messageId: data["message_id"],
+  campaignId: data["campaign_id"],
+  leadId: data["lead_id"] ?? -1,
+  gmailMessageId: data["gmail_message_id"] ?? "",
+  gmailThreadId: data["gmail_thread_id"] ?? "",
+  sendStatus: data["send_status"],
+  fromName: data["from_name"] ?? "",
+  toEmail: data["to_email"] ?? "",
+  messageSubject: data["message_subject"],
+  messageBody: data["message_body"],
+  errorDetail: data["error_detail"] ?? null,
+  campaign: data["campaign"] ? campaignEmailCampaign(data["campaign"]) : null,
+  lead: data["lead"] ? campaignEmailLead(data["lead"]) : null,
+});
+
+const campaignEmailCampaign = (
+  data: ACampaignEmailCampaign
+): ICampaignEmailCampaign => ({
+  campaignId: data["campaign_id"],
+  campaignName: data["campaign_name"] ?? "",
+});
+
+const campaignEmailLead = (data: ACampaignEmailLead): ICampaignEmailLead => ({
+  contact: data["contact"] ? campaignEmailContact(data["contact"]) : null,
+  leadId: data["lead_id"],
+});
+
+const campaignEmailContact = (
+  data: ACampaignEmailContact
+): ICampaignEmailContact => ({
+  email: data["email"] ?? "",
+  firstName: data["first_name"] ?? "",
+  lastName: data["last_name"] ?? "",
+});
+
 export const APINormalizer = {
   lead,
   sourceLead,
   campaign,
+  campaignEmail,
+  campaignEmailSendResult,
 };

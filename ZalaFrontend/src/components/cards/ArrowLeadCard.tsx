@@ -20,10 +20,14 @@ export const ArrowLeadCard = ({
   onClick,
   onIconClick,
 }: ArrowLeadCardProps) => {
-  const [cardHovered, cardHoverProps] = useHover();
-  const [iconHovered, iconHoverProps] = useHover();
-  const cardHoverActivatesIcon = onClick && !onIconClick;
+  const [iconHovered, iconHoverProps] = useHover({ onClick: onIconClick });
   const iconHoveredAndIndependent = onIconClick && iconHovered;
+
+  const [cardHovered, cardHoverProps] = useHover({
+    onClick: iconHoveredAndIndependent ? undefined : onClick,
+  });
+
+  const cardHoverActivatesIcon = onClick && !onIconClick;
   const cardActive = !iconHoveredAndIndependent && cardHovered && onClick;
   return (
     <div
@@ -34,7 +38,6 @@ export const ArrowLeadCard = ({
         border ? (cardActive ? "border-accent" : "border-secondary") : "",
         onClick ? "cursor-pointer" : ""
       )}
-      onClick={iconHoveredAndIndependent ? undefined : onClick}
     >
       <div className="w-[25%]">
         <img
@@ -63,6 +66,7 @@ export const ArrowLeadCard = ({
             {lead.notes}
           </span>
         </div>
+
         <div className="flex items-center justify-center">
           <div {...iconHoverProps}>
             <IconButton
@@ -73,7 +77,6 @@ export const ArrowLeadCard = ({
                   ? IconButtonVariant.Accent
                   : IconButtonVariant.Secondary
               }
-              onClick={onIconClick}
             />
           </div>
         </div>

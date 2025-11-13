@@ -1,4 +1,8 @@
-import { CampaignTab, type ILead } from "../../../../interfaces";
+import {
+  CampaignContactMethod,
+  CampaignTab,
+  type ILead,
+} from "../../../../interfaces";
 import { ContactFolder } from "./ContactFolder";
 import { NotesFolder } from "./NotesFolder";
 import { InfoFolder } from "./InfoFolder";
@@ -8,9 +12,9 @@ import { useCampaignPageStore } from "../../../../stores";
 
 type CampaignFoldersProps = {
   allLeads: ILead[];
-  onPrimary?: () => void;
+  onPrimary?: (from: string) => void;
   unselectAll: () => void;
-  onContactMethod: (toggleMethod: string) => void;
+  onContactMethod: (toggleMethod: CampaignContactMethod) => void;
 };
 
 export const CampaignFolders = ({
@@ -36,14 +40,14 @@ export const CampaignFolders = ({
   };
 
   const singleActions = {
-    onPrimary: onPrimary,
+    onPrimary: () => onPrimary("single"),
     onSecondary: () => {
       if (leadIndex < allLeads.length - 1)
         setViewingLead(allLeads[leadIndex + 1].leadId);
     },
   };
   const multiActions = {
-    onPrimary: onPrimary,
+    onPrimary: () => onPrimary("multi"),
     onSecondary: () => unselectAll(),
   };
 

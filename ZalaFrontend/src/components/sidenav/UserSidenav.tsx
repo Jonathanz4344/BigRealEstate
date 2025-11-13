@@ -1,27 +1,18 @@
-import { Button, GoogleAuthButton } from "../buttons";
-import {
-  useAppNavigation,
-  useGoogleAuthButtonCallback,
-  useLogout,
-} from "../../hooks";
+import { Button, MenuButton } from "../buttons";
+import { useAppNavigation, useLogout } from "../../hooks";
 import { useAuthStore, useSideNavControlStore } from "../../stores";
 import Avatar from "@mui/material/Avatar";
 import { COLORS } from "../../config";
+import { GoogleRequiredCard } from "../cards";
 
 export const UserSidenav = () => {
   const user = useAuthStore((state) => state.user);
   const closeSideNav = useSideNavControlStore((state) => state.close);
   const logout = useLogout();
-  const { toEmailTestPage } = useAppNavigation();
-  const googleConnectCallback = useGoogleAuthButtonCallback({
-    onMsg: () => "Google account connected!",
-  });
+  const { toPastCampaigns, toCampaignEmailTestPage, toEmailTestPage } =
+    useAppNavigation();
 
   const onLogout = () => (closeSideNav(), logout());
-  const onOpenTestPage = () => {
-    closeSideNav();
-    toEmailTestPage();
-  };
 
   const avatarSize = 150;
   return (
@@ -51,33 +42,25 @@ export const UserSidenav = () => {
             </div>
           </div>
 
-          <div
-            className={`w-full space-y-3 rounded-2xl border p-5 ${
-              user.gmailConnected
-                ? "border-[#d2e3fc] bg-[#f8fafd]"
-                : "border-[#fad2cf] bg-[#fef7f5]"
-            }`}
-          >
-            <p className="text-sm font-semibold uppercase tracking-wide text-secondary-50">
-              Google Workspace
-            </p>
-            <p className="text-xl font-semibold text-secondary">
-              {user.gmailConnected
-                ? "Gmail account connected"
-                : "Connect your Google account"}
-            </p>
-            <p className="text-sm text-secondary-50">
-              {user.gmailConnected
-                ? "You're ready to send Gmail campaigns from Zala."
-                : "Sign in with Google to enable Gmail sending from campaigns and test emails."}
-            </p>
-            {user.gmailConnected ? (
-              <Button text="Open Gmail Test" onClick={onOpenTestPage} />
-            ) : (
-              <GoogleAuthButton
-                callback={googleConnectCallback}
-                className="w-full"
-                getExtraPayload={() => ({ targetUserId: user.userId })}
+          <div className="space-y-[15px]">
+            {!user.gmailConnected && <GoogleRequiredCard user={user} />}
+
+            <MenuButton
+              text="Past campaigns"
+              onClick={() => (closeSideNav(), toPastCampaigns())}
+            />
+
+            {user.gmailConnected && (
+              <MenuButton
+                text="Emails Demo"
+                onClick={() => (closeSideNav(), toEmailTestPage())}
+              />
+            )}
+
+            {user.gmailConnected && (
+              <MenuButton
+                text="Campaign Emails Demo"
+                onClick={() => (closeSideNav(), toCampaignEmailTestPage())}
               />
             )}
           </div>

@@ -7,6 +7,7 @@ import {
   NotFoundPage,
   TestEmailPage,
   CampaignEmailDemoPage,
+  PastCampaignsPage,
 } from "../pages";
 import { RootLayout } from "../layouts";
 import { useAuthStore } from "../stores";
@@ -15,7 +16,7 @@ export const NavigationProvider = () => {
   const user = useAuthStore((state) => state.user);
   const NavToLeadSearch = () => <Navigate to={"/"} />;
   const NavTo404 = () => <Navigate to={"/404"} />;
-  const NavToLogin = () => <Navigate to={"/404"} />;
+  const NavToLogin = () => <Navigate to={"/login"} />;
   return (
     <BrowserRouter>
       <Routes>
@@ -32,12 +33,17 @@ export const NavigationProvider = () => {
           {!user && <Route path="*" element={<NavToLogin />} />}
 
           <Route index path="/" element={<LeadSearchPage />} />
-          <Route path="/campaign/:campaignId" element={<CampaignPage />} />
-          <Route path="/email-test" element={<TestEmailPage />} />
-          <Route
-            path="/campaign-email-demo"
-            element={<CampaignEmailDemoPage />}
-          />
+
+          <Route path="/campaigns">
+            <Route index element={<PastCampaignsPage />} />
+            <Route path=":campaignId" element={<CampaignPage />} />
+          </Route>
+
+          <Route path="/demos">
+            <Route path="campaign" element={<CampaignEmailDemoPage />} />
+            <Route path="email" element={<TestEmailPage />} />
+          </Route>
+
           <Route path="404" element={<NotFoundPage />} />
           <Route path="*" element={<NavTo404 />} />
         </Route>

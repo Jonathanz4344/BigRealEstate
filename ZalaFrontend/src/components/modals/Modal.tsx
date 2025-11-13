@@ -6,11 +6,18 @@ export type ModalProps = {
   onClose: () => void;
 };
 
+type ModalComponentProps = ModalProps & {
+  width?: string;
+  height?: string;
+};
+
 export const Modal = ({
   open,
+  width = "75vw",
+  height = "100%",
   onClose,
   children,
-}: PropsWithChildren<ModalProps>) => {
+}: PropsWithChildren<ModalComponentProps>) => {
   return (
     open && (
       <Portal>
@@ -27,7 +34,12 @@ export const Modal = ({
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
-                className="h-full min-w-[50vw] card-base box-shadow p-5"
+                className="card-base box-shadow p-5"
+                style={{
+                  width,
+                  maxWidth: width,
+                  height,
+                }}
               >
                 {children}
               </div>

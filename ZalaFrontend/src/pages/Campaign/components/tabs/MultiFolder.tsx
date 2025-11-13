@@ -44,9 +44,9 @@ export const MultiFolder = ({
       <div className="full py-[15px] px-[15px]">
         <div className="full relative">
           <div className="absolute-fill overflow-y-scroll px-[15px] space-y-[30px]">
-            {leads.map((lead, i) => (
+            {leads.map((lead) => (
               <ArrowLeadCard
-                key={lead.leadId + i}
+                key={lead.leadId}
                 lead={lead}
                 i={allLeads.indexOf(lead)}
                 onClick={() => (

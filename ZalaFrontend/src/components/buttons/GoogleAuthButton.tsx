@@ -13,7 +13,9 @@ type GoogleAuthButtonProps = {
   callback: GoogleAuthButtonCallback;
   text?: string;
   className?: string;
-  getExtraPayload?: () => Partial<Omit<LoginGoogleProps, "code" | "scope">> | undefined;
+  getExtraPayload?: () =>
+    | Partial<Omit<LoginGoogleProps, "code" | "scope">>
+    | undefined;
 };
 
 export const GoogleAuthButton = ({
@@ -32,7 +34,7 @@ export const GoogleAuthButton = ({
     <button
       type="button"
       aria-label={label}
-      className={`relative inline-flex w-full items-center justify-center gap-3 rounded-[4px] border border-[#dadce0] bg-white px-5 py-2.5 text-[15px] font-medium text-[#3c4043] shadow-[0_1px_1px_rgba(0,0,0,0.1)] transition hover:border-[#d2e3fc] hover:bg-[#f8fafd] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a73e8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 ${className}`}
+      className={`relative inline-flex w-full items-center justify-center gap-3 rounded-[4px] border border-[#dadce0] bg-white px-5 py-2.5 text-[15px] font-medium text-[#3c4043] shadow-[0_2px_2px_rgba(0,0,0,0.1)] transition hover:border-[#d2e3fc] hover:bg-[#f8fafd] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a73e8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 ${className}`}
       disabled={disabled}
       onClick={onClick}
       data-google="signin-button"

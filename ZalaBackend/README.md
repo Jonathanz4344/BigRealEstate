@@ -349,7 +349,7 @@ Rerun initalize_db.py to create tables
 
 ### Search-lead pipeline & API usage
 
-- `/api/searchLeads` always executes the **DB search first**. If that query already has nearby data, the endpoint returns immediately and refreshes each configured external source in the background. If the DB has *no* matches for the requested location, Google Places and RapidAPI run inline, persist their results, and the DB search is repeated so the user still gets fresh leads before the response is returned.
+- `/api/searchLeads` always executes the **DB search first**. If that query already has nearby data, the endpoint returns immediately and refreshes each configured external source in the background. If the DB has _no_ matches for the requested location, Google Places and RapidAPI run inline, persist their results, and the DB search is repeated so the user still gets fresh leads before the response is returned.
 - Clients no longer pass a `sources` array. The backend automatically schedules Google Places, RapidAPI, and GPT (with DB caching as the authoritative surface) and decides which ones should block vs. run in the background based on whether the DB already has nearby leads.
 - Google Places & RapidAPI now skip re-geocoding when latitude/longitude already come back from the provider. Only results that lack coordinates are geocoded, and those calls run through a thread pool to keep the map provider from being hammered sequentially.
 - Database filtering now uses a bounding box query to fetch just the nearby leads/properties before running the precise Haversine calculation in Python. That keeps the DB workload tiny even as the table grows.
@@ -358,17 +358,20 @@ Rerun initalize_db.py to create tables
 - Because more work happens in parallel, provider quotas are consumed faster. Keep `app/external_api/api_usage.json` (and the vendor dashboards) updated so you know when to throttle tests.
 
 Google Places
+
 1. Create or select a project at https://console.cloud.google.com/.
 2. Enable the **Geocoding API** (and any other required services).
 3. Generate an API key under **APIs & Services → Credentials**.
 4. Add the key to `.env` as `GOOGLE_API_KEY=...`.
 
 OpenAI
+
 1. Create an API key for OpenAI at https://platform.openai.com/api-keys
 2. Add funds to your OpenAI account at https://platform.openai.com/settings/organization/billing/overview
 3. Add the API key to `.env` as `OPENAI_API_KEY=...`.
 
 Brave
+
 1. Create a Brave account at https://brave.com/search/api/
 2. Subscribe to the Free AI plan at https://api-dashboard.search.brave.com/app/subscriptions/subscribe?tab=ai
 3. Create an API key at https://api-dashboard.search.brave.com/app/keys
@@ -390,7 +393,7 @@ The Gmail integration now requires full OAuth consent with the `https://www.goog
 
 2. Update your OAuth consent screen to include Gmail scopes and allow the `postmessage` redirect URI.
 
-3. Sign in via Google from the login/signup pages. The server exchanges the authorization code, stores encrypted refresh tokens, and the returned `UserPublic` now exposes a `gmail_connected` flag so the UI can reflect status.
+3. Sign in via Google from the login/signup pages on the application. The server exchanges the authorization code, stores encrypted refresh tokens, and the returned `UserPublic` now exposes a `gmail_connected` flag so the UI can reflect status.
 
 4. Open `/email-test` in the frontend to send a sample email. The page calls `POST /api/google-mail/send`, which relays the message through Gmail with the stored credentials.
 
@@ -404,5 +407,3 @@ If Gmail stops working for a user, have them re-run Google sign-in so a new refr
 1. Visit the OAuth consent screen in Google Cloud Console: https://console.cloud.google.com/apis/credentials/consent
 2. Switch to the **Audience** tab.
 3. In the **Test users** panel, click **Add users**, enter each Gmail address that should be able to sign in/send email, then save. You can remove testers from the same panel when access is no longer needed.
-
-

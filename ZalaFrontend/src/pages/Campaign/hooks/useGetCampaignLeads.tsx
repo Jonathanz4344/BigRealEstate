@@ -31,8 +31,12 @@ export const useGetCampaignLeads = (
           ? (state["leads"] as ILead[])
           : null
         : null;
-      if (stateLeads) {
-        setLeads(stateLeads);
+      if (stateLeads && stateLeads.length > 0) {
+        setLeads(
+          campaign.leads.map(
+            (lead) => stateLeads.find((aLead) => aLead.leadId === lead.leadId)!
+          )
+        );
       } else {
         getLeads();
       }
@@ -61,18 +65,13 @@ export const useGetCampaignLeads = (
     if (res.err || !res.data) return apiResponseError("get leads", res.err);
 
     const apiLeads = res.data.map(Normalizer.APINormalizer.lead);
-    // const apiLeads = (
-    //   (
-    //     await Promise.all(
-    //       campaign.leads.map(
-    //         async (lead) => (await getLead(lead.leadId, user.userId)).data
-    //       )
-    //     )
-    //   ).filter((lead) => lead) as ALead[]
-    // ).map(Normalizer.APINormalizer.lead); // TODO: Update api to allow single fetch call for multiple lead ids
 
     setLoading(false);
-    setLeads(apiLeads);
+    setLeads(
+      campaign.leads.map(
+        (lead) => apiLeads.find((aLead) => aLead.leadId === lead.leadId)!
+      )
+    );
   };
 
   return [leads, loading, setLeads, getLeads];

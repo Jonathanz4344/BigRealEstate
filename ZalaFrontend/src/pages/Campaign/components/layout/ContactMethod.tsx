@@ -16,12 +16,11 @@ export const ContactMethod = ({
   active,
   onClick,
 }: ContactMethodProps) => {
-  const [isHovered, hoverProps] = useHover();
+  const [isHovered, hoverProps] = useHover({ onClick });
   const isActive = isHovered || active;
   return (
     <div
       {...hoverProps}
-      onClick={onClick}
       className={clsx(
         "w-[135px] h-[135px] rounded-[15px]",
         "flex flex-col items-center justify-center space-y-[10px] cursor-pointer",

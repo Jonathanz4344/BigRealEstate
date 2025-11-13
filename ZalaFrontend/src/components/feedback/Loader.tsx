@@ -3,9 +3,13 @@ import { COLORS } from "../../config";
 
 type LoaderProps = {
   darkMode?: boolean;
+  text?: string;
 };
 
-export const Loader = ({ darkMode }: LoaderProps) => (
+export const Loader = ({
+  darkMode,
+  text = "Fetching leads...",
+}: LoaderProps) => (
   <div className="flex flex-col items-center justify-center space-y-3">
     <div
       className={clsx(
@@ -14,13 +18,15 @@ export const Loader = ({ darkMode }: LoaderProps) => (
       )}
       style={{ borderTopColor: darkMode ? COLORS.white : COLORS.accent }}
     />
-    <span
-      className={clsx(
-        "text-sm font-medium ",
-        darkMode ? "text-secondary" : "text-white"
-      )}
-    >
-      Fetching leads…
-    </span>
+    {text && (
+      <span
+        className={clsx(
+          "text-sm font-medium ",
+          darkMode ? "text-secondary" : "text-white"
+        )}
+      >
+        {text}
+      </span>
+    )}
   </div>
 );
