@@ -25,6 +25,7 @@ export const Folder = ({
       >
         {icons.map((props) => (
           <Icon
+            key={props.name}
             hoverColor={COLORS.accent}
             {...props}
             className={clsx("cursor-pointer", props.className)}

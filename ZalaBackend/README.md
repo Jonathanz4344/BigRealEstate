@@ -16,8 +16,6 @@ Backend service for the **Zala** project, built with [FastAPI](https://fastapi.t
 ```text
 ZalaBackend/
 ├── app/
-│   ├── data/
-│   │   └── mock_properties.json           # Mock property inventory used by search endpoints
 │   ├── db/
 │   │   ├── crud/                          # CRUD helpers (addresses, leads, campaigns, etc.)
 │   │   ├── schema.sql                     # Core PostgreSQL schema
@@ -105,7 +103,7 @@ Creating a virtual environment ensures dependencies are isolated to this project
 3. Install dependencies:
 
    ```
-   pip install -r requirements.txt
+   py -m pip install -r requirements.txt
    ```
 
 4. Run the application:
@@ -158,6 +156,8 @@ GOOGLE_API_KEY=<your_google_maps_api_key>
 # ─── Google OAuth 2.0 Authentication ────────────────────
 GOOGLE_CLIENT_ID=<your_google_oauth_client_id>
 GOOGLE_CLIENT_SECRET=<your_google_oauth_client_secret>
+GOOGLE_REDIRECT_URI=postmessage
+GOOGLE_TOKEN_ENCRYPTION_KEY=<your_fernet_key_for_token_storage>
 
 # ─── Lead Generation API Keys ────────────────────
 
@@ -167,6 +167,8 @@ BRAVE_API_KEY=<your_brave_api_key>
 
 # ─── Frontend OAuth Integration (for React/Vite) ────────
 VITE_GOOGLE_CLIENT_ID=<same_as_GOOGLE_CLIENT_ID_or_OAuth_client_id>
+VITE_GOOGLE_REDIRECT_URI=postmessage
+VITE_GOOGLE_SCOPES="openid email profile https://www.googleapis.com/auth/gmail.send"
 ```
 
 ### How to Get These Values
@@ -217,6 +219,21 @@ VITE_GOOGLE_CLIENT_ID=<same_as_GOOGLE_CLIENT_ID_or_OAuth_client_id>
    VITE_GOOGLE_CLIENT_ID=<your_client_id>
    ```
 
+7. Use the Google Identity Services `postmessage` redirect for the popup/PKCE flow:
+
+   ```
+   GOOGLE_REDIRECT_URI=postmessage
+   VITE_GOOGLE_REDIRECT_URI=postmessage
+   ```
+
+8. Request the Gmail send scope so users can authorize email sending:
+
+   ```
+   VITE_GOOGLE_SCOPES="openid email profile https://www.googleapis.com/auth/gmail.send"
+   ```
+
+9. Generate a Fernet key and set `GOOGLE_TOKEN_ENCRYPTION_KEY` (see the **Gmail send flow** section) so refresh tokens are stored encrypted.
+
 #### 🧠 Lead Generation API Keys (RapidAPI, OpenAI, Brave Search)
 
 These keys are used for intelligent lead generation, AI processing, and web data enrichment features.
@@ -227,6 +244,7 @@ Each service requires a developer account to generate and manage API credentials
 1. Visit [RapidAPI](https://rapidapi.com) and log in or create an account.
 2. Navigate to the **"My Apps"** section from your dashboard.
 3. Select an existing application or create a new one.
+   Need to subscribe https://rapidapi.com/ntd119/api/zillow-com4/playground/apiendpoint_85a30d86-7f81-4503-b49e-0c6ffe1f5f97
 4. Copy your personal API key.
 5. Add it to your `.env` file as:
 
@@ -276,6 +294,30 @@ SQL_DBNAME=zala
 
 ---
 
+## Fixing Database Structure
+
+Go to Pgadmin and right click your database ex. zala and go to query tool.
+Run the following commands to delete db:
+
+(**MAKE SURE NAMING OF UNAME AND DBNAME MATCHES YOUR CONFIG**)
+-- 1. Drop everything in the schema (irreversible)
+DROP SCHEMA IF EXISTS public CASCADE;
+
+-- 2. Recreate the schema owned by your app role
+CREATE SCHEMA public AUTHORIZATION postgresadmin;
+
+-- 3. Ensure the role keeps access
+GRANT ALL ON SCHEMA public TO postgresadmin;
+
+-- 4. Make sure new sessions see the schema automatically
+ALTER ROLE postgresadmin IN DATABASE zala SET search_path TO public;
+ALTER DATABASE zala SET search_path TO public;
+
+-- 5. Apply the setting for the current session
+SET search_path TO public;
+
+Rerun initalize_db.py to create tables
+
 ## Testing
 
 1. Ensure the server is running:
@@ -304,3 +346,64 @@ SQL_DBNAME=zala
 - Use dedicated link/unlink endpoints for entity relationships instead of embedding IDs in create requests.
 - Keep `API_ROUTES_README.md` updated with endpoint changes for frontend synchronization.
 - Restart your FastAPI server after modifying `.env`.
+
+### Search-lead pipeline & API usage
+
+- `/api/searchLeads` always executes the **DB search first**. If that query already has nearby data, the endpoint returns immediately and refreshes each configured external source in the background. If the DB has _no_ matches for the requested location, Google Places and RapidAPI run inline, persist their results, and the DB search is repeated so the user still gets fresh leads before the response is returned.
+- Clients no longer pass a `sources` array. The backend automatically schedules Google Places, RapidAPI, and GPT (with DB caching as the authoritative surface) and decides which ones should block vs. run in the background based on whether the DB already has nearby leads.
+- Google Places & RapidAPI now skip re-geocoding when latitude/longitude already come back from the provider. Only results that lack coordinates are geocoded, and those calls run through a thread pool to keep the map provider from being hammered sequentially.
+- Database filtering now uses a bounding box query to fetch just the nearby leads/properties before running the precise Haversine calculation in Python. That keeps the DB workload tiny even as the table grows.
+- GPT + Brave fetches are dispatched as a FastAPI background task. The API response returns immediately with `external_persistence["gpt"] = {"status": "queued"}` while the background job calls the LLM, normalizes the leads, and writes them to the DB. Those leads show up on the next request that includes the `db` source—no separate polling needed.
+- `external_persistence` now contains either `{inserted, duplicates, failed}` for blocking sources or `{status: "queued"}` if a background job is still running. This gives the frontend a single place to show async progress.
+- Because more work happens in parallel, provider quotas are consumed faster. Keep `app/external_api/api_usage.json` (and the vendor dashboards) updated so you know when to throttle tests.
+
+Google Places
+
+1. Create or select a project at https://console.cloud.google.com/.
+2. Enable the **Geocoding API** (and any other required services).
+3. Generate an API key under **APIs & Services → Credentials**.
+4. Add the key to `.env` as `GOOGLE_API_KEY=...`.
+
+OpenAI
+
+1. Create an API key for OpenAI at https://platform.openai.com/api-keys
+2. Add funds to your OpenAI account at https://platform.openai.com/settings/organization/billing/overview
+3. Add the API key to `.env` as `OPENAI_API_KEY=...`.
+
+Brave
+
+1. Create a Brave account at https://brave.com/search/api/
+2. Subscribe to the Free AI plan at https://api-dashboard.search.brave.com/app/subscriptions/subscribe?tab=ai
+3. Create an API key at https://api-dashboard.search.brave.com/app/keys
+4. Add the API key to `.env` as `BRAVE_API_KEY=...`.
+
+Restart the server after updating `.env` so changes take effect.
+
+## Gmail send flow
+
+The Gmail integration now requires full OAuth consent with the `https://www.googleapis.com/auth/gmail.send` scope. Make sure the Google client configured in `.env` is the same one your frontend uses.
+
+1. Generate an encryption key and set `GOOGLE_TOKEN_ENCRYPTION_KEY` in `.env`:
+
+   ```bash
+   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+   ```
+
+   This key is used to encrypt Google access and refresh tokens at rest.
+
+2. Update your OAuth consent screen to include Gmail scopes and allow the `postmessage` redirect URI.
+
+3. Sign in via Google from the login/signup pages on the application. The server exchanges the authorization code, stores encrypted refresh tokens, and the returned `UserPublic` now exposes a `gmail_connected` flag so the UI can reflect status.
+
+4. Open `/email-test` in the frontend to send a sample email. The page calls `POST /api/google-mail/send`, which relays the message through Gmail with the stored credentials.
+
+If Gmail stops working for a user, have them re-run Google sign-in so a new refresh token is issued.
+
+> **Note:** The Gmail API must be enabled for the same Google Cloud project that owns your OAuth client. Visit https://console.cloud.google.com/apis/api/gmail.googleapis.com/overview?project=<your_project_id> and click **Enable** (or re-enable) before testing email sends, otherwise Google will return `SERVICE_DISABLED / accessNotConfigured`.
+> **Account linking rule:** Connecting Gmail to an existing Zala account requires using the exact same email address during Google sign-in. If the emails do not match, the backend will reject the link so the wrong Google account cannot be attached.
+
+### Adding Google test users (required while the app is in Testing mode)
+
+1. Visit the OAuth consent screen in Google Cloud Console: https://console.cloud.google.com/apis/credentials/consent
+2. Switch to the **Audience** tab.
+3. In the **Test users** panel, click **Add users**, enter each Gmail address that should be able to sign in/send email, then save. You can remove testers from the same panel when access is no longer needed.

@@ -28,5 +28,4 @@ class Property(Base):
     units: Mapped[List["Unit"]] = relationship("Unit", back_populates="property", cascade="all, delete-orphan")
     lead: Mapped["Lead"] = relationship("Lead", back_populates="properties", uselist=False)
     address: Mapped["Address"] = relationship("Address", back_populates="property", uselist=False)
-    campaigns: Mapped[List["Campaign"]] = relationship("Campaign", back_populates="property")
 

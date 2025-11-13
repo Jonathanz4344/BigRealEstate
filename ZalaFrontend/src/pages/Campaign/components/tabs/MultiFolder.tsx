@@ -1,14 +1,13 @@
 import type { CampaignFolderChildProps } from "./types";
-import { CampaignTab, type DemoData } from "../../../../interfaces";
+import { CampaignTab, type ILead } from "../../../../interfaces";
 import { useFolderIcons } from "../../hooks";
 import { Folder, LeadButtons } from "../layout";
 import { ArrowLeadCard, Icons } from "../../../../components";
-import { useCampaignFolderStore } from "../../../../stores";
+import { useCampaignPageStore } from "../../../../stores";
 
 type MultiFolderProps = Omit<CampaignFolderChildProps, "lead"> & {
-  allLeads: DemoData[];
-  leads: DemoData[];
-  setViewing: (i: number) => void;
+  allLeads: ILead[];
+  leads: ILead[];
 };
 
 export const MultiFolder = ({
@@ -17,11 +16,10 @@ export const MultiFolder = ({
   allLeads,
   leads,
   disableSecondary,
-  setViewing,
   onPrimary,
   onSecondary,
 }: MultiFolderProps) => {
-  const setTab = useCampaignFolderStore((state) => state.setTab);
+  const { setTab, setViewingLead } = useCampaignPageStore();
   const icons = useFolderIcons({ active: CampaignTab.Multi, showBackBtn });
   return (
     <Folder
@@ -48,11 +46,11 @@ export const MultiFolder = ({
           <div className="absolute-fill overflow-y-scroll px-[15px] space-y-[30px]">
             {leads.map((lead) => (
               <ArrowLeadCard
+                key={lead.leadId}
                 lead={lead}
                 i={allLeads.indexOf(lead)}
                 onClick={() => (
-                  setViewing(allLeads.indexOf(lead)),
-                  setTab(CampaignTab.Connect)
+                  setViewingLead(lead.leadId), setTab(CampaignTab.Connect)
                 )}
               />
             ))}

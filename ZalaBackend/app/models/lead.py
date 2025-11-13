@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import Column, ForeignKey, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..db.session import Base
@@ -27,6 +27,10 @@ class Lead(Base):
     contact: Mapped["Contact"] = relationship("Contact", back_populates="leads", uselist=False)
     address: Mapped["Address"] = relationship("Address", back_populates="leads", uselist=False)
     properties: Mapped[List["Property"]] = relationship("Property", back_populates="lead")
-    campaign_messages: Mapped[List["CampaignMessage"]] = relationship(
-        "CampaignMessage", back_populates="lead", cascade="all, delete-orphan"
+    campaign_emails: Mapped[List["CampaignEmail"]] = relationship(
+        "CampaignEmail", back_populates="lead", cascade="all, delete-orphan"
     )
+
+
+    campaigns: Mapped[List["CampaignLead"]] = relationship(
+        "CampaignLead", back_populates="lead", cascade="all, delete-orphan")

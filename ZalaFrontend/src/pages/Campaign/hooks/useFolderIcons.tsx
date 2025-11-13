@@ -1,7 +1,8 @@
 import { Icons, type IconProps } from "../../../components";
-import { useCampaignFolderStore } from "../../../stores";
+
 import { COLORS } from "../../../config";
 import { CampaignTab } from "../../../interfaces";
+import { useCampaignPageStore } from "../../../stores";
 
 type UseFolderIconsProps = {
   active: CampaignTab;
@@ -12,7 +13,7 @@ export const useFolderIcons = ({
   active,
   showBackBtn,
 }: UseFolderIconsProps) => {
-  const { tab, setTab } = useCampaignFolderStore();
+  const { tab, setTab } = useCampaignPageStore();
 
   const sharedIcons: IconProps[] = [
     {

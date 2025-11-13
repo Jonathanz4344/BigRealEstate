@@ -1,17 +1,20 @@
 from enum import Enum
 from pydantic import BaseModel, Field
-from typing import Optional
+
 
 class DataSource(str, Enum):
+    google_places = "google_places"
     gpt = "gpt"
     rapidapi = "rapidapi"
-    webscraping = "webscraping"
+    db = "db"
+
 
 class LocationFilter(BaseModel):
-    zip: Optional[str] = Field(None, pattern=r"^\d{5}$")
-    city: Optional[str] = None
-    state: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    location_text: Optional[str] = None
-    source: DataSource = DataSource.gpt  # default to GPT
+    location_text: str = Field(..., min_length=1)
+
+
+class LeadSearchRequest(LocationFilter):
+    """
+    Combined lead search request supporting multiple data sources.
+    """
+    pass

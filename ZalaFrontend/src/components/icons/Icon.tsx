@@ -24,7 +24,7 @@ export const Icon = ({
   className,
   onClick,
 }: IconProps) => {
-  const [isHovered, hoverProps] = useHover();
+  const [isHovered, hoverProps] = useHover({ onClick });
   const MaterialIcon = getMaterialIcon(name) ?? (() => <></>);
 
   const scale = isHovered ? hoverScale : propScale;
@@ -33,7 +33,6 @@ export const Icon = ({
 
   return (
     <MaterialIcon
-      onClick={onClick}
       className={className}
       {...hoverProps}
       sx={{ color, fontSize: fontSize }}

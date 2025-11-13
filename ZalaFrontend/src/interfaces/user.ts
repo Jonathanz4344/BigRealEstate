@@ -7,6 +7,7 @@ export type IUser = {
   userId: number;
   contact?: IContact;
   xp: number;
+  gmailConnected: boolean;
 };
 
 export type AUser = {
@@ -16,6 +17,7 @@ export type AUser = {
   user_id: number;
   contact?: AContact;
   xp: number;
+  gmail_connected: boolean;
 };
 
 export const AUserToIUser = (body: AUser): IUser => ({
@@ -25,4 +27,5 @@ export const AUserToIUser = (body: AUser): IUser => ({
   userId: body.user_id,
   contact: body.contact ? AContactToIContact(body.contact) : undefined,
   xp: body.xp,
+  gmailConnected: body.gmail_connected,
 });

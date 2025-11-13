@@ -14,12 +14,12 @@ class Campaign(Base):
 
     campaign_id: Mapped[int] = mapped_column(primary_key=True)
     campaign_name: Mapped[str] = mapped_column(nullable=False)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False)
-    property_id: Mapped[Optional[int]] = mapped_column(ForeignKey("properties.property_id"), nullable=True)
+    user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.user_id"), nullable=True)
 
-    user: Mapped["User"] = relationship("User", back_populates="campaigns")
-    property: Mapped[Optional["Property"]] = relationship("Property", back_populates="campaigns")
-    campaign_messages: Mapped[List["CampaignMessage"]] = relationship(
-        "CampaignMessage", back_populates="campaign", cascade="all, delete-orphan"
+    user: Mapped[Optional["User"]] = relationship("User", back_populates="campaigns")
+    campaign_emails: Mapped[List["CampaignEmails"]] = relationship(
+        "CampaignEmail", back_populates="campaign", cascade="all, delete-orphan"
     )
 
+    leads: Mapped[List["CampaignLead"]] = relationship(
+        "CampaignLead", back_populates="campaign", cascade="all, delete-orphan")

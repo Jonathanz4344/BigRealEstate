@@ -21,9 +21,19 @@ This document summarizes the REST endpoints exposed by the FastAPI service so th
 | Method | Path | Purpose | Body Fields | Response |
 | --- | --- | --- | --- | --- |
 | POST | `/api/login/` | Authenticate a user | `username` *(string, required)*, `password` *(string, required)* | `UserPublic` (user details if credentials match) |
-| POST | `/api/login/google` | Authenticate via Google | `id_token` *(string, required)* | `UserPublic` (populated from Google profile or linked user) |
+| POST | `/api/login/google` | Authenticate via Google OAuth | `code` *(string, preferred)* plus optional `scope`; falls back to `id_token` *(string)* for legacy clients | `UserPublic` (populated from Google profile or linked user, includes `gmail_connected` flag) |
 
 401 is returned when credentials are invalid.
+
+---
+
+## Google Mail (`/api/google-mail`)
+
+| Method | Path | Purpose | Body Fields | Response |
+| --- | --- | --- | --- | --- |
+| POST | `/api/google-mail/send` | Send a Gmail message using the authenticated user's Google account | `user_id` *(int, required)*, `to` *(email, required)*, `subject` *(string, required)*, `html` *(string, required)*, `from_name` *(string, optional)* | `{ "id": "<gmail_message_id>", "thread_id": "<gmail_thread_id>" }` |
+
+Returns 400 if the user has not completed Google OAuth with Gmail scopes.
 
 ---
 
@@ -166,14 +176,31 @@ Allowed file MIME types: `text/csv`, `application/vnd.ms-excel`, and `.xlsx`. Th
 
 ---
 
-## Location Filtering (`/api/search-location…`)
+## Lead Search (`/api/searchLeads`)
 
 | Method | Path | Purpose | Body Fields | Response |
 | --- | --- | --- | --- | --- |
-| POST | `/api/search-location/` | External geocode + mock properties | JSON per `LocationFilter` (any of: `zip`, `city`, `state`, `latitude`, `longitude`, `location_text`, `source`) | Normalized location + mock property list (within 50 miles) |
-| POST | `/api/search-location/db` | Geocode, then search DB leads near location | Same as above; if lat/long omitted, server geocodes | Normalized location + `nearby_leads` (serialized lead data + distance) |
+| POST | `/api/searchLeads` | Fetch nearby leads (DB first, external providers auto-triggered) | JSON: `location_text` (string) | `aggregated_leads` (from DB after any inline refresh), optional `external_persistence` statuses, and `errors` keyed by provider |
 
-`LocationFilter.source` defaults to `"gpt"` but you can pass `"rapidapi"` or `"google places"` for tracing.
+Notes:
+- Google Places & RapidAPI execute inline only when the DB cache is empty for the requested area; otherwise they enqueue background refresh jobs. GPT always runs as a background job. Check `external_persistence` for `{inserted, duplicates, failed}` counts or `{status: "queued"}`.
+- If geocoding fails or a provider rejects the request, the reason is listed under `errors[source]`.
+- `location_text` can be a zip code or free-form description; the backend geocodes and extracts any dynamic filters automatically.
+- `aggregated_leads` always contains persisted DB leads (with real `lead_id` values). When inline fetches run, the backend saves results first and then re-queries the DB so IDs remain stable.
+- External provider quotas: RapidAPI requests reset monthly with a cap of 95 calls, and Brave search requests (used by the GPT integration) are limited to 1,950 calls per month.
+
+---
+
+## Send Campaign Email (`/api/campaign-emails/send`)
+
+| Method | Path | Purpose | Body Fields | Response |
+| --- | --- | --- | --- | --- |
+| POST | `/api/campaign-emails/send` | Send one email template to multiple leads already linked to the campaign | `campaign_id` (int), `lead_id` (array of lead IDs), `message_subject` (string), `message_body` (string) | Hydrated `CampaignPublic` object for the campaign after the messages are queued |
+
+Notes:
+- `lead_id` must include at least one ID, and every ID must already be linked to the specified campaign via `/api/campaign-leads`.
+- The endpoint records one `CampaignEmail` per lead and flips the `email_contacted` flag for each matching campaign-lead link.
+- Useful for bulk drip sends where the UI already has a campaign selection and filtered lead list.
 
 ---
 

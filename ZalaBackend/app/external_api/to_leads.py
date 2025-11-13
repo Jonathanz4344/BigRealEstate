@@ -1,11 +1,14 @@
 from typing import List, Tuple
 import sys
 from pathlib import Path
+from decimal import Decimal
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 # from app.models.lead import Lead
 
 from app.schemas.lead import LeadPublic
 from app.schemas.contact import ContactPublic
+from app.schemas.address import AddressPublic
 
 import json
 from pydantic import ValidationError
@@ -18,25 +21,57 @@ def _split_name(name: str) -> Tuple[str, str | None]:
     return (parts[0], " ".join(parts[1:]) or None)
 
 # make a contactbase 
+
+def _make_address(
+    address_text: str | None,
+    lat: float | None = None,
+    lon: float | None = None,
+) -> AddressPublic | None:
+    if not address_text and lat is None and lon is None:
+        return None
+
+    street_1 = address_text or "Unknown"
+    # crude parsing: split "City, ST" -> street_1 still original, but capture tokens for city/state if present
+    city = ""
+    state = ""
+    zipcode = ""
+
+    if address_text and "," in address_text:
+        parts = [p.strip() for p in address_text.split(",") if p.strip()]
+        if len(parts) >= 2:
+            city = parts[-2]
+            state = parts[-1]
+        elif len(parts) == 1:
+            city = parts[0]
+    elif address_text:
+        city = address_text.strip()
+
+    if state:
+        state_tokens = state.split()
+        state = state_tokens[0]
+        if len(state_tokens) > 1:
+            zipcode = state_tokens[1]
+
+    lat_decimal = Decimal(str(lat)) if lat is not None else None
+    lon_decimal = Decimal(str(lon)) if lon is not None else None
+
+    return AddressPublic(
+        address_id=0,
+        street_1=street_1,
+        street_2=None,
+        city=city or street_1,
+        state=state or "",
+        zipcode=zipcode,
+        lat=lat_decimal,
+        long=lon_decimal,
+    )
+
+
 def gplaces_to_leads(items: list[dict]) -> List[LeadPublic]:
-    # leads: List[Lead] = []
-    # for x in items:
-    #     first, last = _split_name(x.get("name", ""))
-    #     leads.append(
-    #         Lead(
-    #             first_name=first,
-    #             last_name=last,
-    #             email=None,  
-    #             phone_number=x.get("phone"),
-    #             address=x.get("address"),
-    #             businessName=x.get("name")
-    #         )
-    #     )
-    # return leads
     leads: List[LeadPublic] = []
 
     for x in items:
-        first, last = _split_name(x.get("name"))
+        first, last = _split_name(x.get("name", ""))
         leads.append(
             LeadPublic(
                 # LeadBase fields
@@ -44,7 +79,7 @@ def gplaces_to_leads(items: list[dict]) -> List[LeadPublic]:
                 business=x.get("name"),
                 website=x.get("website"),
                 license_num=None,
-                notes=None,
+                notes=x.get("address"),
 
                 # LeadPublic required/extra fields
                 lead_id=0,                                # placeholder (not persisted yet)
@@ -56,27 +91,13 @@ def gplaces_to_leads(items: list[dict]) -> List[LeadPublic]:
                     email=None,
                     phone=x.get("phone"),
                 ),
-                address=x.get("address"),                              # we can map to AddressPublic if you share its fields
+                address=_make_address(x.get("address"), x.get("lat"), x.get("lng")),
                 properties=[],                             # none from Places
             )
         )
     return leads
 
 def rapid_to_leads(items: list[dict]) -> List[LeadPublic]:
-    # leads: List[Lead] = []
-    # for x in items:
-    #     first, last = _split_name(x.get("fullName", ""))
-    #     leads.append(
-    #         Lead(
-    #             first_name=first,
-    #             last_name=last,
-    #             email=None, 
-    #             phone_number=x.get("phoneNumber"),
-    #             address=x.get("location"),
-    #             businessName=x.get("businessName")
-    #         )
-    #     )
-    # return leads
     leads: List[LeadPublic] = []
 
     for x in items:
@@ -88,7 +109,7 @@ def rapid_to_leads(items: list[dict]) -> List[LeadPublic]:
                 business=x.get("businessName"),
                 website=x.get("profilePhotoSrc"),
                 license_num=None,
-                notes=None,
+                notes=x.get("location"),
 
                 # LeadPublic required/extra fields
                 lead_id=0,                                # placeholder (not persisted yet)
@@ -100,7 +121,7 @@ def rapid_to_leads(items: list[dict]) -> List[LeadPublic]:
                     email=None,
                     phone=x.get("phoneNumber"),
                 ),
-                address=x.get("location"),                              # we can map to AddressPublic if you share its fields
+                address=_make_address(x.get("location")),
                 properties=[],                             # none from Places
             )
         )
@@ -111,17 +132,6 @@ def openai_to_leads(items: list[dict]) -> List[LeadPublic]:
     for x in items:
         first = x.get("firstName", "")
         last = x.get("lastName", "")
-
-        # Debug: print all fields we attempt to extract
-        # print(f"DEBUG PRINT: firstName: {first}")
-        # print(f"DEBUG PRINT: lastName: {last}")
-        # print(f"DEBUG PRINT: business: {x.get("businessName")}")
-        # print(f"DEBUG PRINT: website: {x.get("website")}")
-        # print(f"DEBUG PRINT: licenseNum: {x.get("licenseNum")}")
-        # print(f"DEBUG PRINT: email: {x.get("email")}")
-        # print(f"DEBUG PRINT: phoneNumber: {x.get("phoneNumber")}")
-        # print(f"DEBUG PRINT: address: {x.get("address")}")
-        
         try:
             leads.append(
                 LeadPublic(
@@ -130,7 +140,7 @@ def openai_to_leads(items: list[dict]) -> List[LeadPublic]:
                     business=x.get("businessName"),
                     website=x.get("website"),
                     license_num=x.get("licenseNum"),
-                    notes=None,
+                    notes=x.get("address"),
                     # LeadPublic required/extra fields
                     lead_id=0,                                # placeholder (not persisted yet)
                     created_by_user=None,                     # unknown in this context
@@ -141,7 +151,7 @@ def openai_to_leads(items: list[dict]) -> List[LeadPublic]:
                         email=x.get("email"),
                         phone=x.get("phoneNumber"),
                     ),
-                    address=x.get("address"),                              # we can map to AddressPublic if you share its fields
+                    address=_make_address(x.get("address")),
                     properties=[],                            # none from LLM response
                 )
             )

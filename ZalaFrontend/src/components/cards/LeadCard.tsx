@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { DemoData } from "../../interfaces";
+import type { ILead, ISourceResult } from "../../interfaces";
 import { IMAGES_ARR } from "../../assets";
 import { Button } from "../buttons";
 import { Icons } from "../icons";
@@ -12,7 +12,8 @@ type LeadCardButton = {
 };
 
 export type LeadCardProps = {
-  lead: DemoData;
+  lead: ILead;
+  sourceResult?: ISourceResult<unknown>;
   i: number;
   active?: boolean;
   button?: LeadCardButton;
@@ -21,6 +22,7 @@ export type LeadCardProps = {
 
 export const LeadCard = ({
   lead,
+  sourceResult,
   button,
   active,
   i,
@@ -49,14 +51,22 @@ export const LeadCard = ({
               active ? "text-accent" : ""
             )}
           >
-            {lead.agent}
+            {lead.contact.firstName} {lead.contact.lastName}
           </span>
           <span className="overflow-ellipsis line-clamp-2 text-sm text-secondary-50">
-            {lead.address}
+            {lead.contact.email}
           </span>
           <span className="overflow-ellipsis line-clamp-1 text-sm  text-secondary-50">
-            {lead.contact}
+            {lead.contact.phone}
           </span>
+          <span className="overflow-ellipsis line-clamp-2 text-sm  text-secondary-50">
+            {lead.notes}
+          </span>
+          {/* {sourceResult && (
+            <span className="overflow-ellipsis line-clamp-1 text-sm  text-secondary-50">
+              Sourced from: {sourceResult.source}
+            </span>
+          )} */}
         </div>
 
         {button && (

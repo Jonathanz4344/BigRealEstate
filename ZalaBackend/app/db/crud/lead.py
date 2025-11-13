@@ -9,10 +9,10 @@ from app.models.contact import Contact
 from app import schemas
 from fastapi import HTTPException, status
 
+from app.models import CampaignLead
+
 
 def get_lead_by_id(db: Session, lead_id: int) -> Optional[Lead]:
-    # use selectinload for the collection relationship to avoid complex outer-join
-    # eager-load nested relationships: properties (with address, units, users), created_by_user, contact and address
     return (
         db.query(Lead)
         .options(
@@ -22,14 +22,15 @@ def get_lead_by_id(db: Session, lead_id: int) -> Optional[Lead]:
             joinedload(Lead.created_by_user),
             joinedload(Lead.contact),
             joinedload(Lead.address),
+            selectinload(Lead.campaigns).joinedload(CampaignLead.campaign)
         )
         .filter(Lead.lead_id == lead_id)
         .first()
     )
 
 
-def get_leads(db: Session, skip: int = 0, limit: int = 100) -> List[Lead]:
-    return (
+def get_leads(db: Session, skip: int = 0, limit: int = 100, lead_ids: Optional[List[int]] = None) -> List[Lead]:
+    query = (
         db.query(Lead)
         .options(
             selectinload(Lead.properties).joinedload(Property.address),
@@ -38,11 +39,12 @@ def get_leads(db: Session, skip: int = 0, limit: int = 100) -> List[Lead]:
             joinedload(Lead.created_by_user),
             joinedload(Lead.contact),
             joinedload(Lead.address),
+            selectinload(Lead.campaigns).joinedload(CampaignLead.campaign)
         )
-        .offset(skip)
-        .limit(limit)
-        .all()
     )
+    if lead_ids:
+        query = query.filter(Lead.lead_id.in_(lead_ids))
+    return query.offset(skip).limit(limit).all()
 
 
 def create_lead(db: Session, lead_in: schemas.LeadCreate) -> Lead:

@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import schemas
 from app.db.crud import campaign as campaign_crud
+from app.db.crud import campaign_lead as campaign_lead_crud
 from app.db.session import get_db
 
 
@@ -19,7 +20,7 @@ def create_campaign(campaign_in: schemas.CampaignCreate, db: Session = Depends(g
     return campaign_crud.create_campaign(db, campaign_in)
 
 
-@router.get("/",summary="Get All Campaigns", response_model=List[schemas.CampaignPublic])
+@router.get("/", summary="Get All Campaigns", response_model=List[schemas.CampaignPublic])
 def list_campaigns(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     List campaigns with optional pagination.
@@ -27,7 +28,7 @@ def list_campaigns(skip: int = 0, limit: int = 100, db: Session = Depends(get_db
     return campaign_crud.get_campaigns(db, skip=skip, limit=limit)
 
 
-@router.get("/{campaign_id}",summary="Get Campaign By Id", response_model=schemas.CampaignPublic)
+@router.get("/{campaign_id}", summary="Get Campaign By Id", response_model=schemas.CampaignPublic)
 def get_campaign(campaign_id: int, db: Session = Depends(get_db)):
     """
     Retrieve a single campaign by ID.
@@ -59,3 +60,5 @@ def delete_campaign(campaign_id: int, db: Session = Depends(get_db)):
     if not campaign_crud.delete_campaign(db, campaign_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
     return None
+
+

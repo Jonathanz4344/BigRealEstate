@@ -1,12 +1,12 @@
 import clsx from "clsx";
-import type { DemoData } from "../../interfaces";
+import type { ILead } from "../../interfaces";
 import { IMAGES_ARR } from "../../assets";
 import { IconButton, IconButtonVariant } from "../buttons";
 import { Icons } from "../icons";
 import { useHover } from "../../hooks";
 
 type ArrowLeadCardProps = {
-  lead: DemoData;
+  lead: ILead;
   i: number;
   border?: boolean;
   onClick?: () => void;
@@ -20,10 +20,14 @@ export const ArrowLeadCard = ({
   onClick,
   onIconClick,
 }: ArrowLeadCardProps) => {
-  const [cardHovered, cardHoverProps] = useHover();
-  const [iconHovered, iconHoverProps] = useHover();
-  const cardHoverActivatesIcon = onClick && !onIconClick;
+  const [iconHovered, iconHoverProps] = useHover({ onClick: onIconClick });
   const iconHoveredAndIndependent = onIconClick && iconHovered;
+
+  const [cardHovered, cardHoverProps] = useHover({
+    onClick: iconHoveredAndIndependent ? undefined : onClick,
+  });
+
+  const cardHoverActivatesIcon = onClick && !onIconClick;
   const cardActive = !iconHoveredAndIndependent && cardHovered && onClick;
   return (
     <div
@@ -34,7 +38,6 @@ export const ArrowLeadCard = ({
         border ? (cardActive ? "border-accent" : "border-secondary") : "",
         onClick ? "cursor-pointer" : ""
       )}
-      onClick={iconHoveredAndIndependent ? undefined : onClick}
     >
       <div className="w-[25%]">
         <img
@@ -51,15 +54,19 @@ export const ArrowLeadCard = ({
               cardActive ? "text-accent" : "text-secondary"
             )}
           >
-            {lead.agent}
+            {lead.contact.firstName} {lead.contact.lastName}
           </p>
           <span className="overflow-ellipsis line-clamp-2 text-base text-secondary-50">
-            {lead.address}
+            {lead.contact.email}
           </span>
           <span className="overflow-ellipsis line-clamp-1 text-base  text-secondary-50">
-            {lead.contact}
+            {lead.contact.phone}
+          </span>
+          <span className="overflow-ellipsis line-clamp-2 text-base  text-secondary-50">
+            {lead.notes}
           </span>
         </div>
+
         <div className="flex items-center justify-center">
           <div {...iconHoverProps}>
             <IconButton
@@ -70,7 +77,6 @@ export const ArrowLeadCard = ({
                   ? IconButtonVariant.Accent
                   : IconButtonVariant.Secondary
               }
-              onClick={onIconClick}
             />
           </div>
         </div>

@@ -1,9 +1,8 @@
-from typing import Optional
+from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.schemas.user import UserPublic
-from app.schemas.property import PropertyPublic
 
 
 class CampaignBase(BaseModel):
@@ -12,15 +11,14 @@ class CampaignBase(BaseModel):
     """
 
     campaign_name: str
-    user_id: int
-    property_id: Optional[int] = None
+    user_id: Optional[int] = None
 
 
 class CampaignCreate(CampaignBase):
     """
     Schema for creating a campaign.
     """
-    pass
+    lead_ids: List[int] = Field(default_factory=list)
 
 
 class CampaignUpdate(BaseModel):
@@ -30,7 +28,7 @@ class CampaignUpdate(BaseModel):
 
     campaign_name: Optional[str] = None
     user_id: Optional[int] = None
-    property_id: Optional[int] = None
+    lead_ids: Optional[List[int]] = None
 
 
 class CampaignPublic(CampaignBase):
@@ -40,7 +38,8 @@ class CampaignPublic(CampaignBase):
 
     campaign_id: int
     user: Optional[UserPublic] = None
-    property: Optional[PropertyPublic] = None
+    leads: List["CampaignLeadPublic"] = []
 
     class Config:
         from_attributes = True
+

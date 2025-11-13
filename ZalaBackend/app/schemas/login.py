@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 
 class Login(BaseModel):
@@ -13,4 +13,13 @@ class GoogleLogin(BaseModel):
     """
     Schema for Google Sign-In
     """
-    id_token: str
+    code: str | None = None
+    id_token: str | None = None
+    scope: str | None = None
+    target_user_id: int | None = None
+
+    @model_validator(mode="after")
+    def _require_token_or_code(self):
+        if not self.code and not self.id_token:
+            raise ValueError("Either authorization code or id_token must be provided.")
+        return self

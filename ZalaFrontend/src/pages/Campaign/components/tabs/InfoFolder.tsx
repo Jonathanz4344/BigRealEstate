@@ -39,12 +39,15 @@ export const InfoFolder = ({
             <div className="relative w-full h-full">
               <div className="absolute-fill flex flex-col items-center overflow-scroll">
                 <p className="w-full text-center text-xl font-bold">
-                  Contact: {lead.agent}
+                  Contact: {lead.contact.firstName} {lead.contact.lastName}
                 </p>
                 <div className="w-full flex grow-1 items-center justify-center">
                   <div className="w-full flex flex-col space-y-[15px]">
-                    <LeadTitleValue title="Email:" value={lead.contact} />
-                    <LeadTitleValue title="Phone #:" value={"5853239877"} />
+                    <LeadTitleValue title="Email:" value={lead.contact.email} />
+                    <LeadTitleValue
+                      title="Phone #:"
+                      value={lead.contact.phone}
+                    />
                     <LeadTitleValue
                       title="Lead type:"
                       value={"Real estate agent"}

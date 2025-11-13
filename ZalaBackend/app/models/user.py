@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import Column, String, ForeignKey, func, DateTime, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -33,5 +33,14 @@ class User(Base):
     authentication: Mapped["UserAuthentication"] = relationship(back_populates="user", cascade="all, delete-orphan", uselist=False)
     properties: Mapped[List["Property"]] = relationship(secondary=user_properties, back_populates="users")
     leads_created: Mapped[List["Lead"]] = relationship("Lead", back_populates="created_by_user")
+    google_credentials: Mapped[Optional["UserGoogleCredential"]] = relationship(
+        "UserGoogleCredential", back_populates="user", cascade="all, delete-orphan", uselist=False
+    )
 
     campaigns: Mapped[List["Campaign"]] = relationship("Campaign", back_populates="user")
+
+    @property
+    def gmail_connected(self) -> bool:
+        # Use getattr so SQLAlchemy lazily loads credentials when needed.
+        creds = getattr(self, "google_credentials", None)
+        return bool(creds and creds.refresh_token_encrypted)

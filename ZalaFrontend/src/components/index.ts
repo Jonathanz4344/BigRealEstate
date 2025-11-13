@@ -6,3 +6,5 @@ export * from "./sections";
 export * from "./buttons";
 export * from "./sidenav";
 export * from "./inputs";
+export * from "./modals";
+export * from "./feedback";

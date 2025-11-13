@@ -5,8 +5,10 @@ import type { UseGoogleAuthButtonCallbackProps } from "../components";
 
 export const useGoogleAuthButtonCallback = ({
   onMsg,
+  onSuccess = () => {},
 }: {
   onMsg: (user: IUser) => string;
+  onSuccess?: () => void;
 }) => {
   const loginUser = useAuthUser();
   const [successMsg, errorMsg] = useSnack();
@@ -18,6 +20,7 @@ export const useGoogleAuthButtonCallback = ({
     if (user) {
       successMsg(onMsg(user));
       loginUser(user);
+      onSuccess();
     }
   };
   return callback;
