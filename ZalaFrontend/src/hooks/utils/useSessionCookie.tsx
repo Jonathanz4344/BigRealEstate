@@ -1,18 +1,33 @@
-import { ReactSession } from "react-client-session";
-
 type CookieNames = "userId";
+
+const isBrowser = typeof window !== "undefined";
+
+const getStoredValue = (key: CookieNames) => {
+  if (!isBrowser) {
+    return undefined;
+  }
+
+  return window.localStorage?.getItem(key) ?? undefined;
+};
+
+const setStoredValue = (key: CookieNames, value: string) => {
+  if (!isBrowser) {
+    return undefined;
+  }
+
+  window.localStorage?.setItem(key, value);
+  return value;
+};
 
 export const useSessionCookie = (): [
   (cookieName?: "userId") => string | undefined,
   (cookieName: "userId", value: string) => string | undefined
 ] => {
-  ReactSession.setStoreType("localStorage");
-
   const getCookie = (cookieName: CookieNames = "userId") =>
-    ReactSession.get(cookieName);
+    getStoredValue(cookieName);
 
   const setCookie = (cookieName: CookieNames, value: string) =>
-    ReactSession.set(cookieName, value);
+    setStoredValue(cookieName, value);
 
   return [getCookie, setCookie];
 };
