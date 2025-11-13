@@ -10,7 +10,7 @@ from app.models.campaign_lead import CampaignLead
 from app.models import Lead
 
 
-def create_lead_to_campaign(db: Session, campaign_id: int, lead_id: int) -> CampaignLead:
+def link_lead_to_campaign(db: Session, campaign_id: int, lead_id: int) -> CampaignLead:
     """
     Create a new association between a campaign and a lead.
     Returns the existing link if it already exists.
