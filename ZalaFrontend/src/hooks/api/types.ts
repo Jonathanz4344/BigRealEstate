@@ -1,4 +1,4 @@
-import type { AContact, DemoDataSource } from "../../interfaces";
+import type { AContact, ILead } from "../../interfaces";
 
 export type APIResponse<T> = {
   data: T | null;
@@ -7,7 +7,12 @@ export type APIResponse<T> = {
 
 export type SearchLeadsProps = {
   query: string;
-  sources: DemoDataSource[];
+};
+
+export type SearchLeadsResponse = {
+  aggregated_leads: never[];
+  external_persistence?: Record<string, unknown>;
+  errors?: Record<string, string>;
 };
 
 export type CreateContactProps = Omit<AContact, "contact_id">;
@@ -30,5 +35,81 @@ export type LoginAPIProps = {
 };
 
 export type LoginGoogleProps = {
-  token: string;
+  code: string;
+  scope?: string;
+  targetUserId?: number;
+};
+
+export type SendTestEmailProps = {
+  userId: number;
+  to: string;
+  subject: string;
+  html: string;
+  fromName?: string;
+};
+
+export type CreateCampaignEmailDraftProps = {
+  campaignId: number;
+  subject: string;
+  body: string;
+  leadId?: number;
+  fromName?: string;
+};
+
+export type SendCampaignEmailProps = {
+  campaignId: number;
+  leadIds: number[];
+  subject: string;
+  body: string;
+  fromName?: string;
+};
+
+export type CampaignEmailQueryParams = {
+  campaignId?: number;
+  skip?: number;
+  limit?: number;
+};
+
+export type UpdateCampaignEmailDraftProps = {
+  messageId: number;
+  subject?: string;
+  body?: string;
+  fromName?: string;
+  leadId?: number | null;
+};
+
+export type DeleteCampaignEmailDraftProps = {
+  messageId: number;
+};
+
+export type ListCampaignsParams = {
+  skip?: number;
+  limit?: number;
+};
+
+export type CreateCampaignProps = {
+  title: string;
+  userId: number;
+  leads: number[];
+};
+
+export type CreateLeadProps = {
+  lead: ILead;
+  createdById: number;
+};
+
+export type UpdateLeadProps = {
+  leadId: number;
+  userId: number;
+  buisness: string;
+  website: string;
+  licenseNumber: string;
+  notes: string;
+};
+
+export type UpdateCampaignLeadProps = {
+  campaignId: number;
+  leadId: number;
+  userId: number;
+  contactMethods: string[];
 };

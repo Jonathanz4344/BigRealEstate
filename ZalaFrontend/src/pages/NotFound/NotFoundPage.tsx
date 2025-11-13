@@ -7,7 +7,7 @@ export const NotFoundPage = () => {
       <p className="text-2xl">Sorry, page not found</p>
       <p className="text-2xl">
         Back to{" "}
-        <Link className="underline text-blue-300" to={"/home"}>
+        <Link className="underline text-blue-300" to={"/"}>
           Home
         </Link>
       </p>

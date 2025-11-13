@@ -1,13 +1,17 @@
-import { Button } from "../buttons";
-import { useLogout } from "../../hooks";
+import { Button, MenuButton } from "../buttons";
+import { useAppNavigation, useLogout } from "../../hooks";
 import { useAuthStore, useSideNavControlStore } from "../../stores";
 import Avatar from "@mui/material/Avatar";
 import { COLORS } from "../../config";
+import { GoogleRequiredCard } from "../cards";
 
 export const UserSidenav = () => {
   const user = useAuthStore((state) => state.user);
   const closeSideNav = useSideNavControlStore((state) => state.close);
   const logout = useLogout();
+  const { toPastCampaigns, toCampaignEmailTestPage, toEmailTestPage } =
+    useAppNavigation();
+
   const onLogout = () => (closeSideNav(), logout());
 
   const avatarSize = 150;
@@ -36,6 +40,29 @@ export const UserSidenav = () => {
                 {user.contact?.firstName} {user.contact?.lastName}
               </p>
             </div>
+          </div>
+
+          <div className="space-y-[15px]">
+            {!user.gmailConnected && <GoogleRequiredCard user={user} />}
+
+            <MenuButton
+              text="Past campaigns"
+              onClick={() => (closeSideNav(), toPastCampaigns())}
+            />
+
+            {user.gmailConnected && (
+              <MenuButton
+                text="Emails Demo"
+                onClick={() => (closeSideNav(), toEmailTestPage())}
+              />
+            )}
+
+            {user.gmailConnected && (
+              <MenuButton
+                text="Campaign Emails Demo"
+                onClick={() => (closeSideNav(), toCampaignEmailTestPage())}
+              />
+            )}
           </div>
         </div>
         <div className="p-[30px]">

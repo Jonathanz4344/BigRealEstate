@@ -68,20 +68,6 @@ def _make_address(
 
 
 def gplaces_to_leads(items: list[dict]) -> List[LeadPublic]:
-    # leads: List[Lead] = []
-    # for x in items:
-    #     first, last = _split_name(x.get("name", ""))
-    #     leads.append(
-    #         Lead(
-    #             first_name=first,
-    #             last_name=last,
-    #             email=None,  
-    #             phone_number=x.get("phone"),
-    #             address=x.get("address"),
-    #             businessName=x.get("name")
-    #         )
-    #     )
-    # return leads
     leads: List[LeadPublic] = []
 
     for x in items:
@@ -112,20 +98,6 @@ def gplaces_to_leads(items: list[dict]) -> List[LeadPublic]:
     return leads
 
 def rapid_to_leads(items: list[dict]) -> List[LeadPublic]:
-    # leads: List[Lead] = []
-    # for x in items:
-    #     first, last = _split_name(x.get("fullName", ""))
-    #     leads.append(
-    #         Lead(
-    #             first_name=first,
-    #             last_name=last,
-    #             email=None, 
-    #             phone_number=x.get("phoneNumber"),
-    #             address=x.get("location"),
-    #             businessName=x.get("businessName")
-    #         )
-    #     )
-    # return leads
     leads: List[LeadPublic] = []
 
     for x in items:
@@ -160,17 +132,6 @@ def openai_to_leads(items: list[dict]) -> List[LeadPublic]:
     for x in items:
         first = x.get("firstName", "")
         last = x.get("lastName", "")
-
-        # Debug: print all fields we attempt to extract
-        # print(f"DEBUG PRINT: firstName: {first}")
-        # print(f"DEBUG PRINT: lastName: {last}")
-        # print(f"DEBUG PRINT: business: {x.get("businessName")}")
-        # print(f"DEBUG PRINT: website: {x.get("website")}")
-        # print(f"DEBUG PRINT: licenseNum: {x.get("licenseNum")}")
-        # print(f"DEBUG PRINT: email: {x.get("email")}")
-        # print(f"DEBUG PRINT: phoneNumber: {x.get("phoneNumber")}")
-        # print(f"DEBUG PRINT: address: {x.get("address")}")
-        
         try:
             leads.append(
                 LeadPublic(

@@ -20,15 +20,12 @@ class PropertyCreate(PropertyBase):
     """
     Schema for Create Property
     """
-    # Address is provided in the path (server-authoritative); no address_id required in body
-    # lead_id: Optional[int] = None
 
 
 class PropertyUpdate(BaseModel):
     """
     Schema for Update a property
     """
-    # address association is managed by the path; updates won't change address_id
     property_name: Optional[str]
     lead_id: Optional[int] = None
     mls_number: Optional[str] = None

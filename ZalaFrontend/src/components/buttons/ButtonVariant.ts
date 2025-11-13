@@ -18,6 +18,18 @@ export const getButtonBgColor = (variant: ButtonVariant) => {
   }
 };
 
+export const getButtonBgColorHex = (variant: ButtonVariant) => {
+  switch (variant) {
+    case ButtonVariant.Primary:
+      return COLORS.accent;
+    case ButtonVariant.Tertiary:
+      return COLORS.secondary;
+    case ButtonVariant.Secondary:
+    default:
+      return COLORS.white;
+  }
+};
+
 export const getButtonTextColor = (variant: ButtonVariant) => {
   switch (variant) {
     case ButtonVariant.Primary:

@@ -24,14 +24,14 @@ def create_campaign_email(
 @send_router.post(
     "/send",
     summary="Send Campaign Email",
-    response_model=schemas.CampaignPublic,
+    response_model=schemas.CampaignEmailSendResponse,
     status_code=status.HTTP_200_OK,
 )
 def send_campaign_email(
         message_in: schemas.CampaignEmailSendRequest, db: Session = Depends(get_db)
 ):
     """
-    Send a campaign email template to multiple leads and return the hydrated campaign.
+    Send a campaign email template to multiple leads and return per-lead send status along with the hydrated campaign.
     """
     return campaign_email_crud.send_campaign_email(db, message_in)
 

@@ -1,10 +1,10 @@
-import type { DemoData } from "../../../../interfaces";
+import type { ILead } from "../../../../interfaces";
 
 export type CampaignFolderChildPropsState = {
   title: string;
   viewing: number;
   showBackBtn?: boolean;
-  lead?: DemoData;
+  lead?: ILead;
   disableSecondary?: boolean;
 };
 

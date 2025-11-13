@@ -8,6 +8,7 @@
 
   --color-background: #fbf1e1;
   --color-white: #ffffff;
+  --color-offwhite: #f8fafd;
 
   --color-secondary-50: #1e1e1e80;
 
@@ -68,4 +69,9 @@ body {
 .ubuntu {
   font-family: "Ubuntu Mono", monospace;
   font-style: normal;
+}
+
+[contenteditable][data-placeholder]:empty:before {
+  content: attr(data-placeholder);
+  color: var(--color-secondary-50);
 }

@@ -1,15 +1,13 @@
-import { useCookies } from "react-cookie";
 import { useAuthStore } from "../../stores";
 import { useApi } from "../api";
-import { AUserToIUser } from "../../interfaces";
-import { useTimeoutEffect } from "../utils";
+import { AUserToIUser, type IUser } from "../../interfaces";
+import { useAppNavigation, useSessionCookie, useTimeoutEffect } from "../utils";
 
 export const useAutoLogin = () => {
-  const setUser = useAuthStore((state) => state.setUser);
+  const { user, setUser } = useAuthStore();
 
-  const [cookies] = useCookies(["userId"], {
-    doNotParse: true,
-  });
+  const { toLoginPage } = useAppNavigation();
+  const [getCookie, setCookie] = useSessionCookie();
 
   const { getUser } = useApi();
 
@@ -18,18 +16,33 @@ export const useAutoLogin = () => {
       autoLogin();
     },
     [],
-    150
+    250
   );
 
-  const autoLogin = () => {
-    const userId = cookies.userId;
+  const onUserFound = (user: IUser) => {
+    setUser(user);
+  };
 
-    if (!userId) return;
+  const onUserNotFound = () => {
+    setCookie("userId", "");
+    toLoginPage();
+  };
+
+  const autoLogin = () => {
+    const userId = getCookie("userId");
+
+    if (user) {
+      return;
+    }
+
+    if (!userId || userId.length === 0) {
+      return onUserNotFound();
+    }
 
     (async () => {
       const user = await login(userId);
-      if (!user) return;
-      setUser(user);
+      if (!user) return onUserNotFound();
+      onUserFound(user);
     })();
   };
 
