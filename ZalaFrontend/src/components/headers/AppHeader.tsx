@@ -5,8 +5,14 @@ import { Icons } from "../icons";
 import { TextInput } from "../inputs";
 
 export const AppHeader = () => {
-  const { query, setQuery, openSideNav, toLeadSearchPage, onSearchClick } =
-    useAppHeader();
+  const {
+    query,
+    setQuery,
+    openSideNav,
+    toLeadSearchPage,
+    toBoardsPage,
+    onSearchClick,
+  } = useAppHeader();
 
   return (
     <div className="w-full z-10 flex flex-row items-center justify-between p-4 px-[100px] bg-[var(--color-primary)] box-shadow">
@@ -32,6 +38,11 @@ export const AppHeader = () => {
       </div>
 
       <div className="flex flex-row space-x-4">
+        <IconButton
+          name={Icons.Notes}
+          onClick={toBoardsPage}
+          variant={IconButtonVariant.Primary}
+        />
         <IconButton name={Icons.Chart} />
         <IconButton name={Icons.User} />
         <IconButton

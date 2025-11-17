@@ -5,6 +5,7 @@ import {
   NotFoundPage,
   SignupPage,
   LoginPage,
+  KanbanBoardPage,
 } from "../pages";
 import { AppLayout } from "../layouts";
 import { useAuthStore } from "../stores";
@@ -34,6 +35,7 @@ export const NavigationProvider = () => {
             <>
               <Route index element={<LeadSearchPage />} />
               <Route path="/campaign/:campaignId" element={<CampaignPage />} />
+              <Route path="/boards" element={<KanbanBoardPage />} />
               <Route path="/signup" element={<Navigate to={"/"} />} />
               <Route path="/login" element={<Navigate to={"/"} />} />
             </>

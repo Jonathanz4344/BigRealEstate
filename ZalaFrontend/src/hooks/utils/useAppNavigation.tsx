@@ -9,6 +9,8 @@ export const useAppNavigation = () => {
   const toCampaignPage = (campaignId: number) =>
     navigate("/campaign/" + campaignId);
 
+  const toBoardsPage = () => navigate("/boards");
+
   const toLoginPage = () => navigate("/login");
 
   const toSignupPage = () => navigate("/signup");
@@ -18,6 +20,7 @@ export const useAppNavigation = () => {
     navigate,
 
     toLeadSearchPage,
+    toBoardsPage,
     toCampaignPage,
     toLoginPage,
     toSignupPage,

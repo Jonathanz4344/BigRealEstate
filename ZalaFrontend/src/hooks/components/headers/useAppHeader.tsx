@@ -9,7 +9,7 @@ import { useApi } from "../../api";
 import { useAppNavigation } from "../../utils";
 
 export const useAppHeader = () => {
-  const { location, toLeadSearchPage } = useAppNavigation();
+  const { location, toLeadSearchPage, toBoardsPage } = useAppNavigation();
   const openSideNav = useSideNavControlStore((state) => state.open);
   const { query, setData, setQuery, setLoading } = useSearchQueryStore();
   const { sources } = useSearchFilterStore();
@@ -57,6 +57,7 @@ export const useAppHeader = () => {
     query,
     setQuery,
     toLeadSearchPage,
+    toBoardsPage,
     openSideNav,
     onSearchClick,
     onSearchCore,

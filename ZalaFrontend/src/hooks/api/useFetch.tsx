@@ -1,7 +1,7 @@
 import { CONFIG } from "../../config";
 import type { APIResponse } from "./types";
 
-const OK_STATUS_CODES = [200, 201];
+const OK_STATUS_CODES = [200, 201, 204];
 
 export const useFetch = () => {
   const jsonHeader = {
@@ -49,11 +49,20 @@ export const useFetch = () => {
         headers: header,
         signal: abortController.signal,
       });
-      const json = await response.json();
+      const raw = await response.text();
+      let json: any = null;
+      if (raw) {
+        try {
+          json = JSON.parse(raw);
+        } catch {
+          // leave json as null and treat as error below if status not ok
+          json = null;
+        }
+      }
 
-      if (!OK_STATUS_CODES.includes(response.status) || json.err || json.error)
+      if (!OK_STATUS_CODES.includes(response.status) || json?.err || json?.error)
         throw new Error(
-          json.err ?? json.error ?? "Error communicating with API"
+          json?.err ?? json?.error ?? "Error communicating with API"
         );
 
       return requestSuccess<T>(json);
