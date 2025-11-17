@@ -26,10 +26,10 @@ class BoardStepCreate(BoardStepBase):
     property_ids: List[int] = Field(default_factory=list)
 
     @model_validator(mode="after")
-    def ensure_single_target(cls, values: "BoardStepCreate") -> "BoardStepCreate":
-        if values.lead_ids and values.property_ids:
+    def ensure_single_target(self) -> "BoardStepCreate":
+        if self.lead_ids and self.property_ids:
             raise ValueError("Board step can target leads or properties, but not both.")
-        return values
+        return self
 
 
 class BoardStepUpdate(BaseModel):
@@ -43,10 +43,10 @@ class BoardStepUpdate(BaseModel):
     property_ids: Optional[List[int]] = None
 
     @model_validator(mode="after")
-    def ensure_single_target(cls, values: "BoardStepUpdate") -> "BoardStepUpdate":
-        if values.lead_ids and values.property_ids:
+    def ensure_single_target(self) -> "BoardStepUpdate":
+        if self.lead_ids and self.property_ids:
             raise ValueError("Board step can target leads or properties, but not both.")
-        return values
+        return self
 
 
 class BoardStepPublic(BoardStepBase):
