@@ -21,7 +21,7 @@ class Property(Base):
     lead_id: Mapped[int] = mapped_column(ForeignKey("leads.lead_id"), nullable=True)
     notes: Mapped[str] = mapped_column(nullable=True)
     image_url: Mapped[Optional[str]] = mapped_column(nullable=True)
-
+    team_id: Mapped[int] = mapped_column(ForeignKey("teams.team_id"), nullable=True)
 
     users: Mapped[List["User"]] = relationship(
         secondary=user_properties,
@@ -41,3 +41,4 @@ class Property(Base):
         cascade="all, delete-orphan",
         order_by="PropertyImage.sort_order",
     )
+    team: Mapped[Optional["Team"]] = relationship("Team", back_populates="properties")
