@@ -44,6 +44,13 @@ from .team import (
     TeamPublic,
     TeamLeaderboardEntry,
     TeamUserXPEntry,
+    TeamPublicWithProperties,
+    TeamPublicWithBoards,
+    TeamPublicWithPropertiesAndBoards,
+    TeamPublicWithInvitations,
+    TeamMembersOnlyPublic,
+    TeamAdminsPublic,
+    TeamMemberPublic
 )
 from .team_invitation import (
     TeamInvitationBase,
