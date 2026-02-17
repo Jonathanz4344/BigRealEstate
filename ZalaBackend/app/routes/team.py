@@ -110,6 +110,33 @@ def get_team_with_members(team_id: int, db: Session = Depends(get_db)):
     return team
 
 
+@router.get("/{team_id}/properties", response_model=schemas.TeamPublicWithProperties)
+def get_team_properties(team_id: int, db: Session = Depends(get_db)):
+    """Retrieve a team with its properties."""
+    team = team_crud.get_team_with_properties(db, team_id=team_id)
+    if not team:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
+    return team
+
+
+@router.get("/{team_id}/boards", response_model=schemas.TeamPublicWithBoards)
+def get_team_boards(team_id: int, db: Session = Depends(get_db)):
+    """Retrieve a team with its boards."""
+    team = team_crud.get_team_with_boards(db, team_id=team_id)
+    if not team:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
+    return team
+
+
+@router.get("/{team_id}/boardsproperties", response_model=schemas.TeamPublicWithPropertiesAndBoards)
+def get_team_boards_and_properties(team_id: int, db: Session = Depends(get_db)):
+    """Retrieve a team with BOTH properties and boards."""
+    team = team_crud.get_team_with_boards_and_properties(db, team_id=team_id)
+    if not team:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
+    return team
+
+
 @router.put("/{team_id}", response_model=schemas.TeamPublic)
 def update_team(team_id: int, team_in: schemas.TeamUpdate, db: Session = Depends(get_db)):
     """Update mutable team fields."""
@@ -405,10 +432,10 @@ If you didn't expect this email, you can safely ignore it.
     summary="Invite someone to the team",
 )
 async def invite_to_team(
-    team_id: int,
-    sender_id: int,
-    invitation_in: schemas.TeamInvitationCreate,
-    db: Session = Depends(get_db)
+        team_id: int,
+        sender_id: int,
+        invitation_in: schemas.TeamInvitationCreate,
+        db: Session = Depends(get_db)
 ):
     """
     Invite someone to join the team.
@@ -588,10 +615,10 @@ def get_user_pending_invitations(user_id: int, db: Session = Depends(get_db)):
     summary="Accept or decline an invitation",
 )
 async def respond_to_invitation(
-    invitation_id: int,
-    user_id: int,
-    response_in: schemas.TeamInvitationUpdate,
-    db: Session = Depends(get_db)
+        invitation_id: int,
+        user_id: int,
+        response_in: schemas.TeamInvitationUpdate,
+        db: Session = Depends(get_db)
 ):
     """
     Accept or decline a team invitation.
@@ -775,10 +802,10 @@ from app.db.crud import team_announcement as announcement_crud
     summary="Create a team announcement (admin only)",
 )
 async def create_announcement(
-    team_id: int,
-    author_id: int,
-    announcement_in: schemas.AnnouncementCreate,
-    db: Session = Depends(get_db)
+        team_id: int,
+        author_id: int,
+        announcement_in: schemas.AnnouncementCreate,
+        db: Session = Depends(get_db)
 ):
     """
     Create a new team announcement. Only team admins can post announcements.
@@ -856,11 +883,11 @@ async def create_announcement(
     summary="Get team announcements",
 )
 def get_team_announcements(
-    team_id: int,
-    user_id: int,
-    skip: int = 0,
-    limit: int = 50,
-    db: Session = Depends(get_db)
+        team_id: int,
+        user_id: int,
+        skip: int = 0,
+        limit: int = 50,
+        db: Session = Depends(get_db)
 ):
     """
     Get all announcements for a team. User must be a member of the team.
@@ -892,10 +919,10 @@ def get_team_announcements(
     summary="Get a specific announcement",
 )
 def get_announcement(
-    team_id: int,
-    announcement_id: int,
-    user_id: int,
-    db: Session = Depends(get_db)
+        team_id: int,
+        announcement_id: int,
+        user_id: int,
+        db: Session = Depends(get_db)
 ):
     """Get a specific announcement by ID."""
     # Check user is a member of the team
@@ -919,11 +946,11 @@ def get_announcement(
     summary="Update an announcement (admin only)",
 )
 async def update_announcement(
-    team_id: int,
-    announcement_id: int,
-    user_id: int,
-    announcement_in: schemas.AnnouncementUpdate,
-    db: Session = Depends(get_db)
+        team_id: int,
+        announcement_id: int,
+        user_id: int,
+        announcement_in: schemas.AnnouncementUpdate,
+        db: Session = Depends(get_db)
 ):
     """Update an existing announcement. Only team admins can update announcements."""
     # Check admin
@@ -964,10 +991,10 @@ async def update_announcement(
     summary="Delete an announcement (admin only)",
 )
 async def delete_announcement(
-    team_id: int,
-    announcement_id: int,
-    user_id: int,
-    db: Session = Depends(get_db)
+        team_id: int,
+        announcement_id: int,
+        user_id: int,
+        db: Session = Depends(get_db)
 ):
     """Delete an announcement. Only team admins can delete announcements."""
     # Check admin
@@ -998,7 +1025,9 @@ async def delete_announcement(
 
     return None
 
-@router.post("/{team_id}/properties/{property_id}", response_model=schemas.TeamPublicWithProperties, summary="Link Property", tags=["Team Properties Link"])
+
+@router.post("/{team_id}/properties/{property_id}", response_model=schemas.TeamPublicWithProperties,
+             summary="Link Property", tags=["Team Properties/Boards Link"])
 def add_property(team_id: int, property_id: int, db: Session = Depends(get_db)):
     """Assign a Property to a Team."""
     db_team = team_crud.add_property_to_team(db=db, team_id=team_id, property_id=property_id)
@@ -1006,7 +1035,9 @@ def add_property(team_id: int, property_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Team or Property not found")
     return db_team
 
-@router.delete("/{team_id}/properties/{property_id}", response_model=schemas.TeamPublicWithProperties, summary="Unlink Property", tags=["Team Properties Link"])
+
+@router.delete("/{team_id}/properties/{property_id}", response_model=schemas.TeamPublicWithProperties,
+               summary="Unlink Property", tags=["Team Properties/Boards Link"])
 def remove_property(team_id: int, property_id: int, db: Session = Depends(get_db)):
     """Unassign a Property from a Team."""
     db_team = team_crud.remove_property_from_team(db=db, team_id=team_id, property_id=property_id)
@@ -1014,7 +1045,9 @@ def remove_property(team_id: int, property_id: int, db: Session = Depends(get_db
         raise HTTPException(status_code=404, detail="Team or Property not found")
     return db_team
 
-@router.post("/{team_id}/boards/{board_id}", response_model=schemas.TeamPublicWithBoards, summary="Link Board", tags=["Team Properties Link"])
+
+@router.post("/{team_id}/boards/{board_id}", response_model=schemas.TeamPublicWithBoards, summary="Link Board",
+             tags=["Team Properties/Boards Link"])
 def add_board(team_id: int, board_id: int, db: Session = Depends(get_db)):
     """Assign a Board to a Team."""
     db_team = team_crud.add_board_to_team(db=db, team_id=team_id, board_id=board_id)
@@ -1022,7 +1055,9 @@ def add_board(team_id: int, board_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Team or Board not found")
     return db_team
 
-@router.delete("/{team_id}/boards/{board_id}", response_model=schemas.TeamPublicWithBoards, summary="Unlink Board", tags=["Team Properties Link"])
+
+@router.delete("/{team_id}/boards/{board_id}", response_model=schemas.TeamPublicWithBoards, summary="Unlink Board",
+               tags=["Team Properties/Boards Link"])
 def remove_board(team_id: int, board_id: int, db: Session = Depends(get_db)):
     """Unassign a Board from a Team."""
     db_team = team_crud.remove_board_from_team(db=db, team_id=team_id, board_id=board_id)
