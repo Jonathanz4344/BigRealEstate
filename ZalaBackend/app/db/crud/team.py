@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app import schemas
 from app.models.team import Team
@@ -36,6 +36,30 @@ def get_team_by_id(db: Session, team_id: int) -> Optional[Team]:
 def get_team_with_members(db: Session, team_id: int) -> Optional[Team]:
     """Return a single team by id with all members loaded. Alias for get_team_by_id."""
     return get_team_by_id(db, team_id)
+
+
+def get_team_with_properties(db: Session, team_id: int):
+    return db.query(Team). \
+        options(selectinload(Team.properties)). \
+        filter(Team.team_id == team_id). \
+        first()
+
+
+def get_team_with_boards(db: Session, team_id: int):
+    return db.query(Team). \
+        options(selectinload(Team.boards)). \
+        filter(Team.team_id == team_id). \
+        first()
+
+
+def get_team_with_boards_and_properties(db: Session, team_id: int):
+    return db.query(Team). \
+        options(
+        selectinload(Team.properties),
+        selectinload(Team.boards)
+    ). \
+        filter(Team.team_id == team_id). \
+        first()
 
 
 def get_teams(db: Session, skip: int = 0, limit: int = 100) -> List[Team]:
@@ -322,9 +346,8 @@ def add_board_to_team(db: Session, team_id: int, board_id: int) -> Optional[Team
     if not db_board:
         return None
     # ensure board not already attached to a different team
-    existing = db.query(Team).filter(Team.board_id == board_id).first()
-    if existing and existing.team_id != team_id:
-        # already linked elsewhere
+    if db_board.team_id is not None and db_board.team_id != team_id:
+        # owned by another team
         return None
     db_board.team_id = team_id
     db.add(db_board)
@@ -339,7 +362,7 @@ def remove_board_from_team(db: Session, team_id: int, board_id: int) -> Optional
     db_board = db.query(Board).filter(Board.board_id == board_id).first()
     if not db_team:
         return None
-    if db_team.board_id != board_id:
+    if db_board.team_id != team_id:
         # nothing to do
         return db_team
     db_board.team_id = None
@@ -358,9 +381,8 @@ def add_property_to_team(db: Session, team_id: int, property_id: int) -> Optiona
     if not db_property:
         return None
     # ensure property not already attached to a different team
-    existing = db.query(Team).filter(Team.property_id == property_id).first()
-    if existing and existing.team_id != team_id:
-        # already linked elsewhere
+    if db_property.team_id is not None and db_property.team_id != team_id:
+        # owned by another team
         return None
     db_property.team_id = team_id
     db.add(db_property)
@@ -375,7 +397,7 @@ def remove_property_from_team(db: Session, team_id: int, property_id: int) -> Op
     db_property = db.query(Property).filter(Property.property_id == property_id).first()
     if not db_team:
         return None
-    if db_team.property_id != property_id:
+    if db_property.team_id != team_id:
         # nothing to do
         return db_team
     db_property.team_id = None
