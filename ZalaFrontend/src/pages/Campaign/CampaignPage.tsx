@@ -1,11 +1,12 @@
-import { EmailModal, Icons, LeadListSection } from "../../components";
+import { Button, EmailModal, Icons, LeadInfoSection, LeadListSection, LeadNotesSection } from "../../components";
 import { produce } from "immer";
 import { ButtonVariant } from "../../components/buttons/ButtonVariant";
-import { CampaignFolders } from "./components";
+import { CampaignFolders, ContactMethod } from "./components";
 import { LoadingPage } from "../Loading";
-import { useCampaignPage } from "../../hooks";
-import { CampaignContactMethod } from "../../interfaces";
+import { useCampaignHighlightComponents, useCampaignPage, useShouldShowTutorial } from "../../hooks";
+import { CampaignContactMethod, CampaignTab } from "../../interfaces";
 import transition from "../../utils/transitions/transition";
+import { TutorialPage, useCampaignPageStore, useTutorialStore } from "../../stores";
 
 /**
  * Container of all leads in a campaign.
@@ -40,6 +41,79 @@ export const CampaignPage = transition(() => {
     onSendEmail,
     updateLeadContactMethod,
   } = useCampaignPage();
+  console.log(leads)
+  const {tab} = useCampaignPageStore();
+  const { notes, setNotes } = useCampaignPageStore();
+  const {tutorial} = useTutorialStore()
+  const {highlightComponentDims, highlightComponentDimsChange, refs} = useCampaignHighlightComponents()
+  useShouldShowTutorial({
+    page: TutorialPage.Campaign,
+    highlightComponentDims,
+    highlightComponentDimsChange,
+    forceWait: (tutorial?.campaign_step === 2 && tab !== CampaignTab.Connect) || (tutorial?.campaign_step === 3 && tab !== CampaignTab.Notes) || (tutorial?.campaign_step === 4 && tab !== CampaignTab.Profile),
+    components: [null,
+      () => (
+        <div className="w-[300px]">
+          <Button
+            variant={ButtonVariant.Primary}
+            text="Email All"
+            icon={Icons.Mail}
+          />
+        </div>
+      ),
+      () => (
+        <div className="flex flex-row justify-between w-full pt-[5px] px-[15px] bg-primary">
+          <ContactMethod
+            active={false}
+            onClick={() => {return;}}
+            text="Email"
+            icon={Icons.Mail}
+            disabled={true}
+          />
+          <ContactMethod
+            active={false}
+            onClick={() => {return;}}
+            text="Phone"
+            icon={Icons.Phone}
+            disabled={true}
+          />
+          <ContactMethod
+            active={false}
+            onClick={() => {return;}}
+            text="SMS"
+            icon={Icons.Txt}
+            disabled={true}
+          />
+        </div>
+      ),
+      () => (
+        <div className="w-full h-full flex flex-col items-center relative">
+          <div className="absolute-fill bg-primary">
+            <p className="w-full text-center text-xl font-bold">
+              Notes: {leads[0].contact?.firstName} {leads[0].contact?.lastName}
+            </p>
+            <div className="w-full h-full flex grow-1 pb-[15px]">
+              <LeadNotesSection
+                lead={leads[0]}
+                notes={notes}
+                setNotes={setNotes}
+              />
+            </div>
+          </div>
+        </div>
+      ),
+      () => (
+        <div className="absolute-fill flex flex-col items-center overflow-scroll bg-primary">
+          <p className="w-full text-center text-xl font-bold">
+            Contact: {leads[0].contact?.firstName} {leads[0].contact?.lastName}
+          </p>
+          <div className="w-full flex grow-1 items-center justify-center">
+            <LeadInfoSection lead={leads[0]} />
+          </div>
+        </div>
+      )
+    ]
+  })
 
   return pageLoading ? (
     <LoadingPage />
@@ -58,6 +132,10 @@ export const CampaignPage = transition(() => {
 
           <div className="grow-1 w-full">
             <CampaignFolders
+              notesRef={refs.notesRef}
+              contactRef={refs.contactRef}
+              emailButtonRef={refs.emailAllRef}
+              infoRef={refs.infoRef}
               allLeads={leads}
               onPrimary={(from) =>
                 user?.gmailConnected

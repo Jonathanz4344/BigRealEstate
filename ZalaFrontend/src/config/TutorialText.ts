@@ -23,6 +23,13 @@ export const TutorialText = {
     "Leads can be added to a campaign individually, or you can add all the results of your search with the 'Add all leads' button.",
     "Add a title and click 'Start' to create a campaign with your selected leads!",
   ],
+  campaign: [
+    "With a campaign, you can store information about leads and manage your communications with them.",
+    "Multiple selected leads can be emailed with the “Email All” button if there are selected leads with known emails.",
+    "You can track how you’ve reached out to a lead by clicking the contact options here.",
+    "You can leave miscellaneous notes on a lead here.",
+    "All known information about a lead is shown here."
+  ]
 };
 
 export type TutorialTextKey = keyof typeof TutorialText;
@@ -43,12 +50,14 @@ export const TutorialSequence = {
   ],
   navbar: ["component"],
   search: ["modal", "component", "component"],
+  campaign: ["modal", "component", "component", "component", "component"]
 };
 
 export const TutorialSequenceMaximums = {
   dashboard: TutorialText.dashboard.length - 1,
   navbar: TutorialText.navbar.length - 1,
   search: TutorialText.search.length - 1,
+  campaign: TutorialText.campaign.length - 1
 };
 
 export const TutorialTextPlacements = {
@@ -67,4 +76,5 @@ export const TutorialTextPlacements = {
   ],
   navbar: [TextPlacement.Bottom],
   search: [TextPlacement.Top, TextPlacement.Left, TextPlacement.Top],
+  campaign: [TextPlacement.Top, TextPlacement.Top, TextPlacement.Bottom, TextPlacement.Bottom, TextPlacement.Bottom]
 };

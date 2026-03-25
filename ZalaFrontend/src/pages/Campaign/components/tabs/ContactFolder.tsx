@@ -6,10 +6,12 @@ import type { CampaignFolderChildProps } from "./types";
 import { useCampaignStore } from "../../../../stores";
 
 type ContactFolderProps = CampaignFolderChildProps & {
+  contactRef: React.RefObject<HTMLDivElement | null>;
   onContactMethod: (method: CampaignContactMethod) => void;
 };
 
 export const ContactFolder = ({
+  contactRef,
   title,
   lead,
   showBackBtn,
@@ -50,7 +52,7 @@ export const ContactFolder = ({
                 <LeadTitleValue title="Email:" value={lead.contact.email} />
                 <LeadTitleValue title="Phone #:" value={lead.contact.phone} />
                 <LeadTitleValue title="Contacted by:">
-                  <div className="flex flex-row justify-between w-full pt-[5px] px-[15px]">
+                  <div className="flex flex-row justify-between w-full pt-[5px] px-[15px]" ref={contactRef}>
                     <ContactMethod
                       active={campaignLead?.contactMethods.includes(
                         CampaignContactMethod.Email

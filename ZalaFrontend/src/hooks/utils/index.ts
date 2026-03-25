@@ -32,3 +32,4 @@ export * from "./useAppLocation";
 export * from "./useAppHeaderHighlightComponents";
 export * from "./useLeadSearchHighlightComponents";
 export * from "./useForceWaitLeadSearchTutorial";
+export * from "./useCampaignHighlightComponents";

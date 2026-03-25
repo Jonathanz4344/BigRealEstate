@@ -5,9 +5,12 @@ import { Folder, LeadButtons, LeadFolder } from "../layout";
 import type { CampaignFolderChildProps } from "./types";
 import { useCampaignPageStore } from "../../../../stores";
 
-type NotesFolderProps = CampaignFolderChildProps;
+type NotesFolderProps = CampaignFolderChildProps & {
+  notesRef: React.RefObject<HTMLDivElement | null>;
+};
 
 export const NotesFolder = ({
+  notesRef,
   title,
   showBackBtn,
   lead,
@@ -37,7 +40,7 @@ export const NotesFolder = ({
     >
       <LeadFolder i={viewing}>
         {lead && (
-          <div className="w-full h-full pr-[30px] py-[30px]">
+          <div className="w-full h-full pr-[30px] py-[30px]" ref={notesRef}>
             <div className="w-full h-full flex flex-col items-center relative">
               <div className="absolute-fill">
                 <p className="w-full text-center text-xl font-bold">

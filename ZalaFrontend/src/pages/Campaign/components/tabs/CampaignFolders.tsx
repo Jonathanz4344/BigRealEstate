@@ -11,6 +11,10 @@ import type { CampaignFolderChildPropsState } from "./types";
 import { useCampaignPageStore } from "../../../../stores";
 
 type CampaignFoldersProps = {
+  notesRef: React.RefObject<HTMLDivElement | null>;
+  contactRef: React.RefObject<HTMLDivElement | null>;
+  emailButtonRef: React.RefObject<HTMLDivElement | null>;
+  infoRef: React.RefObject<HTMLDivElement | null>;
   allLeads: ILead[];
   onPrimary?: (from: string) => void;
   unselectAll: () => void;
@@ -18,6 +22,10 @@ type CampaignFoldersProps = {
 };
 
 export const CampaignFolders = ({
+  notesRef,
+  contactRef,
+  emailButtonRef,
+  infoRef,
   allLeads,
   onPrimary = () => {},
   unselectAll,
@@ -53,16 +61,18 @@ export const CampaignFolders = ({
 
   return tab === CampaignTab.Connect ? (
     <ContactFolder
+      contactRef={contactRef}
       {...campaignFolderChildProps}
       {...singleActions}
       onContactMethod={onContactMethod}
     />
   ) : tab === CampaignTab.Notes ? (
-    <NotesFolder {...campaignFolderChildProps} {...singleActions} />
+    <NotesFolder notesRef={notesRef} {...campaignFolderChildProps} {...singleActions} />
   ) : tab === CampaignTab.Profile ? (
-    <InfoFolder {...campaignFolderChildProps} {...singleActions} />
+    <InfoFolder infoRef={infoRef} {...campaignFolderChildProps} {...singleActions} />
   ) : tab === CampaignTab.Multi ? (
     <MultiFolder
+      emailButtonRef={emailButtonRef}
       {...campaignFolderChildProps}
       {...multiActions}
       disableSecondary={undefined}

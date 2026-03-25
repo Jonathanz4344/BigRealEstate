@@ -1,3 +1,4 @@
+import type React from "react";
 import { Button, Icons } from "../../../../components";
 import { ButtonVariant } from "../../../../components/buttons/ButtonVariant";
 
@@ -9,6 +10,7 @@ type LeadButtonsProps = {
     disabled?: boolean;
   };
   primary: {
+    ref?: React.RefObject<HTMLDivElement | null>;
     text: string;
     icon: Icons;
     onPress?: () => void;
@@ -30,7 +32,7 @@ export const LeadButtons = ({ primary, secondary }: LeadButtonsProps) => {
           />
         </div>
       )}
-      <div className="w-[300px]">
+      <div className="w-[300px]" ref={primary.ref}>
         <Button
           variant={ButtonVariant.Primary}
           text={primary.text}
