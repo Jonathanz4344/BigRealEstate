@@ -1,5 +1,6 @@
 import { Button, EmailModal, Icons, LeadInfoSection, LeadListSection, LeadNotesSection } from "../../components";
 import { produce } from "immer";
+import { useEffect } from "react";
 import { ButtonVariant } from "../../components/buttons/ButtonVariant";
 import { CampaignFolders, ContactMethod } from "./components";
 import { LoadingPage } from "../Loading";
@@ -42,15 +43,26 @@ export const CampaignPage = transition(() => {
     updateLeadContactMethod,
   } = useCampaignPage();
   console.log(leads)
-  const {tab} = useCampaignPageStore();
+  const {tab, setTab} = useCampaignPageStore();
   const { notes, setNotes } = useCampaignPageStore();
   const {tutorial} = useTutorialStore()
   const {highlightComponentDims, highlightComponentDimsChange, refs} = useCampaignHighlightComponents()
+
+  // Auto-switch to Multi tab for step 1 so the "Email All" button is visible
+  useEffect(() => {
+    if (tutorial?.campaign_step === 1 && tab !== CampaignTab.Multi) {
+      if (leads.length > 0) {
+        setSelectedLeads(leads.map((l) => l.leadId));
+      }
+      setTab(CampaignTab.Multi);
+    }
+  }, [tutorial?.campaign_step]);
+
   useShouldShowTutorial({
     page: TutorialPage.Campaign,
     highlightComponentDims,
     highlightComponentDimsChange,
-    forceWait: (tutorial?.campaign_step === 2 && tab !== CampaignTab.Connect) || (tutorial?.campaign_step === 3 && tab !== CampaignTab.Notes) || (tutorial?.campaign_step === 4 && tab !== CampaignTab.Profile),
+    forceWait: (tutorial?.campaign_step === 1 && tab !== CampaignTab.Multi) || (tutorial?.campaign_step === 2 && tab !== CampaignTab.Connect) || (tutorial?.campaign_step === 3 && tab !== CampaignTab.Notes) || (tutorial?.campaign_step === 4 && tab !== CampaignTab.Profile),
     components: [null,
       () => (
         <div className="w-[300px]">
