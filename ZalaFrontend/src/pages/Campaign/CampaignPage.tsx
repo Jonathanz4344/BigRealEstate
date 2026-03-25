@@ -48,13 +48,22 @@ export const CampaignPage = transition(() => {
   const {tutorial} = useTutorialStore()
   const {highlightComponentDims, highlightComponentDimsChange, refs} = useCampaignHighlightComponents()
 
-  // Auto-switch to Multi tab for step 1 so the "Email All" button is visible
+  // Auto-switch to the correct tab for each tutorial step so the highlighted ref exists
   useEffect(() => {
-    if (tutorial?.campaign_step === 1 && tab !== CampaignTab.Multi) {
-      if (leads.length > 0) {
-        setSelectedLeads(leads.map((l) => l.leadId));
-      }
+    if (leads.length === 0) return;
+    const step = tutorial?.campaign_step;
+    if (step === 1 && tab !== CampaignTab.Multi) {
+      setSelectedLeads(leads.map((l) => l.leadId));
       setTab(CampaignTab.Multi);
+    } else if (step === 2 && tab !== CampaignTab.Connect) {
+      setViewingLead(leads[0].leadId);
+      setTab(CampaignTab.Connect);
+    } else if (step === 3 && tab !== CampaignTab.Notes) {
+      setViewingLead(leads[0].leadId);
+      setTab(CampaignTab.Notes);
+    } else if (step === 4 && tab !== CampaignTab.Profile) {
+      setViewingLead(leads[0].leadId);
+      setTab(CampaignTab.Profile);
     }
   }, [tutorial?.campaign_step]);
 
@@ -76,51 +85,48 @@ export const CampaignPage = transition(() => {
       () => (
         <div className="flex flex-row justify-between w-full pt-[5px] px-[15px] bg-primary">
           <ContactMethod
-            active={false}
-            onClick={() => {return;}}
             text="Email"
             icon={Icons.Mail}
-            disabled={true}
           />
           <ContactMethod
-            active={false}
-            onClick={() => {return;}}
             text="Phone"
             icon={Icons.Phone}
-            disabled={true}
           />
           <ContactMethod
-            active={false}
-            onClick={() => {return;}}
             text="SMS"
             icon={Icons.Txt}
-            disabled={true}
           />
         </div>
       ),
       () => (
-        <div className="w-full h-full flex flex-col items-center relative">
-          <div className="absolute-fill bg-primary">
-            <p className="w-full text-center text-xl font-bold">
-              Notes: {leads[0].contact?.firstName} {leads[0].contact?.lastName}
-            </p>
-            <div className="w-full h-full flex grow-1 pb-[15px]">
-              <LeadNotesSection
-                lead={leads[0]}
-                notes={notes}
-                setNotes={setNotes}
-              />
+        <div className="w-full h-full pr-[30px] py-[30px] bg-primary">
+          <div className="w-full h-full flex flex-col items-center relative">
+            <div className="absolute-fill">
+              <p className="w-full text-center text-xl font-bold">
+                Notes: {leads[0]?.contact?.firstName} {leads[0]?.contact?.lastName}
+              </p>
+              <div className="w-full h-full flex grow-1 pb-[15px]">
+                <LeadNotesSection
+                  lead={leads[0]}
+                  notes={notes}
+                  setNotes={setNotes}
+                />
+              </div>
             </div>
           </div>
         </div>
       ),
       () => (
-        <div className="absolute-fill flex flex-col items-center overflow-scroll bg-primary">
-          <p className="w-full text-center text-xl font-bold">
-            Contact: {leads[0].contact?.firstName} {leads[0].contact?.lastName}
-          </p>
-          <div className="w-full flex grow-1 items-center justify-center">
-            <LeadInfoSection lead={leads[0]} />
+        <div className="w-full h-full pr-[30px] py-[30px] bg-primary">
+          <div className="relative w-full h-full">
+            <div className="absolute-fill flex flex-col items-center overflow-scroll">
+              <p className="w-full text-center text-xl font-bold">
+                Contact: {leads[0]?.contact?.firstName} {leads[0]?.contact?.lastName}
+              </p>
+              <div className="w-full flex grow-1 items-center justify-center">
+                <LeadInfoSection lead={leads[0]} />
+              </div>
+            </div>
           </div>
         </div>
       )
