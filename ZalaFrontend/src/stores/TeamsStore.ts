@@ -46,17 +46,10 @@ export const useTeamsStore = create<TeamsState>((set) => ({
 
   addTeam: (team) =>
     set((state) => {
-      console.log(
-        "[TeamsStore] addTeam called with:",
-        team.team_id,
-        team.team_name,
-      );
       // Avoid duplicates
       if (state.teams.some((t) => t.team_id === team.team_id)) {
-        console.log("[TeamsStore] Team already exists, skipping");
         return state;
       }
-      console.log("[TeamsStore] Adding team to store");
       return { teams: [...state.teams, team] };
     }),
 

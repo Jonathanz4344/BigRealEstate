@@ -68,7 +68,7 @@ export const useManualCreateLeadModalPage = ({
   } = useImageCaroselState();
 
   const [leadFormState, setLeadFormState] = useState(
-    new Map(DEFAULT_LEAD_MAP.entries())
+    new Map(DEFAULT_LEAD_MAP.entries()),
   );
   const [
     addressFormState,
@@ -77,7 +77,7 @@ export const useManualCreateLeadModalPage = ({
     isAddressValid,
   ] = useDefaultAddressFormState();
   const [contactFormState, setContactFormState] = useState(
-    new Map(DEFAULT_CONTACT_MAP.entries())
+    new Map(DEFAULT_CONTACT_MAP.entries()),
   );
   const [showBuisInputs, setShowBuisInputs] = useState(true);
   const [showAddyInputs, setShowAddyInputs] = useState(true);
@@ -99,7 +99,7 @@ export const useManualCreateLeadModalPage = ({
 
       return state.get(key) ?? "";
     },
-    [leadFormState, addressFormState, contactFormState]
+    [leadFormState, addressFormState, contactFormState],
   );
 
   const initEditLead = () => {
@@ -126,7 +126,7 @@ export const useManualCreateLeadModalPage = ({
           editingBoardItem.contact.phone.length > 0);
       contactFormInfo.set(
         "firstName",
-        editingBoardItem.contact.firstName ?? ""
+        editingBoardItem.contact.firstName ?? "",
       );
       contactFormInfo.set("lastName", editingBoardItem.contact.lastName ?? "");
       contactFormInfo.set("email", editingBoardItem.contact.email ?? "");
@@ -153,7 +153,7 @@ export const useManualCreateLeadModalPage = ({
             ? (bImg.sortOrder as number)
             : i,
           image: bImg,
-        }))
+        })),
       );
     }
 
@@ -184,7 +184,12 @@ export const useManualCreateLeadModalPage = ({
         });
       }
     },
-    [showContactInputs, setShowContactInputs, showBuisInputs, setShowBuisInputs]
+    [
+      showContactInputs,
+      setShowContactInputs,
+      showBuisInputs,
+      setShowBuisInputs,
+    ],
   );
 
   const validateForm = (showSnack: boolean = true) => {
@@ -201,7 +206,10 @@ export const useManualCreateLeadModalPage = ({
       const email = getKeyInObject("email", "contact");
       const phone = getKeyInObject("phone", "contact");
       if (!isValidString(email) && !isValidString(phone))
-        return onValidationFail("Contact must have an email or phone number", showSnack);
+        return onValidationFail(
+          "Contact must have an email or phone number",
+          showSnack,
+        );
       if (isValidString(email) && !email.includes("@"))
         return onValidationFail("Malformatted email", showSnack);
     }
@@ -317,7 +325,7 @@ export const useManualCreateLeadModalPage = ({
     const response = await action();
 
     if (response.err || !response.data)
-      return apiResponseError("creating a lead", response.err), [];
+      return (apiResponseError("creating a lead", response.err), []);
 
     const createdLead = ALeadToILead(response.data.lead);
 
@@ -326,7 +334,7 @@ export const useManualCreateLeadModalPage = ({
       : [...selectedBoardItemIds, createdLead.leadId]; // Create mode
 
     const filesOnly = images.filter((img) =>
-      Validation.Object.isDefined(img.file)
+      Validation.Object.isDefined(img.file),
     );
     const imgs = [];
     for await (const tempFile of filesOnly) {
@@ -361,8 +369,8 @@ export const useManualCreateLeadModalPage = ({
   const onRemoveLeadFromStep = () => {
     parentOnConfirm(
       selectedBoardItemIds.filter(
-        (boardItemId) => boardItemId !== editingBoardItem?.leadId
-      )
+        (boardItemId) => boardItemId !== editingBoardItem?.leadId,
+      ),
     );
   };
 

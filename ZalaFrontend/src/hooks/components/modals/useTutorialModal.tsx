@@ -20,7 +20,6 @@ import {
   TutorialText,
   type TutorialTextKey,
 } from "../../../config";
-import { stringify } from "../../../utils";
 
 export const useTutorialModal = ({
   onClose = () => {},
@@ -93,10 +92,6 @@ export const useTutorialModal = ({
 
     if (res.err || !res.data) return;
 
-    console.log(`Updated tutorial:`);
-    console.log(stringify(res.data));
-    console.log(``);
-
     tutorialStore.setTutorial(res.data);
     setStep(newValue);
 
@@ -130,9 +125,6 @@ export const useTutorialModal = ({
     const nextPage = getNextPage();
 
     if (nextPage === TutorialPage.Search && !isSearchPage) {
-      // console.log(`Is search page and next page is navbar`);
-      // nextPage = undefined;
-
       return (onClose(), appNavigation.toLeadSearchPage());
     }
 
@@ -153,11 +145,6 @@ export const useTutorialModal = ({
     tutorialStore.setPage(nextPage);
     setStep(tutorialStore.tutorial[tutorialStepKey]);
     globalModalStore.setPage(globalPage);
-
-    console.log(
-      `Global page: ${globalModalStore.page}, New Global page: ${globalPage}, Tutorial page: ${tutorialStore.page}, New Tutorial page: ${nextPage}`,
-    );
-    console.log(``);
   };
 
   const isFinalStep = (page: TutorialPage) => {
@@ -196,8 +183,6 @@ export const useTutorialModal = ({
 
   const skipTutorial = async () => {
     if (isFinalStep(tutorialStore.page)) {
-      console.log(`Skip Tut - Final Step`);
-
       await updateUserTutorial(1);
       setFireSkipNextTutorial(true);
       return;

@@ -23,7 +23,7 @@ export const useAppHeader = () => {
     close: closeSideNav,
     isOpen,
   } = useSideNavControlStore();
-  const { query, setData, setQuery, setLoading } = useSearchQueryStore();
+  const { query, setData, setNearbyProperties, setQuery, setLoading } = useSearchQueryStore();
 
   const globalModalStore = useGlobalModalStore();
 
@@ -52,6 +52,7 @@ export const useAppHeader = () => {
       }
 
       setData(data.nearby_properties);
+      setNearbyProperties(data.nearbyPropertyPins ?? []);
     } finally {
       setLoading(false);
     }

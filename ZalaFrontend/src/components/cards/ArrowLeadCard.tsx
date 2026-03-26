@@ -33,10 +33,10 @@ export const ArrowLeadCard = ({
     <div
       {...cardHoverProps}
       className={clsx(
-        "flex flex-row space-x-[15px] pb-[30px]",
+        "flex flex-row space-x-3.75 pb-7.5",
         border ? "border-b-2" : "",
         border ? (cardActive ? "border-accent" : "border-secondary") : "",
-        onClick ? "cursor-pointer" : ""
+        onClick ? "cursor-pointer" : "",
       )}
     >
       <div className="w-[25%]">
@@ -46,21 +46,21 @@ export const ArrowLeadCard = ({
         />
       </div>
 
-      <div className="w-full flex flex-row space-x-[15px]">
-        <div className="flex flex-col grow-1 space-y-[5px]">
+      <div className="w-full flex flex-row space-x-3.75">
+        <div className="flex flex-col grow space-y-1.25">
           <p
             className={clsx(
               "overflow-ellipsis line-clamp-1 font-bold text-base",
-              cardActive ? "text-accent" : "text-secondary"
+              cardActive ? "text-accent" : "text-secondary",
             )}
           >
-            {lead.contact.firstName} {lead.contact.lastName}
+            {lead.contact?.firstName} {lead.contact?.lastName}
           </p>
           <span className="overflow-ellipsis line-clamp-2 text-base text-secondary-50">
-            {lead.contact.email}
+            {lead.contact?.email}
           </span>
           <span className="overflow-ellipsis line-clamp-1 text-base  text-secondary-50">
-            {lead.contact.phone}
+            {lead.contact?.phone}
           </span>
           <span className="overflow-ellipsis line-clamp-2 text-base  text-secondary-50">
             {lead.notes}

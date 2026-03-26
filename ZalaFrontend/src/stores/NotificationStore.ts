@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Notification } from "../hooks/api/types";
+import type { INotification } from "../interfaces";
 
 type NotificationStore = {
   notifications: INotification[];

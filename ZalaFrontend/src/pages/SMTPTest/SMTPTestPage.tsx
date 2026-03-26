@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { TextInput, Button, Icons, IconButtonVariant } from "../../components";
+import { TextInput, Button, Icons } from "../../components";
 import { useApi } from "../../hooks";
 import { useSnack } from "../../hooks/utils";
 import transition from "../../utils/transitions/transition";
@@ -9,7 +9,7 @@ type SMTPConfig = {
   port: number;
 };
 
-const SMTPTestPage = () => {
+export const SMTPTestPage = transition(() => {
   const { smtpGetConfig, smtpSendEmail } = useApi();
   const [successMsg, errorMsg] = useSnack();
 
@@ -21,7 +21,7 @@ const SMTPTestPage = () => {
   const [name, setName] = useState("");
   const [subject, setSubject] = useState("You're Invited to Join ZLA!");
   const [body, setBody] = useState(
-    "You've been invited to join a team on ZLA. Click the link below to get started."
+    "You've been invited to join a team on ZLA. Click the link below to get started.",
   );
   const [sending, setSending] = useState(false);
 
@@ -71,14 +71,14 @@ const SMTPTestPage = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-1 justify-center items-center p-[40px]">
+      <div className="flex flex-1 justify-center items-center p-10">
         <p className="text-secondary-50">Loading SMTP configuration...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-1 justify-center p-[40px] overflow-y-auto">
+    <div className="flex flex-1 justify-center p-10 overflow-y-auto">
       <div className="card-base box-shadow w-full max-w-xl space-y-6 p-8">
         <div className="space-y-1">
           <p className="text-3xl font-bold text-secondary">SMTP Email Test</p>
@@ -91,7 +91,7 @@ const SMTPTestPage = () => {
         <div
           className={`rounded-xl border p-4 ${
             config?.configured
-              ? "border-[#d2e3fc] bg-[#f8fafd]"
+              ? "border-[#d2e3fc] bg-offwhite"
               : "border-[#fad2cf] bg-[#fef7f5]"
           }`}
         >
@@ -145,15 +145,9 @@ const SMTPTestPage = () => {
           text={sending ? "Sending..." : "Send Test Email"}
           onClick={onSendClick}
           disabled={sending || !config?.configured}
-          iconLeft={
-            sending ? undefined : (
-              <Icons.Email variant={IconButtonVariant.Light} />
-            )
-          }
+          icon={sending ? undefined : Icons.Email}
         />
       </div>
     </div>
   );
-};
-
-export default transition(SMTPTestPage);
+});

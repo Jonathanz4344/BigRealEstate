@@ -1,0 +1,8 @@
+*.tfvars
+.terraform
+.terraform*
+node_modules
+dist
+tmp
+*.zip
+terraform.tfstate*

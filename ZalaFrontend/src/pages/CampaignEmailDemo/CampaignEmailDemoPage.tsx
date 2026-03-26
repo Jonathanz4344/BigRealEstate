@@ -53,7 +53,7 @@ const buildSendState = (campaignId: string): SendFormState => ({
   body: DEFAULT_HTML,
 });
 
-const CampaignEmailDemoPage = () => {
+export const CampaignEmailDemoPage = transition(() => {
   const {
     listCampaigns,
     createCampaignEmailDraft,
@@ -85,7 +85,7 @@ const CampaignEmailDemoPage = () => {
   const [loadingCampaigns, setLoadingCampaigns] = useState(false);
 
   const [draftForm, setDraftForm] = useState<DraftFormState>(
-    buildDraftState("")
+    buildDraftState(""),
   );
   const [sendForm, setSendForm] = useState<SendFormState>(buildSendState(""));
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
@@ -94,7 +94,7 @@ const CampaignEmailDemoPage = () => {
   const [draftsLoading, setDraftsLoading] = useState(false);
 
   const [sendResults, setSendResults] = useState<ACampaignEmailSendResult[]>(
-    []
+    [],
   );
   const [resultCampaignName, setResultCampaignName] = useState("");
 
@@ -106,9 +106,9 @@ const CampaignEmailDemoPage = () => {
     () =>
       campaigns.find(
         (campaign) =>
-          String(campaign.campaign_id) === String(selectedCampaignId)
+          String(campaign.campaign_id) === String(selectedCampaignId),
       ),
-    [campaigns, selectedCampaignId]
+    [campaigns, selectedCampaignId],
   );
 
   const numberOrNull = (value: string) => {
@@ -135,7 +135,7 @@ const CampaignEmailDemoPage = () => {
       setDraftForm(buildDraftState(campaignIdValue));
       setEditingMessageId(null);
     },
-    [selectedCampaignId]
+    [selectedCampaignId],
   );
 
   const refreshDrafts = useCallback(async (campaignId: number) => {
@@ -163,7 +163,7 @@ const CampaignEmailDemoPage = () => {
     setCampaigns(response.data);
     if (response.data.length > 0) {
       setSelectedCampaignId((prev) =>
-        prev ? prev : String(response.data[0].campaign_id)
+        prev || !response.data ? prev : String(response.data[0].campaign_id),
       );
     }
   }, []);
@@ -177,12 +177,12 @@ const CampaignEmailDemoPage = () => {
     setDraftForm((prev) =>
       prev.campaignId === selectedCampaignId
         ? prev
-        : { ...prev, campaignId: selectedCampaignId }
+        : { ...prev, campaignId: selectedCampaignId },
     );
     setSendForm((prev) =>
       prev.campaignId === selectedCampaignId
         ? prev
-        : { ...prev, campaignId: selectedCampaignId }
+        : { ...prev, campaignId: selectedCampaignId },
     );
     setEditingMessageId(null);
     const numericId = numberOrNull(selectedCampaignId);
@@ -287,7 +287,7 @@ const CampaignEmailDemoPage = () => {
     setResultCampaignName(
       name
         ? `${response.data.campaign.campaign_id} – ${name}`
-        : `${response.data.campaign.campaign_id}`
+        : `${response.data.campaign.campaign_id}`,
     );
     successMsg("Campaign send completed");
     refreshDrafts(campaignId);
@@ -303,7 +303,10 @@ const CampaignEmailDemoPage = () => {
       fromName: draft.from_name ?? "",
       body: draft.message_body,
     });
-    draftSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    draftSectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   const onDeleteDraft = async (messageId: number) => {
@@ -497,8 +500,8 @@ const CampaignEmailDemoPage = () => {
                 savingDraft
                   ? "Saving..."
                   : editingMessageId
-                  ? "Update Draft"
-                  : "Save Draft"
+                    ? "Update Draft"
+                    : "Save Draft"
               }
               onClick={onSaveDraft}
               disabled={savingDraft}
@@ -608,5 +611,4 @@ const CampaignEmailDemoPage = () => {
       )}
     </div>
   );
-};
-export default transition(CampaignEmailDemoPage);
+});

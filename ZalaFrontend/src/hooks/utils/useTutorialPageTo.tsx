@@ -15,6 +15,8 @@ export const useTutorialPageTo = () => {
         return "campaign_step";
       case TutorialPage.Navbar:
         return "navbar_step";
+      case TutorialPage.Board:
+        return "board_step";
       default:
         return undefined;
     }

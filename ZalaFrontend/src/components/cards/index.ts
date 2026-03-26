@@ -8,7 +8,7 @@ export * from "./BoardCardColumns";
 export * from "./BoardItemCard";
 export * from "./UserListCard";
 export * from "./DashboardCard";
-export * from "./DashboardAnnouncmentsCard";
+export * from "./DashboardAnnouncementsCard";
 export * from "./AnnouncementCard";
 export * from "./LeaderBoardsCard";
 export * from "./PropertiesListCard";

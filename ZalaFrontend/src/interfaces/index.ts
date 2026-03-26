@@ -3,7 +3,7 @@ export * from "./Campaign";
 export * from "./pages";
 export * from "./user";
 export * from "./Lead";
-export * from "./Contact";
+export * from "./contact";
 export * from "./board";
 export * from "./Address";
 export * from "./SourceResult";

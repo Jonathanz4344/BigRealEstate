@@ -4,7 +4,7 @@ import { AnnouncementCard, OverflowText } from "..";
 import { useFireIfExists } from "../../hooks";
 import { forwardRef } from "react";
 
-type DashboardAnnouncmentsCardProps = DashboardCardProps & {
+type DashboardAnnouncementsCardProps = DashboardCardProps & {
   messages: ITeamAnnouncement[];
   overflowCount: number;
   onClick?: (messageId: number) => void;
@@ -12,9 +12,9 @@ type DashboardAnnouncmentsCardProps = DashboardCardProps & {
   onEdit?: (messageId: number) => void;
 };
 
-export const DashboardAnnouncmentsCard = forwardRef<
+export const DashboardAnnouncementsCard = forwardRef<
   HTMLDivElement,
-  DashboardAnnouncmentsCardProps
+  DashboardAnnouncementsCardProps
 >((props, ref) => {
   const { messages, overflowCount, onClick, onTrash, onEdit } = props;
   const fireIfExists = useFireIfExists();

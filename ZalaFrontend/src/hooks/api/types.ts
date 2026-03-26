@@ -15,8 +15,30 @@ export type SearchLeadsProps = {
   query: string;
 };
 
+export type ANearbyProperty = {
+  property_id: number;
+  property_name: string | null;
+  mls_number: string | null;
+  notes: string | null;
+  image_url: string | null;
+  address_id: number;
+  address: {
+    address_id: number;
+    street_1: string;
+    street_2: string | null;
+    city: string;
+    state: string;
+    zipcode: string;
+    lat: number;
+    long: number;
+  };
+  distance_miles: number;
+  source: "user_property";
+};
+
 export type SearchLeadsResponse = {
   aggregated_leads: never[];
+  nearby_properties?: ANearbyProperty[];
   external_persistence?: Record<string, unknown>;
   errors?: Record<string, string>;
 };

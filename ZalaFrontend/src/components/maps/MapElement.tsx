@@ -17,9 +17,9 @@ export const MapElement = ({
     <div
       onClick={onClick}
       className={clsx(
-        "relative flex items-start justify-start w-min translate-[-50%]",
+        "relative flex flex-col items-center justify-end w-min translate-[-50%] overflow-visible",
         onClick ? "cursor-pointer" : "",
-        active ? "z-1" : "z-0"
+        active ? "z-10" : "z-0"
       )}
     >
       {children}

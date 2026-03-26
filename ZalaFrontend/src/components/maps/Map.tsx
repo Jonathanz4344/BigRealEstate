@@ -3,12 +3,13 @@ import { COLORS, CONFIG } from "../../config";
 import { NightMapStyle } from "./MapStyles";
 import { Icon, Icons } from "../icons";
 import { MapElement } from "./MapElement";
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
 import {
   useMapComponent,
   type MapCoords,
   type MapRefHandle,
 } from "../../hooks";
+import { MapInfoBox, type MapPinInfo } from "./MapInfoBox";
 
 type MapPinProps = {
   iconName?: Icons;
@@ -19,7 +20,8 @@ type MapPinProps = {
   active?: boolean;
   center: MapCoords;
   onClick?: () => void;
-} | null;
+  info?: MapPinInfo;
+};
 
 type MapProps = {
   center?: MapCoords;
@@ -69,11 +71,22 @@ export const Map = forwardRef<MapRefHandle, MapProps>(
     const initialCenter = propsCenter ?? (DefaultProps.center as MapCoords);
     const initialZoom = propsZoom ?? (DefaultProps.initialZoom as number);
 
+    const [selectedPin, setSelectedPin] = useState<number | null>(null);
+
     const { center, zoom, onMapChange, onMarkerClick } = useMapComponent({
       ref,
       initialCenter,
       initialZoom,
     });
+
+    const handleChildClick = (
+      hoverKey: string | number,
+      childProps: MapCoords & unknown,
+    ) => {
+      const key = Number(hoverKey);
+      onMarkerClick(key, childProps);
+      setSelectedPin((prev) => (prev === key ? null : key));
+    };
 
     return (
       <div ref={dimsRef} className="w-full h-full">
@@ -87,7 +100,8 @@ export const Map = forwardRef<MapRefHandle, MapProps>(
           zoom={zoom}
           options={{ styles: NightMapStyle }}
           onChange={onMapChange}
-          onChildClick={onMarkerClick}
+          onChildClick={handleChildClick}
+          onClick={() => setSelectedPin(null)}
         >
           {(pins ?? []).map(
             (pin, index) =>
@@ -96,9 +110,15 @@ export const Map = forwardRef<MapRefHandle, MapProps>(
                   key={index}
                   lat={pin.center.lat}
                   lng={pin.center.lng}
-                  active={pin.active}
+                  active={pin.active || selectedPin === index}
                   onClick={pin.onClick}
                 >
+                  {selectedPin === index && pin.info && (
+                    <MapInfoBox
+                      info={pin.info}
+                      onClose={() => setSelectedPin(null)}
+                    />
+                  )}
                   <Icon
                     name={pin.iconName ?? Icons.UserPin}
                     scale={

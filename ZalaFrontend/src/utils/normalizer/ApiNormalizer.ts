@@ -58,14 +58,13 @@ const lead = (data: ALead): ILead => {
     buisness: data["business"], // Note: Typo on API side ?
     website: data["website"],
     notes: data["notes"],
-    // properties: data["properties"],
-    // campaigns: data["campaigns"],
+    personType: "business",
   };
 };
 
 const sourceResult = <T, B>(
   data: ASourceResult<T>,
-  result: B
+  result: B,
 ): ISourceResult<B> => {
   return {
     ...result,
@@ -99,7 +98,7 @@ const campaign = (data: ACampaign): ICampaign => {
 };
 
 const campaignEmailSendResult = (
-  data: ACampaignEmailSendResult
+  data: ACampaignEmailSendResult,
 ): ICampaignEmailSendResult => ({
   leadId: data["lead_id"],
   messageId: data["message_id"] ?? -1,
@@ -125,7 +124,7 @@ const campaignEmail = (data: ACampaignEmail): ICampaignEmail => ({
 });
 
 const campaignEmailCampaign = (
-  data: ACampaignEmailCampaign
+  data: ACampaignEmailCampaign,
 ): ICampaignEmailCampaign => ({
   campaignId: data["campaign_id"],
   campaignName: data["campaign_name"] ?? "",
@@ -137,7 +136,7 @@ const campaignEmailLead = (data: ACampaignEmailLead): ICampaignEmailLead => ({
 });
 
 const campaignEmailContact = (
-  data: ACampaignEmailContact
+  data: ACampaignEmailContact,
 ): ICampaignEmailContact => ({
   email: data["email"] ?? "",
   firstName: data["first_name"] ?? "",

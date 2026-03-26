@@ -47,7 +47,6 @@ class WebSocketManager {
    */
   connect(url: string): void {
     if (this.socket?.readyState === WebSocket.OPEN) {
-      // console.log("[WebSocket] Already connected");
       return;
     }
 
@@ -58,7 +57,6 @@ class WebSocketManager {
       this.socket = new WebSocket(url);
 
       this.socket.onopen = () => {
-        // console.log("[WebSocket] Connected to", url);
         this.reconnectAttempts = 0;
         this.emit("connection", { status: "connected" });
       };
@@ -66,7 +64,7 @@ class WebSocketManager {
       this.socket.onmessage = (event) => {
         try {
           const message: WebSocketMessage = JSON.parse(event.data);
-          // console.log("[WebSocket] Received:", message);
+
           // Emit to listeners for this specific type
           this.emit(message.type, message.data);
           // Also emit to catch-all "message" listeners
@@ -79,7 +77,6 @@ class WebSocketManager {
       };
 
       this.socket.onclose = (_event) => {
-        // console.log("[WebSocket] Disconnected", event.code, event.reason);
         this.emit("connection", { status: "disconnected" });
 
         if (
@@ -87,7 +84,7 @@ class WebSocketManager {
           this.reconnectAttempts < this.maxReconnectAttempts
         ) {
           this.reconnectAttempts++;
-          // console.log(`[WebSocket] Reconnecting in ${this.reconnectDelay}ms... (attempt ${this.reconnectAttempts})`);
+
           setTimeout(() => this.connect(this.url), this.reconnectDelay);
         }
       };
@@ -157,7 +154,7 @@ class WebSocketManager {
    */
   private emit<T>(type: WebSocketEventType, data: T): void {
     const listeners = this.listeners.get(type);
-    // console.log(
+
     //   `[WebSocket] Emitting ${type}, listeners found:`,
     //   listeners?.size ?? 0,
     // );

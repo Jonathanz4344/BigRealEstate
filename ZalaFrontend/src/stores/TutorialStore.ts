@@ -6,6 +6,7 @@ export enum TutorialPage {
   Navbar = "Navbar",
   Search = "Search",
   Campaign = "Campaign",
+  Board = "Board",
 }
 
 type ITutorialStore = {

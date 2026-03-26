@@ -3,7 +3,7 @@ import { useLoginPage } from "../../../hooks";
 import { CardPage } from "../components";
 import transition from "../../../utils/transitions/transition";
 
-const LoginPage = () => {
+export const LoginPage = transition(() => {
   const {
     state: { userName, setUserName, password, setPassword, errors },
     onLoginClick,
@@ -32,8 +32,8 @@ const LoginPage = () => {
       }}
       googleCallback={googleAuthCallback}
     >
-      <div className="w-[75%] grow-1 flex items-center">
-        <div className="w-full space-y-[15px]">
+      <div className="w-[75%] grow flex items-center">
+        <div className="w-full space-y-3.75">
           <TextInput
             label="Username"
             value={userName}
@@ -58,5 +58,4 @@ const LoginPage = () => {
       </div>
     </CardPage>
   );
-};
-export default transition(LoginPage);
+});

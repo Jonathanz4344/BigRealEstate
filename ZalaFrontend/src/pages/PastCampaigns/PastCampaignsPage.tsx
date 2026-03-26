@@ -3,7 +3,7 @@ import { usePastCampaignsPage } from "../../hooks";
 import { LoadingPage } from "../Loading";
 import transition from "../../utils/transitions/transition";
 
-const PastCampaignsPage = () => {
+export const PastCampaignsPage = transition(() => {
   const { campaigns, loading, toCampaignPage } = usePastCampaignsPage();
   return loading ? (
     <LoadingPage />
@@ -34,5 +34,4 @@ const PastCampaignsPage = () => {
       </div>
     </div>
   );
-};
-export default transition(PastCampaignsPage);
+});

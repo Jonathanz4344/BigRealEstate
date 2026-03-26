@@ -118,7 +118,6 @@ export const useAllBoardsPage = () => {
   };
 
   const onSettingsSave = async () => {
-    console.log(`On settings saved`);
     await apiFunctions.updateBoardName(boardSettingsFuncs.boardName);
   };
 

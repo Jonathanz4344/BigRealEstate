@@ -490,9 +490,27 @@ export const useLeadsApi = (props: APIHookProps) => {
       ? response.data.aggregated_leads.map(Normalizer.APINormalizer.sourceLead)
       : [];
 
+    const nearbyPropertyPins = Array.isArray(response.data.nearby_properties)
+      ? response.data.nearby_properties.map((p) => ({
+          propertyId: p.property_id,
+          propertyName: p.property_name ?? "Property",
+          address: {
+            lat: p.address.lat,
+            long: p.address.long,
+            street1: p.address.street_1,
+            city: p.address.city,
+            state: p.address.state,
+            zipcode: p.address.zipcode,
+          },
+          distanceMiles: p.distance_miles,
+          source: "user_property" as const,
+        }))
+      : [];
+
     return {
       data: {
         nearby_properties,
+        nearbyPropertyPins,
         external_persistence: response.data.external_persistence ?? {},
         errors: response.data.errors ?? {},
       },

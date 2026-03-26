@@ -8,7 +8,7 @@ import { useApi } from "../../api";
 import { useSnack } from "../../utils";
 import { wsManager } from "../../../utils";
 import { CONFIG } from "../../../config";
-import type { Notification, ITeam } from "../../api/types";
+import type { INotification, ITeam } from "../../../interfaces";
 
 export const useNotificationBell = () => {
   const user = useAuthStore((state) => state.user);
@@ -65,11 +65,10 @@ export const useNotificationBell = () => {
     wsConnected.current = true;
 
     // Listen for new notifications - WebSocket only pushes when events happen
-    const unsubscribe = wsManager.on<Notification>(
+    const unsubscribe = wsManager.on<INotification>(
       "notification",
       (message) => {
-        console.log("New notification received:", message);
-        addNotification(message.data as Notification);
+        addNotification(message.data as INotification);
       },
     );
 
@@ -78,7 +77,6 @@ export const useNotificationBell = () => {
       team_id: number;
       team_name: string;
     }>("team_deleted", (message) => {
-      console.log("[NotificationBell] Team deleted:", message.data);
       removeTeam(message.data.team_id);
     });
 
@@ -86,7 +84,6 @@ export const useNotificationBell = () => {
     const unsubscribeTeamJoined = wsManager.on<ITeam>(
       "team_joined",
       (message) => {
-        console.log("[NotificationBell] Team joined:", message.data);
         addTeam(message.data);
       },
     );
@@ -96,7 +93,6 @@ export const useNotificationBell = () => {
       team_id: number;
       team_name: string;
     }>("member_kicked", (message) => {
-      console.log("[NotificationBell] Kicked from team:", message.data);
       removeTeam(message.data.team_id);
     });
 

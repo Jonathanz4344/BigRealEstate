@@ -24,15 +24,15 @@ export const useFetch = () => {
       typeof err === "string"
         ? err
         : err instanceof Error
-        ? err.message
-        : "Request failed",
+          ? err.message
+          : "Request failed",
   });
 
   const fetchWithParams = async <T,>(
     apiEndpoint: string,
     method: "POST" | "GET" | "PUT" | "DELETE" | "PATCH",
     body: unknown,
-    { signal, isFormData }: RequestOptions = {}
+    { signal, isFormData }: RequestOptions = {},
   ): Promise<APIResponse<T>> => {
     const url = CONFIG.api + apiEndpoint;
     const abortSignal = signal ?? new AbortController().signal;
@@ -73,16 +73,21 @@ export const useFetch = () => {
 
       if (
         !OK_STATUS_CODES.includes(response.status) ||
-        (parsed && typeof parsed === "object" && ((parsed as Record<string, unknown>).err || (parsed as Record<string, unknown>).error))
+        (parsed &&
+          typeof parsed === "object" &&
+          ((parsed as Record<string, unknown>).err ||
+            (parsed as Record<string, unknown>).error))
       ) {
         const errorObj = parsed as Record<string, unknown> | null;
         // FastAPI returns errors with "detail" key, also check for "err" and "error"
         throw new Error(
-          (errorObj?.detail as string) ?? 
-          (errorObj?.err as string) ?? 
-          (errorObj?.error as string) ?? 
-          "Error communicating with API"
-          (errorObj?.err as string) ?? (errorObj?.error as string) ?? (errorObj?.detail as string) ?? "Error communicating with API"
+          (errorObj?.detail as string) ??
+            (errorObj?.err as string) ??
+            (errorObj?.error as string) ??
+            (errorObj?.err as string) ??
+            (errorObj?.error as string) ??
+            (errorObj?.detail as string) ??
+            "Error communicating with API",
         );
       }
 
@@ -94,7 +99,7 @@ export const useFetch = () => {
 
   const get = async <T,>(
     apiEndpoint: string,
-    signal?: AbortSignal
+    signal?: AbortSignal,
   ): Promise<APIResponse<T>> => {
     return await fetchWithParams<T>(apiEndpoint, "GET", null, {
       isFormData: false,
@@ -105,7 +110,7 @@ export const useFetch = () => {
   const post = async <T,>(
     apiEndpoint: string,
     body: unknown,
-    options: RequestOptions = {}
+    options: RequestOptions = {},
   ): Promise<APIResponse<T>> => {
     return await fetchWithParams<T>(apiEndpoint, "POST", body, options);
   };
@@ -113,14 +118,14 @@ export const useFetch = () => {
   const put = async <T,>(
     apiEndpoint: string,
     body: unknown,
-    options: RequestOptions = {}
+    options: RequestOptions = {},
   ): Promise<APIResponse<T>> => {
     return await fetchWithParams<T>(apiEndpoint, "PUT", body, options);
   };
 
   const del = async <T,>(
     apiEndpoint: string,
-    signal?: AbortSignal
+    signal?: AbortSignal,
   ): Promise<APIResponse<T>> => {
     return await fetchWithParams<T>(apiEndpoint, "DELETE", null, {
       isFormData: false,
@@ -131,7 +136,7 @@ export const useFetch = () => {
   const patch = async <T,>(
     apiEndpoint: string,
     body: unknown,
-    options: RequestOptions = {}
+    options: RequestOptions = {},
   ): Promise<APIResponse<T>> => {
     return await fetchWithParams<T>(apiEndpoint, "PATCH", body, options);
   };

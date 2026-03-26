@@ -13,6 +13,7 @@ import {
   type AUserIdXp,
   type ITeamDeal,
   type ITutorial,
+  type INotification,
 } from "../../interfaces";
 import type {
   CreateUserProps,
@@ -501,14 +502,14 @@ export const useApi = () => {
 
   // Notification APIs
   const getNotifications = async (userId: number) => {
-    return await get<Notification[]>(
+    return await get<INotification[]>(
       `/api/notifications/user/${userId}`,
       getSignal("getNotifications"),
     );
   };
 
   const markNotificationRead = async (notificationId: number) => {
-    return await patch<Notification>(
+    return await patch<INotification>(
       `/api/notifications/${notificationId}/read`,
       {},
       { isFormData: false, signal: getSignal("markNotificationRead") },

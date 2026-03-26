@@ -1,7 +1,6 @@
 import { TextInput } from "../../components";
 import { Icons, Icon } from "../../components/icons";
 import { useTeamInvitePage } from "../../hooks";
-import type { TeamMember, TeamWithMembers } from "../../interfaces";
 import transition from "../../utils/transitions/transition";
 import type { ITeamMember, ITeam, ITeamAnnouncement } from "../../interfaces";
 
@@ -217,7 +216,7 @@ const getStatusBadge = (status: boolean | null) => {
   );
 };
 
-const TeamInviteTestPage = () => {
+export const TeamInviteTestPage = transition(() => {
   const {
     user,
     teams,
@@ -444,7 +443,7 @@ const TeamInviteTestPage = () => {
       </div>
     </div>
   );
-};
+});
 
 // Team Detail View Component
 const TeamDetailView = ({
@@ -570,7 +569,7 @@ const TeamDetailView = ({
               <button
                 onClick={actions.onInvite}
                 disabled={loading.sendingInvite || !forms.inviteEmail.trim()}
-                className="px-6 py-2 bg-accent text-white rounded-xl font-medium hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-[42px] self-end"
+                className="px-6 py-2 bg-accent text-white rounded-xl font-medium hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-10.5 self-end"
               >
                 {loading.sendingInvite ? "Sending..." : "Send Invite"}
               </button>
@@ -706,10 +705,10 @@ const MembersTab = ({
                   <div
                     className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
                       isCreator
-                        ? "bg-gradient-to-br from-yellow-400 to-orange-500"
+                        ? "bg-linear-to-br from-yellow-400 to-orange-500"
                         : isAdmin
-                          ? "bg-gradient-to-br from-accent to-blue-600"
-                          : "bg-gradient-to-br from-secondary-50 to-secondary"
+                          ? "bg-linear-to-br from-accent to-blue-600"
+                          : "bg-linear-to-br from-secondary-50 to-secondary"
                     }`}
                   >
                     {initials}
@@ -915,7 +914,6 @@ const InvitationsTab = ({
   );
 };
 
-export default transition(TeamInviteTestPage);
 // Announcements Tab Component
 const AnnouncementsTab = ({
   announcements,
@@ -967,7 +965,7 @@ const AnnouncementsTab = ({
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-linear-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
                       <Icon
                         name={Icons.Announce}
                         size={20}

@@ -23,6 +23,22 @@ import { COLORS } from "../../config";
 import transition from "../../utils/transitions/transition";
 import type { ILead } from "../../interfaces";
 
+const formatAddress = (addr: {
+  street1: string;
+  city: string;
+  state: string;
+  zipcode: string;
+}) => {
+  const zip = addr.zipcode && addr.zipcode !== "00000" ? addr.zipcode : "";
+  // If street1 already contains the city, it's a full geocoded address — just use it
+  if (addr.street1 && addr.city && addr.street1.includes(addr.city)) {
+    return addr.street1;
+  }
+  return [addr.street1, [addr.city, addr.state].filter(Boolean).join(", "), zip]
+    .filter(Boolean)
+    .join(", ");
+};
+
 export const LeadSearchPage = transition(() => {
   const {
     showLeads,
@@ -32,6 +48,7 @@ export const LeadSearchPage = transition(() => {
     setCampaignTitle,
     mapRef,
     leadData,
+    nearbyProperties,
     activeLead,
     setActiveLead,
     campaignHasAllLeads,
@@ -125,21 +142,45 @@ export const LeadSearchPage = transition(() => {
             )}
             <Map
               ref={mapRef}
-              pins={leadData.map((lead) =>
-                lead.address
-                  ? {
-                      center: {
-                        lat: lead.address.lat,
-                        lng: lead.address.long,
-                      },
-                      iconName: Icons.UserPin,
-                      active: lead.leadId === activeLead,
-                      color: COLORS.white,
-                      activeColor: COLORS.accent,
-                      onClick: () => setActiveLead(lead.leadId),
-                    }
-                  : null,
-              )}
+              pins={[
+                ...leadData.map((lead) => ({
+                  center: {
+                    lat: lead.address?.lat ?? 0,
+                    lng: lead.address?.long ?? 0,
+                  },
+                  iconName: Icons.UserPin,
+                  active: lead.leadId === activeLead,
+                  color: COLORS.white,
+                  activeColor: COLORS.accent,
+                  onClick: () => setActiveLead(lead.leadId),
+                  info: {
+                    type: "Lead" as const,
+                    title: lead.contact
+                      ? `${lead.contact.firstName} ${lead.contact.lastName}`
+                      : "Unknown Contact",
+                    subtitle: lead.buisness || undefined,
+                    address: lead.address
+                      ? formatAddress(lead.address)
+                      : undefined,
+                  },
+                })),
+                ...nearbyProperties.map((prop) => ({
+                  center: {
+                    lat: prop.address.lat,
+                    lng: prop.address.long,
+                  },
+                  iconName: Icons.PropertyPin,
+                  active: false,
+                  color: "#4FC3F7",
+                  activeColor: "#0288D1",
+                  onClick: () => {},
+                  info: {
+                    type: "Property" as const,
+                    title: prop.propertyName || "Unnamed Property",
+                    address: formatAddress(prop.address),
+                  },
+                })),
+              ]}
             />
             {loading && (
               <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 backdrop-blur-sm">

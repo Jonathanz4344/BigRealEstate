@@ -38,6 +38,7 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import ImageIcon from "@mui/icons-material/Image";
 import PaidIcon from "@mui/icons-material/Paid";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import LocationCityIcon from "@mui/icons-material/LocationCity";
 import LeaderboardIcon from "@mui/icons-material/Leaderboard";
 import GroupsIcon from "@mui/icons-material/Groups";
 
@@ -123,6 +124,8 @@ export const getMaterialIcon = (iconName: Icons) => {
       return (props: SvgIconProps) => <PaidIcon {...props} />;
     case Icons.ChevronLeft:
       return (props: SvgIconProps) => <ChevronLeftIcon {...props} />;
+    case Icons.PropertyPin:
+      return (props: SvgIconProps) => <LocationCityIcon {...props} />;
     case Icons.Leaderboard:
       return (props: SvgIconProps) => <LeaderboardIcon {...props} />;
     default:

@@ -52,7 +52,9 @@ CREATE TABLE users (
 CREATE TABLE boards (
     board_id        SERIAL PRIMARY KEY,
     board_name      TEXT NOT NULL,
-    user_id         INTEGER REFERENCES users(user_id) ON DELETE SET NULL
+    user_id         INTEGER REFERENCES users(user_id) ON DELETE SET NULL,
+    board_type      TEXT NOT NULL DEFAULT 'default',
+    team_id         INTEGER REFERENCES teams(team_id) ON DELETE SET NULL
 );
 
 CREATE TABLE board_steps (

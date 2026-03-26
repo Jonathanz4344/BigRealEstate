@@ -23,6 +23,12 @@ export const TutorialText = {
     "Leads can be added to a campaign individually, or you can add all the results of your search with the 'Add all leads' button.",
     "Add a title and click 'Start' to create a campaign with your selected leads!",
   ],
+  board: [
+    "A board is used to track progress of pursuing leads or selling properties.",
+    "Admins of a team board or creators of a board can edit board settings, delete a board, or change the title of a board.",
+    "This is where you can modify properties of your board like the name or the type of board.",
+    'A board contains a series of steps that leads or properties must progress through to get to the end goal. For example, a lead may start as a "New Lead", then progress to "Contact Made", then "Sale Closed". You can add an item to the board with the + button under a step, then drag the item to move it to different steps.',
+  ],
   campaign: [
     "With a campaign, you can store information about leads and manage your communications with them.",
     "Multiple selected leads can be emailed with the “Email All” button if there are selected leads with known emails.",
@@ -50,6 +56,7 @@ export const TutorialSequence = {
   ],
   navbar: ["component"],
   search: ["modal", "component", "component"],
+  board: ["modal", "component", "component", "component"],
   campaign: ["modal", "component", "component", "component", "component"]
 };
 
@@ -57,6 +64,7 @@ export const TutorialSequenceMaximums = {
   dashboard: TutorialText.dashboard.length - 1,
   navbar: TutorialText.navbar.length - 1,
   search: TutorialText.search.length - 1,
+  board: TutorialText.board.length - 1,
   campaign: TutorialText.campaign.length - 1
 };
 
@@ -75,6 +83,12 @@ export const TutorialTextPlacements = {
     TextPlacement.Modal,
   ],
   navbar: [TextPlacement.Bottom],
-  search: [TextPlacement.Top, TextPlacement.Left, TextPlacement.Top],
+  search: [TextPlacement.Top, TextPlacement.Left, TextPlacement.Right],
+  board: [
+    TextPlacement.Modal,
+    TextPlacement.Bottom,
+    TextPlacement.Bottom,
+    TextPlacement.Top,
+  ],
   campaign: [TextPlacement.Top, TextPlacement.Top, TextPlacement.Bottom, TextPlacement.Bottom, TextPlacement.Bottom]
 };

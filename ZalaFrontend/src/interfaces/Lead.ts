@@ -1,5 +1,5 @@
 import { AAddressToIAddress, type AAddress, type IAddress } from "./Address";
-import { AContactToIContact, type AContact, type IContact } from "./Contact";
+import { type AContact, type IContact, AContactToIContact } from "./contact";
 import { AImageToIImage, type AImage, type IImage } from "./Image";
 import { AUserToIUser, type AUser, type IUser } from "./user";
 

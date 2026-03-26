@@ -23,6 +23,7 @@ const DEFAULT_BOARD: IKanbanBoard = {
     properties: [],
     stepName: v,
   })),
+  boardType: "lead",
 };
 
 export const DEFAULTS = {

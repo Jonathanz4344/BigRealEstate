@@ -607,9 +607,66 @@ def _perform_db_search(filter: LocationFilter, db: Session) -> Dict[str, object]
     )
     candidate_ids.update(row[0] for row in property_rows if row[0] is not None)
 
+    # --- Nearby user-created properties (not linked to any lead) ---
+    nearby_user_properties: List[Dict[str, object]] = []
+    standalone_property_rows = (
+        db.query(Property)
+        .join(Address, Property.address_id == Address.address_id)
+        .filter(Property.lead_id.is_(None))
+        .filter(Address.lat.isnot(None), Address.long.isnot(None))
+        .filter(Address.lat != 0, Address.long != 0)
+        .filter(Address.lat.between(lat_min, lat_max))
+        .filter(Address.long.between(lon_min, lon_max))
+        .options(
+            joinedload(Property.address),
+            selectinload(Property.units),
+        )
+        .all()
+    )
+    for prop in standalone_property_rows:
+        prop_addr = getattr(prop, "address", None)
+        if not prop_addr or prop_addr.lat is None or prop_addr.long is None:
+            continue
+        dist = haversine(lat, lon, float(prop_addr.lat), float(prop_addr.long))
+        if dist <= radius_miles:
+            units = [
+                {
+                    "unit_id": u.unit_id,
+                    "property_id": u.property_id,
+                    "apt_num": u.apt_num,
+                    "bedrooms": u.bedrooms,
+                    "bath": u.bath,
+                    "sqft": u.sqft,
+                    "notes": u.notes,
+                }
+                for u in getattr(prop, "units", []) or []
+            ]
+            nearby_user_properties.append({
+                "property_id": prop.property_id,
+                "property_name": getattr(prop, "property_name", None),
+                "mls_number": getattr(prop, "mls_number", None),
+                "notes": getattr(prop, "notes", None),
+                "image_url": getattr(prop, "image_url", None),
+                "address_id": prop_addr.address_id,
+                "address": {
+                    "address_id": prop_addr.address_id,
+                    "street_1": prop_addr.street_1,
+                    "street_2": prop_addr.street_2,
+                    "city": prop_addr.city,
+                    "state": prop_addr.state,
+                    "zipcode": prop_addr.zipcode,
+                    "lat": prop_addr.lat,
+                    "long": prop_addr.long,
+                },
+                "units": units,
+                "distance_miles": round(dist, 2),
+                "source": "user_property",
+            })
+
     if not candidate_ids:
         return {
             "leads": [],
+            "nearby_properties": nearby_user_properties,
             "normalized_location": normalized_location,
             "radius_miles": radius_miles,
         }
@@ -654,6 +711,7 @@ def _perform_db_search(filter: LocationFilter, db: Session) -> Dict[str, object]
 
     return {
         "leads": nearby_leads,
+        "nearby_properties": nearby_user_properties,
         "normalized_location": normalized_location,
         "radius_miles": radius_miles,
     }
@@ -826,9 +884,11 @@ def search_leads(
     external_persistence: Dict[str, Dict[str, object]] = {}
 
     aggregated_leads: List[Dict[str, object]] = []
+    nearby_properties: List[Dict[str, object]] = []
     try:
         db_result = _perform_db_search(request, db)
         aggregated_leads = db_result.get("leads", [])
+        nearby_properties = db_result.get("nearby_properties", [])
     except LocationResolutionError as exc:
         errors[DataSource.db.value] = exc.message
     except Exception as exc:
@@ -879,6 +939,7 @@ def search_leads(
         try:
             db_result = _perform_db_search(request, db)
             aggregated_leads = db_result.get("leads", [])
+            nearby_properties = db_result.get("nearby_properties", [])
         except LocationResolutionError as exc:
             errors[DataSource.db.value] = exc.message
         except Exception as exc:
@@ -891,6 +952,7 @@ def search_leads(
 
     response: Dict[str, object] = {
         "aggregated_leads": aggregated_leads,
+        "nearby_properties": nearby_properties,
     }
     if external_persistence:
         response["external_persistence"] = external_persistence

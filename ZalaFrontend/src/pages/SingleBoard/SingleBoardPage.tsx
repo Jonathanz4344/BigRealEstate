@@ -3,21 +3,28 @@ import { useParams } from "react-router";
 import {
   useAllBoardsPage,
   useAppNavigation,
+  useBoardHighlightComponents,
   useDashboardPage,
+  useShouldShowTutorial,
   useTimeoutEffect,
 } from "../../hooks";
 import { LoadingPage } from "../Loading";
 import transition from "../../utils/transitions/transition";
 import {
   BoardCard,
+  BoardCardColumns,
   BoardModal,
   Button,
   ButtonVariant,
+  EditablePageHeader,
+  EditablePageHeaderVariant,
+  IconButton,
+  IconButtonVariant,
   Icons,
 } from "../../components";
-import { useAuthStore } from "../../stores";
+import { TutorialPage, useAuthStore } from "../../stores";
 
-const SingleBoardPage = () => {
+export const SingleBoardPage = transition(() => {
   const routeParams = useParams();
   const boardId = parseInt(routeParams?.boardId ?? `-1`);
 
@@ -51,6 +58,48 @@ const SingleBoardPage = () => {
 
   const { toDashboard, goBack, toNotFound } = useAppNavigation();
 
+  const boardHighlightComponents = useBoardHighlightComponents();
+  const boardHighlightRefs = boardHighlightComponents.refs;
+
+  useShouldShowTutorial({
+    page: TutorialPage.Board,
+    forceWait: !selectedBoard,
+    highlightComponentDims: boardHighlightComponents.highlightComponentDims,
+    highlightComponentDimsChange:
+      boardHighlightComponents.highlightComponentDimsChange,
+    components: [
+      null, // Step 0: Board Overview (modal)
+      () => (
+        <div className="w-full flex flex-row items-center px-15 pt-15">
+          <EditablePageHeader
+            variant={EditablePageHeaderVariant.Card}
+            value={selectedBoardName}
+            setValue={() => {}}
+            actions={[]}
+            editable={false}
+          />
+        </div>
+      ),
+      () => (
+        <IconButton
+          name={Icons.Settings}
+          variant={IconButtonVariant.Secondary}
+        />
+      ),
+      () => (
+        <div className="full px-15">
+          <div className="full p-7.5 overflow-x-scroll">
+            <BoardCardColumns
+              expanded={true}
+              steps={selectedBoard?.boardSteps ?? []}
+            />
+          </div>
+        </div>
+      ),
+    ],
+    deps: [selectedBoard?.boardId],
+  });
+
   useEffect(() => {
     if (boards.length <= 0) return;
     const board = boards.find((board) => board.boardId === boardId);
@@ -78,9 +127,12 @@ const SingleBoardPage = () => {
   if (!selectedBoard?.boardId) return <LoadingPage text="" />;
 
   return (
-    <div className="flex relative flex-col gap-y-[60px] flex-1 overflow-y-scroll">
+    <div className="flex relative flex-col gap-y-15 flex-1 overflow-y-scroll">
       <BoardCard
         board={selectedBoard}
+        headerRef={boardHighlightRefs.boardHeaderRef}
+        columnsRef={boardHighlightRefs.boardColumnsRef}
+        settingsRef={boardHighlightRefs.boardSettingsRef}
         expandable={{
           expanded: true,
           boardName: selectedBoardName,
@@ -98,7 +150,7 @@ const SingleBoardPage = () => {
       />
 
       {canUserMakeAdminChanges && (
-        <div className="fixed pointer-events-none bottom-0 left-0 right-0 z-[10] flex flex-row justify-end pb-[30px] pr-[30px]">
+        <div className="fixed pointer-events-none bottom-0 left-0 right-0 z-10 flex flex-row justify-end pb-7.5 pr-7.5">
           <div className="flex-[.15] pointer-events-auto flex justify-center items-center flex-row">
             <Button
               variant={ButtonVariant.Primary}
@@ -113,6 +165,4 @@ const SingleBoardPage = () => {
       <BoardModal onAddLeads={() => getBoards()} />
     </div>
   );
-};
-
-export default transition(SingleBoardPage);
+});

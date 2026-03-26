@@ -1,5 +1,5 @@
 import {
-  DashboardAnnouncmentsCard,
+  DashboardAnnouncementsCard,
   BoardsListCard,
   Button,
   DashboardModals,
@@ -129,7 +129,7 @@ export const DashboardPage = transition(() => {
         />
       ),
       () => (
-        <DashboardAnnouncmentsCard
+        <DashboardAnnouncementsCard
           title="Announcments:"
           overflowCount={overflow.announcements}
           messages={[...announcements].splice(0, sliceCount.announcements + 1)}
@@ -365,9 +365,9 @@ export const DashboardPage = transition(() => {
 
           <div className="flex flex-row gap-x-15">
             <div className="w-[70%] min-w-[70%] max-w-[70%]">
-              <DashboardAnnouncmentsCard
+              <DashboardAnnouncementsCard
                 ref={highlighComponentRefs.announcmentRef}
-                title="Announcments:"
+                title="Announcements:"
                 overflowCount={overflow.announcements}
                 messages={[...announcements].splice(
                   0,

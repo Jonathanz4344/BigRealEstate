@@ -48,12 +48,12 @@ export const useShouldShowTutorial = ({
 
   const { pageToMaxTutorialStep, pageToTutorialKey } = useTutorialPageTo();
 
-  const { pathname, isDashboardPage, isSearchPage } = useAppLocation();
+  const { pathname } = useAppLocation();
 
   useTimeoutEffect(
     () => {
       if (forceWait) return;
-      const res = shouldShowTutorialForPage();
+      shouldShowTutorialForPage();
     },
     [
       forceWait,
@@ -84,9 +84,6 @@ export const useShouldShowTutorial = ({
     highlightComponentStore.setTextPlacement(
       TutorialTextPlacements[page.toLowerCase() as TutorialTextKey],
     );
-    // console.log(
-    //   `shouldShowTutorialForPage(${page}) - Step: ${tutorialStep} - MaxTutStep: ${maxTutorialStep} - Page: ${page} - Store Page: ${tutorialStore.page}`,
-    // );
 
     if (
       globalModalStore.isOpen &&

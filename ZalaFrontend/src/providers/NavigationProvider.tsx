@@ -1,18 +1,22 @@
 import { Navigate, Route, Routes, useLocation } from "react-router";
-import TeamInviteTestPage from "../pages/TeamInviteTest/TeamInviteTestPage";
 import { RootLayout } from "../layouts";
 import { useAuthStore } from "../stores";
-import SingleBoardPage from "../pages/SingleBoard/SingleBoardPage";
-import LoginPage from "../pages/Auth/Login/LoginPage";
 import SignupPage from "../pages/Auth/Signup/SignupPage";
 import KanbanBoardPage from "../pages/Boards/KanbanBoardPage";
 import NotFoundPage from "../pages/NotFound/NotFoundPage";
 import TestEmailPage from "../pages/TestEmail/TestEmailPage";
-import CampaignEmailDemoPage from "../pages/CampaignEmailDemo/CampaignEmailDemoPage";
-import PastCampaignsPage from "../pages/PastCampaigns/PastCampaignsPage";
-import SMTPTestPage from "../pages/SMTPTest/SMTPTestPage";
 import { AnimatePresence } from "framer-motion";
-import { CampaignPage, DashboardPage, LeadSearchPage } from "../pages";
+import {
+  CampaignPage,
+  DashboardPage,
+  LeadSearchPage,
+  SingleBoardPage,
+  TeamInviteTestPage,
+  PastCampaignsPage,
+  SMTPTestPage,
+  CampaignEmailDemoPage,
+  LoginPage,
+} from "../pages";
 import { NavigationPath } from "./types";
 
 /**

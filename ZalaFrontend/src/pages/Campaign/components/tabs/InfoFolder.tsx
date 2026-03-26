@@ -19,7 +19,7 @@ export const InfoFolder = ({
   onSecondary,
 }: InfoFolderProps) => {
   const icons = useFolderIcons({ active: CampaignTab.Profile, showBackBtn });
-
+  const hasEmail = lead?.contact?.email === "" || lead?.contact?.email === null;
   return (
     <Folder
       title={title}
@@ -32,19 +32,24 @@ export const InfoFolder = ({
             onPress: onSecondary,
             disabled: disableSecondary,
           }}
-          primary={{ text: "Email", icon: Icons.Mail, onPress: onPrimary }}
+          primary={{
+            text: "Email",
+            icon: Icons.Mail,
+            disabled: hasEmail,
+            onPress: onPrimary,
+          }}
         />
       }
     >
       <LeadFolder i={viewing}>
         {lead && (
-          <div className="w-full h-full pr-[30px] py-[30px]">
+          <div className="w-full h-full pr-7.5 py-7.5">
             <div className="relative w-full h-full">
               <div className="absolute-fill flex flex-col items-center overflow-scroll" ref={infoRef}>
                 <p className="w-full text-center text-xl font-bold">
-                  Contact: {lead.contact.firstName} {lead.contact.lastName}
+                  Contact: {lead.contact?.firstName} {lead.contact?.lastName}
                 </p>
-                <div className="w-full flex grow-1 items-center justify-center">
+                <div className="w-full flex grow items-center justify-center">
                   <LeadInfoSection lead={lead} />
                 </div>
               </div>

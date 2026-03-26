@@ -58,6 +58,7 @@ const createDefaultPropertyForm = (): PropertyComposerState => ({
 const KanbanBoardPage = () => {
   const { get, post, put, del } = useFetch();
   const { enqueueSnackbar } = useSnackbar();
+
   const currentUser = useAuthStore((state) => state.user);
   const [boards, setBoards] = useState<KanbanBoard[]>([]);
   const [activeBoardId, setActiveBoardId] = useState<number | null>(null);

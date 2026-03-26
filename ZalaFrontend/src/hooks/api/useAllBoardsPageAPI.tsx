@@ -230,10 +230,6 @@ export const useAllBoardsPageAPI = () => {
   const selectedBoardAPIResponse = (data: AKanbanBoard) => {
     const board = AKanbanBoardToIKanbanBoard(data);
 
-    console.log(`Response Board:`);
-    console.log(board);
-    console.log(``);
-
     setBoards((prev) =>
       produce(prev, (draft) => {
         const index = draft.findIndex(

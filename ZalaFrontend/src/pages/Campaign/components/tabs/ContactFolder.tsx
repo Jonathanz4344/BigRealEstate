@@ -24,7 +24,7 @@ export const ContactFolder = ({
   const campaign = useCampaignStore((state) => state.campaign);
   const campaignLead = campaign.leads.find((lead) => lead.leadId === viewing);
   const icons = useFolderIcons({ active: CampaignTab.Connect, showBackBtn });
-  const hasEmail = lead.contact.email === "" || lead.contact.email === null;
+  const hasEmail = lead?.contact?.email === "" || lead?.contact?.email === null;
   return (
     <Folder
       icons={icons}
@@ -37,28 +37,37 @@ export const ContactFolder = ({
             onPress: onSecondary,
             disabled: disableSecondary,
           }}
-          primary={{ text: "Email", disabled:hasEmail, icon: Icons.Mail, onPress: onPrimary }}
+          primary={{
+            text: "Email",
+            disabled: hasEmail,
+            icon: Icons.Mail,
+            onPress: onPrimary,
+          }}
         />
       }
     >
       <LeadFolder i={viewing}>
         {lead && (
-          <div className="w-full flex flex-col items-center pr-[30px] pt-[30px]">
+          <div className="w-full flex flex-col items-center pr-.5 pt-.5">
             <p className="w-full text-center text-xl font-bold">
-              Contact: {lead.contact.firstName} {lead.contact.lastName}
+              Contact: {lead.contact?.firstName} {lead.contact?.lastName}
             </p>
-            <div className="w-full flex grow-1 items-center justify-center">
-              <div className="w-full flex flex-col space-y-[15px]">
-                <LeadTitleValue title="Email:" value={lead.contact.email} />
-                <LeadTitleValue title="Phone #:" value={lead.contact.phone} />
+            <div className="w-full flex grow items-center justify-center">
+              <div className="w-full flex flex-col space-y-3.5">
+                <LeadTitleValue title="Email:" value={lead.contact?.email} />
+                <LeadTitleValue title="Phone #:" value={lead.contact?.phone} />
                 <LeadTitleValue title="Contacted by:">
-                  <div className="flex flex-row justify-between w-full pt-[5px] px-[15px]" ref={contactRef}>
+                  <div className="flex flex-row justify-between w-full pt-1.25 px-3.5" ref={contactRef}>
                     <ContactMethod
                       active={campaignLead?.contactMethods.includes(
-                        CampaignContactMethod.Email
+                        CampaignContactMethod.Email,
                       )}
-                      onClick={hasEmail ? () => {return;} : () =>
-                        onContactMethod(CampaignContactMethod.Email)
+                      onClick={
+                        hasEmail
+                          ? () => {
+                              return;
+                            }
+                          : () => onContactMethod(CampaignContactMethod.Email)
                       }
                       text="Email"
                       icon={Icons.Mail}
@@ -66,7 +75,7 @@ export const ContactFolder = ({
                     />
                     <ContactMethod
                       active={campaignLead?.contactMethods.includes(
-                        CampaignContactMethod.Phone
+                        CampaignContactMethod.Phone,
                       )}
                       onClick={() =>
                         onContactMethod(CampaignContactMethod.Phone)
@@ -76,7 +85,7 @@ export const ContactFolder = ({
                     />
                     <ContactMethod
                       active={campaignLead?.contactMethods.includes(
-                        CampaignContactMethod.SMS
+                        CampaignContactMethod.SMS,
                       )}
                       onClick={() => onContactMethod(CampaignContactMethod.SMS)}
                       text="SMS"

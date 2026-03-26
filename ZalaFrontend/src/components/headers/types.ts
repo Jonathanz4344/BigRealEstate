@@ -1,3 +1,4 @@
+import type { RefObject } from "react";
 import type { IconButtonProps } from "../buttons";
 import type { IconProps } from "../icons";
 
@@ -19,6 +20,7 @@ export type Actions = {
   type: ActionType;
   side: ActionSide;
   visible?: boolean;
+  ref?: RefObject<HTMLDivElement | null>;
   iconBtnProps?: IconButtonProps;
   iconProps?: IconProps;
 };

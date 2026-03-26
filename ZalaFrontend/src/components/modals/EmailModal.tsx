@@ -32,7 +32,7 @@ export const EmailModal = ({
   const hasEmail = [];
   const notHasEmail = [];
   for (const i of leads) {
-    if (i["contact"]["email"]) {
+    if (i.contact?.email) {
       hasEmail.push(i);
     } else {
       notHasEmail.push(i);
@@ -41,7 +41,7 @@ export const EmailModal = ({
   return (
     <Modal open={open} onClose={onClose}>
       <div className="w-full max-h-[80vh] p-6 flex flex-col overflow-hidden">
-        <div className="space-y-[5px] mb-4 flex-shrink-0">
+        <div className="space-y-1.25 mb-4 shrink-0">
           <h2 className="text-2xl font-bold text-secondary">
             Email Lead{leads.length > 1 ? "s" : ""}
           </h2>
@@ -49,10 +49,10 @@ export const EmailModal = ({
             {hasEmail.length < 1 ? "" : "Send an email to"}{" "}
             {hasEmail.slice(0, Math.min(leads.length, 3)).map((lead) => (
               <span
-                key={lead.leadId ?? lead.contact.email}
+                key={lead.leadId ?? lead.contact?.email}
                 className="font-bold text-secondary"
-              >{`${lead.contact.firstName} ${lead.contact.lastName} (${
-                lead.contact.email ?? lead.contact.phone
+              >{`${lead.contact?.firstName} ${lead.contact?.lastName} (${
+                lead.contact?.email ?? lead.contact?.phone
               })`}</span>
             ))}{" "}
             {hasEmail.length > 3 ? `+${hasEmail.length - 3} more` : ""}
@@ -61,17 +61,17 @@ export const EmailModal = ({
             {hasEmail.length < 1 ? "Cannot Email" : ""}{" "}
             {notHasEmail.slice(0, Math.min(leads.length, 3)).map((lead) => (
               <span
-                key={lead.leadId ?? lead.contact.email}
+                key={lead.leadId ?? lead.contact?.email}
                 className="font-bold text-secondary"
                 style={{ color: "red" }}
-              >{`${lead.contact.firstName} ${lead.contact.lastName} (${
-                lead.contact.email ?? lead.contact.phone
+              >{`${lead.contact?.firstName} ${lead.contact?.lastName} (${
+                lead.contact?.email ?? lead.contact?.phone
               })`}</span>
             ))}{" "}
             {notHasEmail.length > 3 ? `+${notHasEmail.length - 3} more` : ""}
           </p>
         </div>
-        <div className="space-y-[15px] flex-1 overflow-y-auto pr-2 min-h-0">
+        <div className="space-y-3.75 flex-1 overflow-y-auto pr-2 min-h-0">
           <TextInput
             label="Subject"
             value={subject}
@@ -109,7 +109,7 @@ export const EmailModal = ({
             )}
           </div>
         </div>
-        <div className="flex flex-row space-x-[15px] mt-6 pt-2 border-t border-gray-100 flex-shrink-0">
+        <div className="flex flex-row space-x-3.75 mt-6 pt-2 border-t border-gray-100 shrink-0">
           <Button
             text={"Cancel"}
             onClick={onClose}

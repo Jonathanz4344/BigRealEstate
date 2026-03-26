@@ -57,7 +57,7 @@ export const LeadListSection = forwardRef<HTMLDivElement, LeadListSectionProps>(
           >
             <div className="relative h-full w-full">
               {showLeads && title && (
-                <span className="block sticky top-0 z-1 bg-background w-full text-center text-base pb-[5px]">
+                <span className="block sticky top-0 z-1 bg-background w-full text-center text-base pb-1.25">
                   {title}
                 </span>
               )}
@@ -83,7 +83,7 @@ export const LeadListSection = forwardRef<HTMLDivElement, LeadListSectionProps>(
           {footerBtn && showLeads && (
             <div
               className={clsx(
-                "absolute bottom-0 left-0 z-1 w-full flex justify-center p-[15px] bg-background pb-0 !bg-green",
+                "absolute bottom-0 left-0 z-1 w-full flex justify-center p-3.75 bg-background pb-0 bg-green!",
                 "transition-transform duration-1000 delay-100",
                 showLeads ? "translate-y-0" : "translate-y-[-150%]",
               )}

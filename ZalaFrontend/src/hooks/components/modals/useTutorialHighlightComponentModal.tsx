@@ -24,7 +24,7 @@ export const useTutorialHighlightComponentModal = ({
 
   const hiddenTextTimeoutRef = useRef<number | null>(null);
 
-  const { tutorialStore, step, tutorialText, nextTutorial } = useTutorialModal({
+  const { step, tutorialText, nextTutorial } = useTutorialModal({
     onClose,
   });
   const onTutorialModalChange = useOnTutorialModalChange();
@@ -58,12 +58,6 @@ export const useTutorialHighlightComponentModal = ({
     [step],
     50,
   );
-
-  useEffect(() => {
-    console.log(`HighlightComponent`);
-    console.log(tutorialStore.page);
-    console.log(``);
-  }, [tutorialStore.page]);
 
   useTimeoutEffect(
     () => {

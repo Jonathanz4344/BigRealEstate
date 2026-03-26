@@ -35,12 +35,13 @@ export const HeaderActions = ({ actions = [], side }: HeaderActionsProps) => {
           : []) as (Actions | null)[],
       ),
     );
-  }, [addAmount, stringify(actions)]);
+  }, [addAmount, stringify(actions.map((a) => a && ({ ...a, ref: undefined })))]);
 
   return allActions.map((action, i) =>
     action && action.side === side ? (
       <motion.div
         key={i}
+        ref={action.ref}
         className={clsx(
           "transition-opacity duration-150",
           action.visible === false ? "opacity-0" : "opacity-[100]",
