@@ -42,7 +42,7 @@ export const CampaignPage = transition(() => {
     onSendEmail,
     updateLeadContactMethod,
   } = useCampaignPage();
-  console.log(leads)
+  
   const {tab, setTab} = useCampaignPageStore();
   const { notes, setNotes } = useCampaignPageStore();
   const {tutorial} = useTutorialStore()
