@@ -77,3 +77,9 @@ VITE_GOOGLE_SCOPES=openid email profile https://www.googleapis.com/auth/gmail.se
 ## Authors
 
 Senior Project — 2026
+
+- Andrew Moulton
+- Colin Tondreau
+- Jonathan Zhu
+- Niccolls Evsseef
+- Robert Huang
