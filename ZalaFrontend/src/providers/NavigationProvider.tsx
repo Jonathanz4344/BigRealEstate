@@ -52,12 +52,12 @@ export const NavigationProvider = () => {
           <Route
             index
             path={NavigationPath.Root}
-            element={<NavToDashboard />}
+            element={user ? <NavToDashboard /> : <NavToLogin />}
           />
 
           <Route path={NavigationPath.Campaigns}>
-            <Route index element={<PastCampaignsPage />} />
-            <Route path=":campaignId" element={<CampaignPage />} />
+            <Route index element={user ? <PastCampaignsPage /> : <NavToLogin />} />
+            <Route path=":campaignId" element={user ? <CampaignPage /> : <NavToLogin />} />
           </Route>
 
           <Route path={NavigationPath.Demos}>
@@ -68,11 +68,11 @@ export const NavigationProvider = () => {
             <Route path="board" element={<KanbanBoardPage />} />
           </Route>
 
-          <Route path={NavigationPath.Dashboard} element={<DashboardPage />} />
-          <Route path={NavigationPath.Search} element={<LeadSearchPage />} />
+          <Route path={NavigationPath.Dashboard} element={user ? <DashboardPage /> : <NavToLogin />} />
+          <Route path={NavigationPath.Search} element={user ? <LeadSearchPage /> : <NavToLogin />} />
           <Route
             path={NavigationPath.SingleBoard}
-            element={<SingleBoardPage />}
+            element={user ? <SingleBoardPage /> : <NavToLogin />}
           />
 
           <Route path={NavigationPath.NotFound} element={<NotFoundPage />} />

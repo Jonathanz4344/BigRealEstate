@@ -18,7 +18,7 @@ public_router = APIRouter(
 )
 
 
-@router.post("/",tags=["Users"], response_model=schemas.UserPublic, status_code=status.HTTP_201_CREATED)
+@router.post("",tags=["Users"], response_model=schemas.UserPublic, status_code=status.HTTP_201_CREATED)
 def create_user(
         user_in: schemas.UserCreate,
         db: Session = Depends(get_db)
@@ -79,7 +79,7 @@ def signup_user(
     return user_crud.create_user_with_contact(db=db, user=user_in)
 
 
-@router.get("/",tags=["Users"], response_model=List[schemas.UserPublic])
+@router.get("",tags=["Users"], response_model=List[schemas.UserPublic])
 def read_users(
         skip: int = 0,
         limit: int = 100,

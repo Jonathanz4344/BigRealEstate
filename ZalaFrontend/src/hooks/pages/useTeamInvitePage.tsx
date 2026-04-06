@@ -93,9 +93,15 @@ export const useTeamInvitePage = () => {
     setLoadingTeams(false);
   };
 
-  // Load team invitations
+  // Load team invitations (admin only)
   const loadInvitations = async (teamId: number) => {
     if (!user) return;
+    // Only admins can view invitations; skip to avoid 403
+    const team = teams.find((t) => t.team_id === teamId);
+    const isAdmin = team?.members.some(
+      (m) => m.user.user_id === user.userId && m.role === "admin",
+    );
+    if (!isAdmin) return;
     const response = await api.getTeamInvitations(teamId, user.userId);
     if (response.data) {
       setInvitations(
@@ -131,21 +137,33 @@ export const useTeamInvitePage = () => {
     }
   }, [selectedTeam?.team_id]);
 
-  // WebSocket for real-time team updates
+  // Production: poll for team updates | Dev: use WebSocket
+  const isProduction = CONFIG.env === "production";
+  const POLL_INTERVAL = 1000; // 1 seconds
+
   useEffect(() => {
     if (!selectedTeam || !user) return;
 
+    if (isProduction) {
+      const pollTeamData = async () => {
+        loadTeams();
+        loadInvitations(selectedTeam.team_id);
+        loadAnnouncements(selectedTeam.team_id);
+        refreshTeamMembersWithXp();
+      };
+      const interval = setInterval(pollTeamData, POLL_INTERVAL);
+      return () => clearInterval(interval);
+    }
+
+    // Dev: WebSocket for real-time team updates
     const wsProtocol = CONFIG.api.startsWith("https") ? "wss" : "ws";
     const wsHost = CONFIG.api.replace(/^https?:\/\//, "");
     const wsUrl = `${wsProtocol}://${wsHost}/ws/team/${selectedTeam.team_id}`;
 
-    // logs("[TeamWS] Connecting to:", wsUrl);
     const teamSocket = new WebSocket(wsUrl);
     const currentTeamId = selectedTeam.team_id;
 
-    teamSocket.onopen = () => {
-      // logs("[TeamWS] Connected to team", currentTeamId);
-    };
+    teamSocket.onopen = () => {};
 
     teamSocket.onmessage = (event) => {
       try {
@@ -159,8 +177,6 @@ export const useTeamInvitePage = () => {
 
         if (message.type === "invitation_update") {
           const updatedInvitation = message.data;
-
-          // Update invitation status in list
           setInvitations(
             invitations.map((inv) =>
               inv.invitation_id === updatedInvitation.invitation_id
@@ -171,7 +187,6 @@ export const useTeamInvitePage = () => {
         }
 
         if (message.type === "member_joined") {
-          // logs("[TeamWS] Member joined, updating state...");
           const {
             user_id,
             username,
@@ -192,10 +207,8 @@ export const useTeamInvitePage = () => {
             },
           };
 
-          // Add new member to selectedTeam
           setSelectedTeam((prev) => {
             if (!prev) return prev;
-            // Check if member already exists to avoid duplicates
             if (prev.members.some((m) => m.user.user_id === user_id)) {
               return prev;
             }
@@ -205,11 +218,9 @@ export const useTeamInvitePage = () => {
             };
           });
 
-          // Add new member to teams list
           setTeams((prev) =>
             prev.map((t) => {
               if (t.team_id !== currentTeamId) return t;
-              // Check if member already exists
               if (
                 t.members.some((m: ITeamMember) => m.user.user_id === user_id)
               ) {
@@ -224,10 +235,8 @@ export const useTeamInvitePage = () => {
         }
 
         if (message.type === "member_removed") {
-          // logs("[TeamWS] Member removed, updating state...");
           const removedUserId = message.data.user_id;
 
-          // Update selectedTeam by removing the member immediately
           setSelectedTeam((prev) => {
             if (!prev) return prev;
             return {
@@ -238,7 +247,6 @@ export const useTeamInvitePage = () => {
             };
           });
 
-          // Update teams list
           setTeams((prev) =>
             prev.map((t) => {
               if (t.team_id !== currentTeamId) return t;
@@ -253,10 +261,8 @@ export const useTeamInvitePage = () => {
         }
 
         if (message.type === "member_role_changed") {
-          // logs("[TeamWS] Member role changed, updating state...");
           const { user_id: changedUserId, new_role: newRole } = message.data;
 
-          // Update selectedTeam by changing the member's role
           setSelectedTeam((prev) => {
             if (!prev) return prev;
             return {
@@ -267,7 +273,6 @@ export const useTeamInvitePage = () => {
             };
           });
 
-          // Update teams list
           setTeams((prev) =>
             prev.map((t) => {
               if (t.team_id !== currentTeamId) return t;
@@ -284,10 +289,8 @@ export const useTeamInvitePage = () => {
         }
 
         if (message.type === "team_deleted") {
-          // logs("[TeamWS] Team deleted, removing from state...");
           const deletedTeamId = message.data.team_id;
 
-          // Clear selected team if it's the deleted one
           setSelectedTeam((prev) => {
             if (prev?.team_id === deletedTeamId) {
               return null;
@@ -295,17 +298,11 @@ export const useTeamInvitePage = () => {
             return prev;
           });
 
-          // Remove the team from teams list
           setTeams((prev) => prev.filter((t) => t.team_id !== deletedTeamId));
-
-          // Also remove from the global store
           removeTeam(deletedTeamId);
-
-          // Exit edit mode if active
           setEditMode(false);
         }
 
-        // Handle new announcements in real-time
         if (message.type === "new_announcement") {
           logs("[TeamWS] New announcement received:", message.data);
           const newAnnouncement: ITeamAnnouncement = {
@@ -321,12 +318,9 @@ export const useTeamInvitePage = () => {
               profile_pic: message.data.author_profile_pic,
             },
           };
-
-          // Add to beginning of announcements list
           setAnnouncements((prev) => [newAnnouncement, ...prev]);
         }
 
-        // Handle announcement updates
         if (message.type === "announcement_updated") {
           logs("[TeamWS] Announcement updated:", message.data);
           setAnnouncements((prev) =>
@@ -343,7 +337,6 @@ export const useTeamInvitePage = () => {
           );
         }
 
-        // Handle announcement deletions
         if (message.type === "announcement_deleted") {
           logs("[TeamWS] Announcement deleted:", message.data);
           setAnnouncements((prev) =>
@@ -353,7 +346,6 @@ export const useTeamInvitePage = () => {
           );
         }
 
-        // Handle team info updates (name, xp) in real-time
         if (message.type === "team_updated") {
           logs("[TeamWS] Team updated:", message.data);
           const { team_name, xp } = message.data;
@@ -379,7 +371,6 @@ export const useTeamInvitePage = () => {
           );
         }
 
-        // Handle property linked/unlinked — reload teams to get fresh data
         if (
           message.type === "team_property_linked" ||
           message.type === "team_property_unlinked"
@@ -388,7 +379,6 @@ export const useTeamInvitePage = () => {
           loadTeams();
         }
 
-        // Handle board linked/unlinked — reload teams to get fresh data
         if (
           message.type === "team_board_linked" ||
           message.type === "team_board_unlinked"
@@ -410,12 +400,9 @@ export const useTeamInvitePage = () => {
       console.error("[TeamWS] Error:", error);
     };
 
-    teamSocket.onclose = () => {
-      // logs("[TeamWS] Disconnected from team", currentTeamId);
-    };
+    teamSocket.onclose = () => {};
 
     return () => {
-      // logs("[TeamWS] Cleaning up connection for team", currentTeamId);
       teamSocket.close();
     };
   }, [selectedTeam?.team_id, user?.userId]);

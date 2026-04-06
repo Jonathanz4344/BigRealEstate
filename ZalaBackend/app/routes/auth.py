@@ -19,7 +19,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=UserPublic)
+@router.post("", response_model=UserPublic)
 def login(login_data: Login, db: Session = Depends(get_db)):
     """
     login route

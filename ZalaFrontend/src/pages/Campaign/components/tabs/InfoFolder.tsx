@@ -4,9 +4,12 @@ import { useFolderIcons } from "../../hooks";
 import { Folder, LeadButtons, LeadFolder } from "../layout";
 import type { CampaignFolderChildProps } from "./types";
 
-type InfoFolderProps = CampaignFolderChildProps;
+type InfoFolderProps = CampaignFolderChildProps & {
+  infoRef: React.RefObject<HTMLDivElement | null>;
+}
 
 export const InfoFolder = ({
+  infoRef,
   title,
   showBackBtn,
   lead,
@@ -42,7 +45,7 @@ export const InfoFolder = ({
         {lead && (
           <div className="w-full h-full pr-7.5 py-7.5">
             <div className="relative w-full h-full">
-              <div className="absolute-fill flex flex-col items-center overflow-scroll">
+              <div className="absolute-fill flex flex-col items-center overflow-scroll" ref={infoRef}>
                 <p className="w-full text-center text-xl font-bold">
                   Contact: {lead.contact?.firstName} {lead.contact?.lastName}
                 </p>

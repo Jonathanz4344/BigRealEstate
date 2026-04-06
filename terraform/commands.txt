@@ -1,0 +1,8 @@
+# for deleting .pem key
+icacls.exe zla-stakeholder-key.pem /grant:r "$($env:USERNAME):(F)"
+Remove-Item zla-stakeholder-key.pem -Force
+
+# for ssh into ubuntu server
+icacls.exe zla-stakeholder-key.pem /inheritance:r
+icacls.exe zla-stakeholder-key.pem /grant:r "$($env:USERNAME):(R)"
+ssh -i zla-stakeholder-key.pem ubuntu@<YOUR_NEW_EC2_IP_ADDRESS>

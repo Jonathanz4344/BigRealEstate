@@ -13,7 +13,7 @@ router = APIRouter(prefix="/addresses/{address_id}/properties", tags=["Propertie
 properties_public = APIRouter(prefix="/properties", tags=["Properties"]) 
 
 
-@router.post("/", response_model=PropertyPublic, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=PropertyPublic, status_code=status.HTTP_201_CREATED)
 def create_property(
     address_id: int,
     property_in: PropertyCreate,
@@ -24,7 +24,7 @@ def create_property(
     return property_crud.create_property(db=db, property_in=property_in, address_id=address_id, creator_id=creator_id)
 
 
-@router.get("/", response_model=List[PropertyPublic])
+@router.get("", response_model=List[PropertyPublic])
 def read_properties(address_id: int, skip: int = 0, limit: int = 100, created_by: int = None, db: Session = Depends(get_db)):
     """List properties for an address. Optional `created_by` filters properties associated with that user."""
     return property_crud.get_properties(db=db, address_id=address_id, skip=skip, limit=limit, creator_id=created_by)
@@ -131,7 +131,7 @@ def remove_property_image(address_id: int, property_id: int, db: Session = Depen
     return db_property
 
 
-@properties_public.get("/", response_model=List[PropertyPublic], summary="List properties (optionally filter by creator)")
+@properties_public.get("", response_model=List[PropertyPublic], summary="List properties (optionally filter by creator)")
 def list_properties(created_by: int = None, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """List all properties. If `created_by` is provided, return properties linked to that user."""
     # No creator filter: return empty list to avoid returning huge dataset without address scope

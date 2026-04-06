@@ -11,7 +11,7 @@ export const useAddressApi = ({ getSignal }: APIHookProps) => {
     address: Omit<IAddress, "addressId">;
   }) => {
     return await post<AAddress>(
-      `/api/addresses/`,
+      `/api/addresses`,
       {
         street_1: address.street1,
         street_2: address.street2,

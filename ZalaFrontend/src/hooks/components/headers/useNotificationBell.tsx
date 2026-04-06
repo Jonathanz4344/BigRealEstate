@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   useAuthStore,
   useNotificationStore,
@@ -30,6 +30,8 @@ export const useNotificationBell = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const hasFetchedNotifications = useRef(false);
   const wsConnected = useRef(false);
+  const isProduction = CONFIG.env === "production";
+  const POLL_INTERVAL = 1000; // 1 seconds
 
   // Constants
   const PREVIEW_COUNT = 3;
@@ -52,11 +54,30 @@ export const useNotificationBell = () => {
     loadNotifications();
   }, [user]);
 
-  // WebSocket connection for real-time notifications - only fires on events, doesn't poll
-  useEffect(() => {
-    if (!user || wsConnected.current) return;
+  // Polling fallback for production (no WSS support without a domain)
+  const pollNotifications = useCallback(async () => {
+    if (!user) return;
+    const response = await api.getNotifications(user.userId);
+    if (response.data) {
+      setNotifications(response.data);
+    }
+    const teamsResponse = await api.getTeamsByUser(user.userId);
+    if (teamsResponse.data) {
+      setTeams(teamsResponse.data);
+    }
+  }, [user]);
 
-    // Construct WebSocket URL
+  // Production: poll every 15s | Dev: use WebSocket
+  useEffect(() => {
+    if (!user) return;
+
+    if (isProduction) {
+      const interval = setInterval(pollNotifications, POLL_INTERVAL);
+      return () => clearInterval(interval);
+    }
+
+    // Dev: WebSocket connection for real-time notifications
+    if (wsConnected.current) return;
     const wsProtocol = CONFIG.api.startsWith("https") ? "wss" : "ws";
     const wsHost = CONFIG.api.replace(/^https?:\/\//, "");
     const wsUrl = `${wsProtocol}://${wsHost}/ws/notifications/${user.userId}`;
@@ -64,7 +85,6 @@ export const useNotificationBell = () => {
     wsManager.connect(wsUrl);
     wsConnected.current = true;
 
-    // Listen for new notifications - WebSocket only pushes when events happen
     const unsubscribe = wsManager.on<INotification>(
       "notification",
       (message) => {
@@ -72,7 +92,6 @@ export const useNotificationBell = () => {
       },
     );
 
-    // Listen for team_deleted events - remove team from My Teams in real-time
     const unsubscribeTeamDeleted = wsManager.on<{
       team_id: number;
       team_name: string;
@@ -80,7 +99,6 @@ export const useNotificationBell = () => {
       removeTeam(message.data.team_id);
     });
 
-    // Listen for team_joined events - add team to My Teams when user accepts invitation
     const unsubscribeTeamJoined = wsManager.on<ITeam>(
       "team_joined",
       (message) => {
@@ -88,7 +106,6 @@ export const useNotificationBell = () => {
       },
     );
 
-    // Listen for member_kicked events - remove team from My Teams when user is kicked
     const unsubscribeMemberKicked = wsManager.on<{
       team_id: number;
       team_name: string;

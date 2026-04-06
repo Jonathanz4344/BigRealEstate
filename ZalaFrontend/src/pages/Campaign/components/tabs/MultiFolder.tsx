@@ -6,11 +6,13 @@ import { ArrowLeadCard, Icons } from "../../../../components";
 import { useCampaignPageStore } from "../../../../stores";
 
 type MultiFolderProps = Omit<CampaignFolderChildProps, "lead"> & {
+  emailButtonRef: React.RefObject<HTMLDivElement | null>;
   allLeads: ILead[];
   leads: ILead[];
 };
 
 export const MultiFolder = ({
+  emailButtonRef,
   title,
   showBackBtn,
   allLeads,
@@ -37,7 +39,7 @@ export const MultiFolder = ({
                 }
               : undefined
           }
-          primary={{ text: "Email All", icon: Icons.Mail, onPress: onPrimary }}
+          primary={{ref:emailButtonRef, text: "Email All", icon: Icons.Mail, onPress: onPrimary }}
         />
       }
     >

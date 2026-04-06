@@ -29,6 +29,13 @@ export const TutorialText = {
     "This is where you can modify properties of your board like the name or the type of board.",
     'A board contains a series of steps that leads or properties must progress through to get to the end goal. For example, a lead may start as a "New Lead", then progress to "Contact Made", then "Sale Closed". You can add an item to the board with the + button under a step, then drag the item to move it to different steps.',
   ],
+  campaign: [
+    "With a campaign, you can store information about leads and manage your communications with them.",
+    "Multiple selected leads can be emailed with the “Email All” button if there are selected leads with known emails.",
+    "You can track how you’ve reached out to a lead by clicking the contact options here.",
+    "You can leave miscellaneous notes on a lead here.",
+    "All known information about a lead is shown here.",
+  ],
 };
 
 export type TutorialTextKey = keyof typeof TutorialText;
@@ -50,6 +57,7 @@ export const TutorialSequence = {
   navbar: ["component"],
   search: ["modal", "component", "component"],
   board: ["modal", "component", "component", "component"],
+  campaign: ["modal", "component", "component", "component", "component"],
 };
 
 export const TutorialSequenceMaximums = {
@@ -57,6 +65,7 @@ export const TutorialSequenceMaximums = {
   navbar: TutorialText.navbar.length - 1,
   search: TutorialText.search.length - 1,
   board: TutorialText.board.length - 1,
+  campaign: TutorialText.campaign.length - 1,
 };
 
 export const TutorialTextPlacements = {
@@ -79,6 +88,13 @@ export const TutorialTextPlacements = {
     TextPlacement.Modal,
     TextPlacement.Bottom,
     TextPlacement.Bottom,
+    TextPlacement.Top,
+  ],
+  campaign: [
+    TextPlacement.Top,
+    TextPlacement.Top,
+    TextPlacement.Bottom,
+    TextPlacement.Top,
     TextPlacement.Top,
   ],
 };

@@ -6,3 +6,4 @@ dist
 tmp
 *.zip
 terraform.tfstate*
+*.pem

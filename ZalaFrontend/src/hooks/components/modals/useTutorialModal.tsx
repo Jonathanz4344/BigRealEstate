@@ -159,6 +159,7 @@ export const useTutorialModal = ({
 
   const nextTutorial = async () => {
     switch (tutorialStore.page) {
+      case TutorialPage.Campaign:
       case TutorialPage.Search:
         await updateUserTutorial(1, tutorialStore.page);
         onClose();

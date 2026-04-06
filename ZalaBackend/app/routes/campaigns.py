@@ -12,7 +12,7 @@ from app.db.session import get_db
 router = APIRouter(prefix="/campaigns", tags=["Campaigns"])
 
 
-@router.post("/", response_model=schemas.CampaignPublic, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=schemas.CampaignPublic, status_code=status.HTTP_201_CREATED)
 def create_campaign(campaign_in: schemas.CampaignCreate, db: Session = Depends(get_db)):
     """
     Create a new campaign.
@@ -20,7 +20,7 @@ def create_campaign(campaign_in: schemas.CampaignCreate, db: Session = Depends(g
     return campaign_crud.create_campaign(db, campaign_in)
 
 
-@router.get("/", summary="Get All Campaigns", response_model=List[schemas.CampaignPublic])
+@router.get("", summary="Get All Campaigns", response_model=List[schemas.CampaignPublic])
 def list_campaigns(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     List campaigns with optional pagination.

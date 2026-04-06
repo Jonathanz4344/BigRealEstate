@@ -10,7 +10,7 @@ from app.db.session import get_db
 router = APIRouter(prefix="/board-steps", tags=["Board Steps"])
 
 
-@router.post("/", response_model=schemas.BoardStepPublic, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=schemas.BoardStepPublic, status_code=status.HTTP_201_CREATED)
 def create_board_step(step_in: schemas.BoardStepCreate, db: Session = Depends(get_db)):
     """
     Create a new board step.
@@ -18,7 +18,7 @@ def create_board_step(step_in: schemas.BoardStepCreate, db: Session = Depends(ge
     return board_step_crud.create_board_step(db, step_in)
 
 
-@router.get("/", summary="Get Board Steps", response_model=List[schemas.BoardStepPublic])
+@router.get("", summary="Get Board Steps", response_model=List[schemas.BoardStepPublic])
 def list_board_steps(
     skip: int = 0,
     limit: int = 100,

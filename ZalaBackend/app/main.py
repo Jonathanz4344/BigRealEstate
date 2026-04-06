@@ -33,7 +33,7 @@ from app.routes import (
 )
 from app.services.file_storage import get_upload_root
 
-app = FastAPI()
+app = FastAPI(redirect_slashes=False)
 
 uploads_path = get_upload_root()
 app.mount("/uploads", StaticFiles(directory=str(uploads_path)), name="uploads")

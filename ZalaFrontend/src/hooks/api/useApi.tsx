@@ -89,7 +89,7 @@ export const useApi = () => {
   const propertyApiRoutes = usePropertyApi(apiProps);
 
   const createUser = async (body: CreateUserProps) => {
-    return await post<AUser>(`/api/users/`, body, {
+    return await post<AUser>(`/api/users`, body, {
       isFormData: false,
       signal: getSignal("createUser"),
     });
@@ -123,7 +123,7 @@ export const useApi = () => {
     userId,
   }: CreateCampaignProps) => {
     return await post<ACampaign>(
-      `/api/campaigns/`,
+      `/api/campaigns`,
       {
         campaign_name: title,
         user_id: userId,
@@ -287,7 +287,7 @@ export const useApi = () => {
     body,
     fromName,
   }: CreateCampaignEmailDraftProps) => {
-    return await post<ACampaignEmail>(`/api/campaign-emails/`, {
+    return await post<ACampaignEmail>(`/api/campaign-emails`, {
       campaign_id: campaignId,
       lead_id: leadId,
       message_subject: subject,
@@ -364,7 +364,7 @@ export const useApi = () => {
 
   // Team Management APIs
   const getTeams = async () => {
-    return await get<ITeam[]>(`/api/teams/`, getSignal(`getTeams`));
+    return await get<ITeam[]>(`/api/teams`, getSignal(`getTeams`));
   };
 
   const createTeam = async ({
@@ -611,7 +611,7 @@ export const useApi = () => {
       leads_created: number[];
       leads_updated: number[];
       leads_unchanged: number[];
-    }>(`/api/import-csv/`, formData, {
+    }>(`/api/import-csv`, formData, {
       isFormData: true,
       signal: getSignal("intakeCsv"),
     });

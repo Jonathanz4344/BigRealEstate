@@ -10,13 +10,13 @@ from app.schemas.unit import UnitCreate, UnitUpdate, UnitPublic
 router = APIRouter(prefix="/properties/{property_id}/units", tags=["Units"])
 
 
-@router.post("/", response_model=UnitPublic, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=UnitPublic, status_code=status.HTTP_201_CREATED)
 def create_unit(property_id: int, unit_in: UnitCreate, db: Session = Depends(get_db)):
     # property_id from path is authoritative; override any provided property_id in body
     return unit_crud.create_unit(db=db, unit_in=unit_in, property_id=property_id)
 
 
-@router.get("/", response_model=List[UnitPublic])
+@router.get("", response_model=List[UnitPublic])
 def read_units(property_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return unit_crud.get_units(db=db, property_id=property_id, skip=skip, limit=limit)
 

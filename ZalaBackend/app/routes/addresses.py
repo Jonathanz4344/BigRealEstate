@@ -9,12 +9,12 @@ from app.schemas.address import AddressCreate, AddressPublic, AddressUpdate
 router = APIRouter(prefix="/addresses", tags=["Addresses"])
 
 
-@router.post("/", response_model=AddressPublic)
+@router.post("", response_model=AddressPublic)
 def create_address(address_in: AddressCreate, db: Session = Depends(get_db)):
     return address_crud.create_address(db=db, address_in=address_in)
 
 
-@router.get("/", response_model=List[AddressPublic])
+@router.get("", response_model=List[AddressPublic])
 def read_addresses(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return address_crud.get_addresses(db=db, skip=skip, limit=limit)
 

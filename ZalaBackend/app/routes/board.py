@@ -11,7 +11,7 @@ from app.db.session import get_db
 router = APIRouter(prefix="/boards", tags=["Boards"])
 
 
-@router.post("/", response_model=schemas.BoardPublic, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=schemas.BoardPublic, status_code=status.HTTP_201_CREATED)
 def create_board(board_in: schemas.BoardCreate, db: Session = Depends(get_db)):
     """
     Create a new board.
@@ -19,7 +19,7 @@ def create_board(board_in: schemas.BoardCreate, db: Session = Depends(get_db)):
     return board_crud.create_board(db, board_in)
 
 
-@router.get("/", summary="Get Boards", response_model=List[schemas.BoardPublic])
+@router.get("", summary="Get Boards", response_model=List[schemas.BoardPublic])
 def list_boards(
     skip: int = 0,
     limit: int = 100,

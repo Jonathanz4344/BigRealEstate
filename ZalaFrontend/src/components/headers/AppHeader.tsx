@@ -1,3 +1,4 @@
+import { IMAGES } from "../../assets";
 import { TutorialSequenceMaximums } from "../../config";
 import {
   useAppHeader,
@@ -60,7 +61,7 @@ export const AppHeader = () => {
           className="text-5xl font-bold cursor-pointer grenze"
           onClick={toDashboard}
         >
-          <img className="min-w-25 w-25" src="src\assets\images\zala_b.png" />
+          <img className="min-w-25 w-25" src={IMAGES.ZalaBlackLogo} />
         </button>
       </div>
 

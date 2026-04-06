@@ -21,7 +21,7 @@ from app.routes.websocket import send_notification_to_user, send_team_update, se
 router = APIRouter(prefix="/teams", tags=["Teams"])
 
 
-@router.post("/", response_model=schemas.TeamPublic, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=schemas.TeamPublic, status_code=status.HTTP_201_CREATED)
 def create_team(team_in: schemas.TeamCreate, db: Session = Depends(get_db)):
     """Create a new team (without setting an admin - use create_team_with_admin for that)."""
 
@@ -47,7 +47,7 @@ def create_team_with_admin(team_in: schemas.TeamCreate, admin_user_id: int, db: 
         )
 
 
-@router.get("/", response_model=List[schemas.TeamPublic])
+@router.get("", response_model=List[schemas.TeamPublic])
 def list_teams(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """List teams with basic pagination."""
 

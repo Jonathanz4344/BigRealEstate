@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=schemas.ContactPublic, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=schemas.ContactPublic, status_code=status.HTTP_201_CREATED)
 def create_new_contact(contact_in: schemas.ContactCreate, db: Session = Depends(get_db)):
     """
     Create a new contact
@@ -20,7 +20,7 @@ def create_new_contact(contact_in: schemas.ContactCreate, db: Session = Depends(
     return contact_crud.create_contact(db=db, contact_in=contact_in)
 
 
-@router.get("/", response_model=List[schemas.ContactPublic])
+@router.get("", response_model=List[schemas.ContactPublic])
 def read_contacts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     Get a list of contacts

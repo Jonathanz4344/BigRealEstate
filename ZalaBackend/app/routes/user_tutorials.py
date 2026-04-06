@@ -8,7 +8,7 @@ from app.db.crud import user_tutorial as tutorial_crud
 router = APIRouter(prefix="/user/{user_id}/tutorials", tags=["User Tutorials"])
 
 
-@router.post("/", response_model=UserTutorialPublic, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=UserTutorialPublic, status_code=status.HTTP_201_CREATED)
 def create_tutorial_record(
         user_id: int,
         db: Session = Depends(get_db)
@@ -21,7 +21,7 @@ def create_tutorial_record(
     return tutorial_crud.create_user_tutorial(db=db, tutorial=tutorial_in)
 
 
-@router.get("/", response_model=UserTutorialPublic)
+@router.get("", response_model=UserTutorialPublic)
 def get_user_tutorial(user_id: int, db: Session = Depends(get_db)):
     tutorial = tutorial_crud.get_tutorial_by_user(db, user_id)
     if not tutorial:
@@ -29,7 +29,7 @@ def get_user_tutorial(user_id: int, db: Session = Depends(get_db)):
     return tutorial
 
 
-@router.put("/", response_model=UserTutorialPublic)
+@router.put("", response_model=UserTutorialPublic)
 def update_user_tutorial(
         user_id: int,
         tutorial_update: UserTutorialUpdate,
@@ -41,7 +41,7 @@ def update_user_tutorial(
     return updated_tutorial
 
 
-@router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user_tutorial(user_id: int, db: Session = Depends(get_db)):
     success = tutorial_crud.delete_tutorial(db, user_id)
     if not success:

@@ -59,7 +59,25 @@ def create_contact(db: Session, contact_in: schemas.ContactCreate) -> Contact:
         phone=contact_in.phone,
     )
     db.add(db_contact)
-    db.commit()
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        error_msg = str(e).lower()
+        if "email" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A contact with this email already exists."
+            )
+        if "phone" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A contact with this phone already exists."
+            )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to create contact — a duplicate may exist."
+        )
     db.refresh(db_contact)
     return db_contact
 

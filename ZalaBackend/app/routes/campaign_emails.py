@@ -11,7 +11,7 @@ router = APIRouter(prefix="/campaign-emails", tags=["Campaign Emails"])
 send_router = APIRouter(prefix="/campaign-emails", tags=["Send Campaign Email"])
 
 
-@router.post("/", response_model=schemas.CampaignEmailPublic, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=schemas.CampaignEmailPublic, status_code=status.HTTP_201_CREATED)
 def create_campaign_email(
         message_in: schemas.CampaignEmailCreate, db: Session = Depends(get_db)
 ):
@@ -36,7 +36,7 @@ def send_campaign_email(
     return campaign_email_crud.send_campaign_email(db, message_in)
 
 
-@router.get("/", summary="Get All Campaign Emails", response_model=List[schemas.CampaignEmailPublic])
+@router.get("", summary="Get All Campaign Emails", response_model=List[schemas.CampaignEmailPublic])
 def list_campaign_emails(
         skip: int = 0,
         limit: int = 100,

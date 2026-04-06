@@ -28,7 +28,7 @@ resource "aws_amplify_app" "amplify_app" {
   name         = var.app_name
   repository   = var.repository
   access_token = var.github_token
-  
+
   build_spec   = file("./build.yml")
 
   platform                    = "WEB"
@@ -47,8 +47,15 @@ resource "aws_amplify_app" "amplify_app" {
     AMPLIFY_DIFF_DEPLOY       = false
     AMPLIFY_MONOREPO_APP_ROOT = var.app_root
 
-    # REACT_APP_API_ENDPOINT     = ""
     REACT_APP_ENV              = "PRODUCTION"
+
+    # Application Specific Env Variables
+    VITE_API_URL     = "http://${aws_eip.backend_ip.public_ip}:8000" #var.react_api_url
+    VITE_GOOGLE_MAPS_KEY     = var.google_maps_key
+    VITE_GOOGLE_CLIENT_ID     = var.google_client_id
+    VITE_GOOGLE_REDIRECT_URI     = "postmessage"
+    VITE_GOOGLE_SCOPES     = "openid email profile https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.settings.basic"
+
   }
 
   custom_rule {
@@ -62,6 +69,7 @@ resource "aws_amplify_app" "amplify_app" {
     target = "/index.html"
   }
 
+  depends_on = [aws_eip.backend_ip]
 }
 
 resource "aws_amplify_branch" "dev_branch" {

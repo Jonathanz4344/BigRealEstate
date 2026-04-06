@@ -68,7 +68,7 @@ export const useLeadSearchPage = () => {
     if (!mapRef.current) return;
 
     const leadEntry = leadData[0];
-    if (leadEntry.address) {
+    if (leadEntry?.address) {
       mapRef.current?.centerMap({
         lat: leadEntry.address.lat,
         lng: leadEntry.address.long,

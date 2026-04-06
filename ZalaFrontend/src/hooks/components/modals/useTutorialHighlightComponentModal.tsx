@@ -51,6 +51,19 @@ export const useTutorialHighlightComponentModal = ({
     calculateTextDims();
   }, []);
 
+  // Auto-skip steps where the highlight component ref isn't attached to a DOM
+  // element (e.g. InvitedCardList hidden for non-admin users)
+  useTimeoutEffect(
+    () => {
+      if (step === -1) return;
+      if (currentStepDims && !currentStepDims.ref?.current) {
+        nextTutorial();
+      }
+    },
+    [step],
+    100,
+  );
+
   useTimeoutEffect(
     () => {
       onTutorialModalChange(step);
