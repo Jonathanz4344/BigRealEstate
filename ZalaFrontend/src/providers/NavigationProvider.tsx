@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes, useLocation } from "react-router";
 import { RootLayout } from "../layouts";
 import { useAuthStore } from "../stores";
-import SignupPage from "../pages/Auth/Signup/SignupPage";
 import KanbanBoardPage from "../pages/Boards/KanbanBoardPage";
 import NotFoundPage from "../pages/NotFound/NotFoundPage";
 import TestEmailPage from "../pages/TestEmail/TestEmailPage";
@@ -16,6 +15,8 @@ import {
   SMTPTestPage,
   CampaignEmailDemoPage,
   LoginPage,
+  SignupPage,
+  AdminPage,
 } from "../pages";
 import { NavigationPath } from "./types";
 
@@ -35,6 +36,7 @@ export const NavigationProvider = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+        <Route path={NavigationPath.Admin} element={<AdminPage />} />
         <Route element={<RootLayout />}>
           <Route
             path={NavigationPath.Login}

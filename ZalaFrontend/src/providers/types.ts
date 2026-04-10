@@ -8,5 +8,6 @@ export enum NavigationPath {
   Dashboard = "/dashboard",
   Search = "/search",
   SingleBoard = "/board/:boardId",
+  Admin = "/admin",
   NotFound = "404",
 }

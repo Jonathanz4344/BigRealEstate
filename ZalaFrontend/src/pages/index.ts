@@ -12,3 +12,4 @@ export * from "./Dashboard";
 export * from "./SMTPTest";
 export * from "./TeamInviteTest";
 export * from "./SingleBoard";
+export * from "./Admin";

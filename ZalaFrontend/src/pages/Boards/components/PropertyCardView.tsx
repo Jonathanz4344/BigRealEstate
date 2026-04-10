@@ -206,7 +206,7 @@ export const PropertyCardView = ({
               cardId: property.property_id,
               fromStepId: stepId,
               cardType: "property",
-            })
+            }),
           );
         }}
         onClick={() => setIsModalOpen(true)}
@@ -239,7 +239,9 @@ export const PropertyCardView = ({
               PROPERTY
             </span>
           </div>
-          <p className="text-sm text-secondary-50 mt-2">Click to view details</p>
+          <p className="text-sm text-secondary-50 mt-2">
+            Click to view details
+          </p>
         </div>
       </div>
 

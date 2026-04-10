@@ -1,5 +1,11 @@
+export enum ConfigEnv {
+  Production = "PRODUCTION",
+  Dev = "Dev",
+}
+
 type IConfig = {
   api: string;
+  proxyApi: ConfigEnv;
   env: string;
   keys: {
     google: {
@@ -10,11 +16,15 @@ type IConfig = {
     };
   };
   maxBoardItemCards: number;
+  polling: {
+    interval: number;
+  };
 };
 
 export const CONFIG: IConfig = {
   api: import.meta.env.VITE_API_URL,
-  env: import.meta.env.VITE_ENV,
+  proxyApi: import.meta.env.VITE_PROXY_API_URL || "",
+  env: import.meta.env.VITE_ENV || ConfigEnv.Dev,
   keys: {
     google: {
       maps: import.meta.env.VITE_GOOGLE_MAPS_KEY || "",
@@ -26,4 +36,7 @@ export const CONFIG: IConfig = {
     },
   },
   maxBoardItemCards: 4,
+  polling: {
+    interval: 5000, // 5 seconds
+  },
 };

@@ -7,7 +7,7 @@ import {
   useEditingFormStore,
   useTeamsStore,
 } from "../../stores";
-import { CONFIG } from "../../config";
+import { CONFIG, ConfigEnv } from "../../config";
 import type {
   ITeam,
   ITeamInvitation,
@@ -103,7 +103,7 @@ export const useTeamInvitePage = () => {
     );
     if (!isAdmin) return;
     const response = await api.getTeamInvitations(teamId, user.userId);
-    if (response.data) {
+    if (response.data && Array.isArray(response.data)) {
       setInvitations(
         response.data.filter((invite: ITeamInvitation) => !invite.status),
       );
@@ -115,7 +115,7 @@ export const useTeamInvitePage = () => {
     if (!user) return;
     setLoadingAnnouncements(true);
     const response = await api.getTeamAnnouncements(teamId, user.userId);
-    if (response.data) {
+    if (response.data && Array.isArray(response.data)) {
       setAnnouncements(response.data);
     }
     setLoadingAnnouncements(false);
@@ -138,8 +138,8 @@ export const useTeamInvitePage = () => {
   }, [selectedTeam?.team_id]);
 
   // Production: poll for team updates | Dev: use WebSocket
-  const isProduction = CONFIG.env === "production";
-  const POLL_INTERVAL = 1000; // 1 seconds
+  const isProduction = CONFIG.env === ConfigEnv.Production;
+  const POLL_INTERVAL = CONFIG.polling.interval;
 
   useEffect(() => {
     if (!selectedTeam || !user) return;

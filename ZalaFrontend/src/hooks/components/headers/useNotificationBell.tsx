@@ -7,7 +7,7 @@ import {
 import { useApi } from "../../api";
 import { useSnack } from "../../utils";
 import { wsManager } from "../../../utils";
-import { CONFIG } from "../../../config";
+import { CONFIG, ConfigEnv } from "../../../config";
 import type { INotification, ITeam } from "../../../interfaces";
 
 export const useNotificationBell = () => {
@@ -30,8 +30,8 @@ export const useNotificationBell = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const hasFetchedNotifications = useRef(false);
   const wsConnected = useRef(false);
-  const isProduction = CONFIG.env === "production";
-  const POLL_INTERVAL = 1000; // 1 seconds
+  const isProduction = CONFIG.env === ConfigEnv.Production;
+  const POLL_INTERVAL = CONFIG.polling.interval;
 
   // Constants
   const PREVIEW_COUNT = 3;

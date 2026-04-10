@@ -2,15 +2,6 @@ resource "aws_security_group" "zla_test" {
   name        = "zla_test"
   description = "Security group for backend EC2"
 
-  # SSH
-  ingress {
-    description = "SSH from my IP"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["168.92.252.37/32"]
-  }
-
   # basic https
   ingress {
     description = "HTTP"
@@ -125,6 +116,7 @@ resource "aws_instance" "backend_server" {
     services:
       api:
         build: .
+        restart: always
         ports:
           - "8000:8000"
         depends_on:
@@ -133,6 +125,7 @@ resource "aws_instance" "backend_server" {
           - .env
       db:
         image: postgres:15
+        restart: always
         environment:
           POSTGRES_USER: postgresadmin
           POSTGRES_PASSWORD: ${var.db_password}
@@ -157,7 +150,7 @@ resource "aws_instance" "backend_server" {
     # Google Cloud & OAuth
     GOOGLE_API_KEY=${var.google_api_key}
     GOOGLE_TOKEN_ENCRYPTION_KEY=${var.google_token_encryption_key}
-    GOOGLE_CLIENT_ID=${var.google_client_id}
+    GOOGLE_CLIENT_ID=${var.google_oauth_client_id}
     GOOGLE_CLIENT_SECRET=${var.google_client_secret}
     GOOGLE_REDIRECT_URI=postmessage
     VITE_GOOGLE_REDIRECT_URI=postmessage
@@ -203,12 +196,8 @@ resource "aws_eip" "backend_ip" {
   }
 }
 
-# Output the IP address to your terminal so you know what it is after deploying
-output "backend_public_ip" {
-  value = aws_eip.backend_ip.public_ip
-}
-
 # Output a clickable link to test the live API
-output "backend_test_docs" {
-  value = "http://${aws_eip.backend_ip.public_ip}:8000/docs"
+output "API_URL" {
+  value = "http://${aws_eip.backend_ip.public_ip}:8000"
+  # value = "http://${aws_eip.backend_ip.public_ip}:8000/api"
 }

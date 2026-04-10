@@ -157,7 +157,7 @@ export const useGoogleAuthButton = ({
       scope: scopes,
       redirect_uri: redirectUri,
       ux_mode: "popup",
-      prompt: "consent",
+      prompt: "select_account consent",
       access_type: "offline",
       callback: (response: GoogleCodeResponse) => {
         if (!response.code) {

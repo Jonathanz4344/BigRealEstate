@@ -48,13 +48,19 @@ resource "aws_amplify_app" "amplify_app" {
     AMPLIFY_MONOREPO_APP_ROOT = var.app_root
 
     REACT_APP_ENV              = "PRODUCTION"
+    VITE_ENV = "PRODUCTION"
 
-    # Application Specific Env Variables
-    VITE_API_URL     = "http://${aws_eip.backend_ip.public_ip}:8000" #var.react_api_url
-    VITE_GOOGLE_MAPS_KEY     = var.google_maps_key
-    VITE_GOOGLE_CLIENT_ID     = var.google_client_id
+
+    VITE_API_URL     = "http://${aws_eip.backend_ip.public_ip}:8000"
+    VITE_PROXY_API_URL = "${aws_api_gateway_deployment.api_deployment.invoke_url}${aws_api_gateway_stage.api_stage.stage_name}/${aws_api_gateway_resource.api_parent_resource.path_part}"
+    VITE_GOOGLE_MAPS_KEY     = var.google_api_key
+    VITE_GOOGLE_CLIENT_ID     = var.google_oauth_client_id
     VITE_GOOGLE_REDIRECT_URI     = "postmessage"
     VITE_GOOGLE_SCOPES     = "openid email profile https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.settings.basic"
+
+    VITE_ADMIN_USERNAME    = var.admin_dashboard_username
+    VITE_ADMIN_PASSWORD    = var.admin_dashboard_password
+    VITE_EC2_CONTROL_URL   = "${aws_api_gateway_deployment.api_deployment.invoke_url}${aws_api_gateway_stage.api_stage.stage_name}/ec2"
 
   }
 
@@ -69,7 +75,7 @@ resource "aws_amplify_app" "amplify_app" {
     target = "/index.html"
   }
 
-  depends_on = [aws_eip.backend_ip]
+  depends_on = [aws_eip.backend_ip, aws_api_gateway_deployment.api_deployment]
 }
 
 resource "aws_amplify_branch" "dev_branch" {
@@ -94,6 +100,7 @@ resource "null_resource" "trigger_amplify_deployment" {
   # The command to be ran
   provisioner "local-exec" {
     command = "aws amplify start-job --app-id ${aws_amplify_app.amplify_app.id} --branch-name ${aws_amplify_branch.dev_branch.branch_name} --job-type RELEASE"
+    interpreter = [local.os == "Windows" ? "PowerShell" : "bash", "-c" ]
   }
 }
 
@@ -110,6 +117,6 @@ resource "null_resource" "trigger_amplify_deployment" {
 #   depends_on = [aws_amplify_app.amplify_app]
 # }
 
-output "invoke_ui" {
+output "UI_URL" {
   value = "https://${var.branch_name}.${aws_amplify_app.amplify_app.id}.amplifyapp.com"
 }

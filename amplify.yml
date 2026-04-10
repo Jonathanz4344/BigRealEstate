@@ -15,6 +15,9 @@ applications:
             - echo "VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID" >> .env.local
             - echo "VITE_GOOGLE_REDIRECT_URI=$VITE_GOOGLE_REDIRECT_URI" >> .env.local
             - echo "VITE_GOOGLE_SCOPES=$VITE_GOOGLE_SCOPES" >> .env.local
+            - echo "VITE_ADMIN_USERNAME=$VITE_ADMIN_USERNAME" >> .env.local
+            - echo "VITE_ADMIN_PASSWORD=$VITE_ADMIN_PASSWORD" >> .env.local
+            - echo "VITE_EC2_CONTROL_URL=$VITE_EC2_CONTROL_URL" >> .env.local
             - cat .env.local
             - npm run build
       artifacts:

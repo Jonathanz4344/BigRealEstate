@@ -1,13 +1,9 @@
-import {
-  IconButtonVariant,
-  Icons,
-  TextInput,
-} from "../../../components";
+import { IconButtonVariant, Icons, TextInput } from "../../../components";
 import { useSignupPage } from "../../../hooks";
 import { CardPage } from "../components";
 import transition from "../../../utils/transitions/transition";
 
-const SignupPage = () => {
+export const SignupPage = transition(() => {
   const {
     state: {
       userName,
@@ -51,8 +47,8 @@ const SignupPage = () => {
             ? "Verifying..."
             : "Verify Code"
           : sendingCode
-          ? "Sending Code..."
-          : "Create Account",
+            ? "Sending Code..."
+            : "Create Account",
         onClick: verificationStep ? onVerifyCode : onCreateClick,
       }}
       secondaryBtn={{
@@ -186,5 +182,4 @@ const SignupPage = () => {
       </div>
     </CardPage>
   );
-};
-export default transition(SignupPage);
+});

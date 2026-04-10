@@ -8,6 +8,8 @@ import {
   useTimeoutEffect,
 } from "../utils";
 import { CookieKeys } from "../../interfaces/CookieKeys";
+import { useLocation } from "react-router";
+import { NavigationPath } from "../../providers";
 
 export const useAutoLogin = () => {
   const { user } = useAuthStore();
@@ -15,6 +17,7 @@ export const useAutoLogin = () => {
   const { toLoginPage } = useAppNavigation();
   const [getCookie, _setCookie, removeCookie] = useSessionCookie();
   const authenticateUser = useAuthUser();
+  const { pathname } = useLocation();
 
   const { getUser } = useApi();
 
@@ -32,7 +35,10 @@ export const useAutoLogin = () => {
 
   const onUserNotFound = () => {
     removeCookie(CookieKeys.UserId);
-    toLoginPage();
+
+    console.log(`Pathname: ${pathname}`, NavigationPath.SignUp);
+    if (pathname !== NavigationPath.SignUp && pathname !== NavigationPath.Login)
+      toLoginPage();
   };
 
   const autoLogin = () => {

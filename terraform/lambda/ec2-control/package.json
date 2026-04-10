@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "build": "(npm install || true) && npx tsc",
+    "postbuild": "run-script-os",
+    "postbuild:windows": "(copy package*.json dist || true) && (cd dist || true) && npm i --omit=dev",
+    "postbuild:default": "cp package*.json dist && cd dist && npm i --omit=dev"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.149",
+    "@types/node": "^22.19.17",
+    "run-script-os": "^1.1.6",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ec2": "^3.600.0"
+  }
+}
