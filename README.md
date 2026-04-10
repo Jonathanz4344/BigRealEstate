@@ -22,6 +22,7 @@ A full-stack real estate CRM platform for managing leads, running email campaign
 | Frontend | React 19, TypeScript, Vite, TailwindCSS, Material UI, Zustand, React Router v7 |
 | Backend | Python, FastAPI, SQLAlchemy 2.0, Pydantic v2, Uvicorn |
 | Database | PostgreSQL |
+| Infrastructure | AWS (Amplify, EC2, API Gateway, Lambda), Terraform, Docker |
 | Integrations | Google OAuth, Gmail API, Google Maps, RapidAPI, OpenAI |
 
 ## Project Structure
@@ -29,8 +30,30 @@ A full-stack real estate CRM platform for managing leads, running email campaign
 ```
 ├── ZalaFrontend/    # Main CRM frontend (React + TypeScript)
 ├── ZalaBackend/     # API server (FastAPI + PostgreSQL)
-└── BigRealEstate/   # Property analysis tool (React + TypeScript)
+├── BigRealEstate/   # Property analysis tool (React + TypeScript)
+└── terraform/       # Infrastructure as Code (AWS provisioning)
 ```
+
+## Infrastructure
+
+All AWS infrastructure is managed via Terraform in the `terraform/` directory. A single `terraform apply` provisions:
+
+- **AWS Amplify** — Hosts the React frontend with automatic builds on push to `main`
+- **EC2 (t3.micro)** — Runs the FastAPI backend and PostgreSQL in Docker containers with an Elastic IP
+- **API Gateway + Lambda (Proxy)** — Routes frontend API requests to the EC2 backend
+- **API Gateway + Lambda (EC2 Control)** — Provides start/stop/status endpoints for the EC2 instance
+
+### Admin Dashboard
+
+An admin dashboard is available at `/admin` on the frontend. It provides:
+
+- **Login** — Credential-based authentication (separate from the app's Google OAuth)
+- **EC2 Start/Stop** — One-click buttons to start or stop the backend server
+- **Live Status** — Auto-polls EC2 instance state every 15 seconds
+
+When EC2 starts, Docker containers (`api` + `db`) auto-restart via `restart: always` policy. No SSH or manual intervention required.
+
+Admin credentials are configured via Amplify environment variables (`VITE_ADMIN_USERNAME`, `VITE_ADMIN_PASSWORD`) set through Terraform.
 
 ## Getting Started
 

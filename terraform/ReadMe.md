@@ -34,8 +34,8 @@ Below is a quick rundown of every variable expected by the Terraform modules.
 | `rapidapi_key`                | A key registered to an Rapid API account.                                                                                         | `string` | `value`                           |
 | `smtp_username`               | A username for associated emails to originate from.                                                                               | `string` | `value`                           |
 | `smtp_password`               | A password for the account where associated emails will originate from.                                                           | `string` | `value`                           |
-| `<other_variable_3>`          | _Brief description of what this variable controls._                                                                               | `type`   | `value`                           |
-| _(add more as required)_      |                                                                                                                                   |          |                                   |
+| `admin_dashboard_username`    | Username for the `/admin` EC2 control dashboard login.                                                                            | `string` | `zalaadmin`                       |
+| `admin_dashboard_password`    | Password for the `/admin` EC2 control dashboard login.                                                                            | `string` | `value`                           |
 
 Place the above entries in a file called **`variables.tfvars`** in the root of the terraform folder.
 
@@ -79,7 +79,40 @@ Place the above entries in a file called **`variables.tfvars`** in the root of t
 12. **SMTP Password**
     Ask a dev or obtain an email to allow system emails to originate from and use the same password for this email.
 
-Feel free to expand each section with screenshots, URLs, or any organization‑specific steps.
+13. **Admin Dashboard Username**
+    Choose any username for the admin dashboard login at `/admin`.
+
+14. **Admin Dashboard Password**
+    Choose a strong password for the admin dashboard login.
+
+---
+
+## 🏗️ Infrastructure Architecture
+
+Running `terraform apply -var-file=variables.tfvars` provisions the following AWS resources:
+
+| Resource | Purpose |
+|----------|--------|
+| **AWS Amplify** | Hosts the React frontend, auto-builds on push to `main` |
+| **EC2 (t3.micro)** | Runs FastAPI + PostgreSQL in Docker containers with an Elastic IP |
+| **API Gateway** | Single HTTP API with two route groups |
+| **Lambda (Proxy)** | Routes `/DEV/{proxy+}` requests from the frontend to the EC2 backend |
+| **Lambda (EC2 Control)** | Handles `/DEV/ec2/{start,stop,status}` for the admin dashboard |
+| **Security Groups** | Controls inbound access (HTTP, HTTPS, port 8000) |
+| **Elastic IP** | Static IP assigned to EC2 so the address survives stop/start cycles |
+| **IAM Roles** | Least-privilege roles for each Lambda function |
+
+### Admin Dashboard (`/admin`)
+
+The frontend includes an admin page at `/admin` that allows starting and stopping the EC2 backend server without SSH or AWS Console access.
+
+**Flow:**
+1. Login with `admin_dashboard_username` / `admin_dashboard_password`
+2. Click **Start** → API Gateway → EC2 Control Lambda → `StartInstancesCommand`
+3. Click **Stop** → API Gateway → EC2 Control Lambda → `StopInstancesCommand`
+4. Status auto-polls every 15 seconds via `DescribeInstancesCommand`
+
+Docker containers on EC2 use `restart: always`, so they auto-start when the instance boots — no manual intervention needed.
 
 ---
 
