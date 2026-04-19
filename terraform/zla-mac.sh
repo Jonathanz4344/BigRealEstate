@@ -1,2 +1,0 @@
-alias zla-start="cd ./BigRealEstate/terraform && terraform init && terraform apply --auto-approve -var-file='variables.tfvars' && cd ../../"
-alias zla-stop="cd ./BigRealEstate/terraform && terraform destroy --auto-approve -var-file='variables.tfvars' && cd ../../"

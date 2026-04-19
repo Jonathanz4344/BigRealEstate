@@ -93,6 +93,12 @@ resource "aws_api_gateway_rest_api" "api" {
   name        = var.app_name
   description = "Secure API for proxy to python ec2 API"
 
+  binary_media_types = [
+    "multipart/form-data",
+    "image/*",
+    "application/octet-stream"
+  ]
+
   endpoint_configuration {
     types = ["REGIONAL"]
   }
@@ -211,6 +217,7 @@ resource "aws_api_gateway_deployment" "api_deployment" {
       aws_api_gateway_integration.ec2_control_post_integration.id,
       aws_api_gateway_method.ec2_control_get.id,
       aws_api_gateway_integration.ec2_control_get_integration.id,
+      aws_api_gateway_rest_api.api.binary_media_types,
     ]))
   }
 

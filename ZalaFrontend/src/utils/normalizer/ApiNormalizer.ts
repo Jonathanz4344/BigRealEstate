@@ -52,8 +52,8 @@ const lead = (data: ALead): ILead => {
     leadId: data["lead_id"],
     licenseNum: data["license_num"],
 
-    contact: contact(data["contact"]),
-    address: address(data["address"]),
+    contact: data["contact"] ? contact(data["contact"]) : undefined,
+    address: data["address"] ? address(data["address"]) : undefined,
 
     buisness: data["business"], // Note: Typo on API side ?
     website: data["website"],

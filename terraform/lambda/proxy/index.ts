@@ -17,28 +17,63 @@ export const handler: Handler = async (event: APIGatewayProxyEvent) => {
     headers: {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers":
+        "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+      "Access-Control-Allow-Methods": "*",
     },
     body: ``,
   };
 
   const method = event.httpMethod;
+
+  // Handle CORS preflight
+  if (method === "OPTIONS") {
+    return response;
+  }
+
   const forwardPath =
     (event.pathParameters?.forwardPath as string | undefined) || "";
   const bodyJson = event.body;
-  const params = (event.queryStringParameters || {}) as {
-    [key: string]: string;
+  const isBase64 = event.isBase64Encoded || false;
+  const incomingContentType =
+    event.headers?.["Content-Type"] ||
+    event.headers?.["content-type"] ||
+    "application/json";
+  const multiParams = (event.multiValueQueryStringParameters || {}) as {
+    [key: string]: string[];
   };
-  const paramKeys = Object.keys(params);
+  const paramKeys = Object.keys(multiParams);
 
   try {
-    const url = `${process.env.API_URL}/${forwardPath.split("__").join("/")}${paramKeys.length > 0 ? `?${paramKeys.map((key, i, arr) => `${key}=${params[key]}${arr.length - 1 > i ? "&" : ""}`).join("")}` : ""}`;
+    const queryString = paramKeys
+      .flatMap((key) => multiParams[key].map((val) => `${key}=${val}`))
+      .join("&");
+    const url = `${process.env.API_URL}/${forwardPath.split("__").join("/")}${queryString ? `?${queryString}` : ""}`;
+
+    // Build request body — decode base64 for binary uploads
+    let requestBody: any = null;
+    const isBinaryContent =
+      /^multipart\/form-data/i.test(incomingContentType) ||
+      /^image\//i.test(incomingContentType) ||
+      /^application\/octet-stream/i.test(incomingContentType);
+
+    if (bodyJson) {
+      if (isBase64) {
+        requestBody = Buffer.from(bodyJson, "base64");
+      } else if (isBinaryContent) {
+        // API Gateway may pass binary as latin1 string when not base64-encoded
+        requestBody = Buffer.from(bodyJson, "latin1");
+      } else {
+        requestBody = bodyJson;
+      }
+    }
 
     const apiResponse = await fetch(url, {
       method,
-      body: bodyJson,
+      body: requestBody,
       headers: {
         Accept: "application/json",
-        "Content-Type": "application/json",
+        "Content-Type": incomingContentType,
       },
     });
 

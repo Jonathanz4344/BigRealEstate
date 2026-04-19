@@ -80,7 +80,7 @@ export const useManualCreateLeadModalPage = ({
     new Map(DEFAULT_CONTACT_MAP.entries()),
   );
   const [showBuisInputs, setShowBuisInputs] = useState(true);
-  const [showAddyInputs, setShowAddyInputs] = useState(true);
+  const [showAddyInputs, setShowAddyInputs] = useState(false);
   const [showContactInputs, setShowContactInputs] = useState(true);
 
   useEffect(() => {

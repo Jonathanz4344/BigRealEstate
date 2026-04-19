@@ -35,7 +35,13 @@ export const CardPage = ({
 }: PropsWithChildren<CardPageProps>) => {
   return (
     <div className="flex flex-1 items-center justify-center py-15">
-      <div className="card-base box-shadow w-[75%] h-full p-7.5 space-y-7.5 flex flex-col items-center space">
+      <form
+        className="card-base box-shadow w-[75%] h-full p-7.5 space-y-7.5 flex flex-col items-center space"
+        onSubmit={(e) => {
+          e.preventDefault();
+          primaryBtn.onClick();
+        }}
+      >
         <div className="flex flex-col items-center space-y-1.25">
           <img src={IMAGES.ZalaBlackLogo} width={200} height={200} />
           <p className="text-base text-secondary-50">
@@ -77,7 +83,7 @@ export const CardPage = ({
             </p>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

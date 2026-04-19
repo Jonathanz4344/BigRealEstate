@@ -29,6 +29,15 @@ resource "aws_security_group" "zla_test" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # ssh
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # outbound
   egress {
     from_port   = 0
@@ -74,6 +83,7 @@ resource "aws_instance" "backend_server" {
   instance_type = "t3.micro"
   key_name      = aws_key_pair.generated_key.key_name
   vpc_security_group_ids = [aws_security_group.zla_test.id]
+  iam_instance_profile   = aws_iam_instance_profile.ec2_s3_profile.name
 
   # hdd size for docker
   root_block_device {
@@ -169,6 +179,10 @@ resource "aws_instance" "backend_server" {
     SMTP_USE_TLS=true
     SMTP_FROM_EMAIL=${var.smtp_username}
     SMTP_FROM_NAME="Zala CRM"
+
+    # S3 Uploads
+    S3_UPLOADS_BUCKET=${aws_s3_bucket.uploads.bucket}
+    S3_UPLOADS_REGION=${var.aws_region}
     ENVFILE
 
     # 7. Boot up backend

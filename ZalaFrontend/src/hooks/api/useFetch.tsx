@@ -51,6 +51,8 @@ export const useFetch = () => {
         if (isFormData) {
           if (body instanceof FormData) {
             bodyToSend = body;
+            // Tell API Gateway this is binary so it base64-encodes the body
+            headers["Accept"] = "*/*";
           } else {
             throw new Error("Form data body must be an instance of FormData");
           }

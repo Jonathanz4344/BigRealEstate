@@ -72,7 +72,7 @@ export const BoardItemCard = ({
       )}
       onClick={onClick}
     >
-      <div className={clsx("h-[150px] rounded-[15px] overflow-hidden")}>
+      <div className={clsx("h-[225px] rounded-[15px] overflow-hidden")}>
         <ImageCard
           src={showingImage ? toUrl(showingImage.imageUrl) : undefined}
           alt={showingImage?.caption}

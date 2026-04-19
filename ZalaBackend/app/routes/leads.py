@@ -107,7 +107,7 @@ def _serialize_lead(lead: Lead) -> dict:
 
 
 @router.post(
-    "/",
+    "",
     tags=["Leads"],
     response_model=schemas.LeadPublic,
     status_code=status.HTTP_201_CREATED,
@@ -117,7 +117,7 @@ def create_lead(lead_in: schemas.LeadCreate, db: Session = Depends(get_db)):
 
 
 @router.get(
-    "/",
+    "",
     tags=["Leads"],
     summary="Get All Leads",
     response_model=List[schemas.LeadPublic],

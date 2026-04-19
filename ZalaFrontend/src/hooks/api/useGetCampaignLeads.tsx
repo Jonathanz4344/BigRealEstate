@@ -35,16 +35,21 @@ export const useGetCampaignLeads = (
           : null
         : null;
       if (stateLeads && stateLeads.length > 0) {
-        setLeads(
-          campaign.leads.map(
-            (lead) => stateLeads.find((aLead) => aLead.leadId === lead.leadId)!
+        const resolved = campaign.leads
+          .map((lead) =>
+            stateLeads.find((aLead) => aLead.leadId === lead.leadId)
           )
-        );
+          .filter((lead): lead is ILead => lead !== undefined);
+        if (resolved.length === campaign.leads.length) {
+          setLeads(resolved);
+        } else {
+          getLeads();
+        }
       } else {
         getLeads();
       }
     },
-    [stringify(state), campaign?.campaignId],
+    [stringify(state), campaign?.campaignId, campaign?.leads.length],
     250
   );
 
@@ -67,15 +72,16 @@ export const useGetCampaignLeads = (
       user.userId
     );
 
-    if (res.err || !res.data) return apiResponseError("get leads", res.err);
+    if (res.err || !res.data || !Array.isArray(res.data))
+      return apiResponseError("get leads", res.err);
 
     const apiLeads = res.data.map(Normalizer.APINormalizer.lead);
 
     setLoading(false);
     setLeads(
-      campaign.leads.map(
-        (lead) => apiLeads.find((aLead) => aLead.leadId === lead.leadId)!
-      )
+      campaign.leads
+        .map((lead) => apiLeads.find((aLead) => aLead.leadId === lead.leadId))
+        .filter((lead): lead is ILead => lead !== undefined)
     );
   };
 
